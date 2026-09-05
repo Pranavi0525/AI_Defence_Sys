@@ -100,6 +100,10 @@ def load_and_classify_misses(path: Path) -> list[dict]:
             if not line:
                 continue
             m = json.loads(line)
+            # misses.jsonl begins with an artifact-metadata record.
+            # It is provenance, not a miss, so do not classify it.
+            if "_artifact_metadata" in m:
+                continue
             if not m["stage1_escalated_to_ml"]:
                 stage = "stage1_miss"
             elif m.get("graph_connected"):
