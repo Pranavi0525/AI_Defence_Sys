@@ -383,7 +383,7 @@ The decision policy was tested under different assumptions about production frau
 Across the tested ranges:
 
 - Production fraud rate: **0.2%–2.0%**
-- Review-operation cost: **–**
+- Review-operation cost: **$5-$50**
 
 the selected block threshold remained stable at:
 
@@ -398,7 +398,7 @@ The block-threshold span across both sensitivity sweeps was:
 span = 0.000
 ```
 
-At the reference sensitivity setting of **0.6% production fraud rate** and ** review-operation cost**, the evaluated policy produced:
+At the reference sensitivity setting of **0.6% production fraud rate** and **$12 review-operation cost**, the evaluated policy produced:
 
 | Decision | Share |
 |---|---:|
