@@ -1,0 +1,48 @@
+{
+  "verdict": "PASS",
+  "checks": [
+    {
+      "name": "threshold_agreement",
+      "passed": true,
+      "details": [
+        "All 1 distinct threshold pair(s) in misses.jsonl match decision_policy_results.json['corrected']."
+      ]
+    },
+    {
+      "name": "case_reports_threshold_agreement",
+      "passed": true,
+      "details": [
+        "Every case_reports.json entry with its own stage4 thresholds matches decision_policy_results.json['corrected']."
+      ]
+    },
+    {
+      "name": "miss_completeness",
+      "passed": true,
+      "details": [
+        "case_reports.json's example trace (atk-693a3017) is present in misses.jsonl, as expected."
+      ]
+    },
+    {
+      "name": "shared_trace_score_agreement",
+      "passed": null,
+      "details": [
+        "No trace_id appears in both misses.jsonl and case_reports.json -- skipped."
+      ]
+    },
+    {
+      "name": "decision_label_agreement",
+      "passed": null,
+      "details": [
+        "No trace_id appears in both misses.jsonl and case_reports.json -- skipped."
+      ]
+    },
+    {
+      "name": "provenance_agreement",
+      "passed": true,
+      "details": [
+        "All stamped artifacts agree on git_commit=62fdb9aa093dd03049a2dbf8d20bdb45a0474849.",
+        "WARNING (not a failure): generated with a dirty working tree: ['decision_policy_results.json', 'misses.jsonl', 'case_reports.json']. Not exactly reproducible from the commit hash alone; regenerate from a clean tree before freezing."
+      ]
+    }
+  ]
+}

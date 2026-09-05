@@ -54,6 +54,76 @@ import cascade_with_graph as cwg          # noqa: E402
 
 
 # ---------------------------------------------------------------------------
+# Validation cache provenance (Phase 4C, B-2)
+# ---------------------------------------------------------------------------
+# decision_policy_validation_cache.npz is written by TWO different
+# functions -- get_validation_data() (raw Stage 1+2+3 cascade score,
+# variant "cascade") and get_validation_data_fused() (Stage 5 fused
+# score, variant "fused") -- and consumed by THREE different scripts
+# (decision_policy.py itself, miss_collector.py, explainability.py) plus
+# decision_policy_sensitivity.py's own independent cache reader. Before
+# this fix, the cache carried no tag identifying which variant it held,
+# so whichever function last wrote it silently determined what every
+# reader got, even if that reader assumed the other variant. This was
+# the confirmed root cause of the Phase 4C threshold/score disagreements
+# (see reports/ Phase 4C audit, finding B-2).
+CACHE_PATH = Path(__file__).parent / "decision_policy_validation_cache.npz"
+VALID_VALIDATION_VARIANTS = ("cascade", "fused")
+
+
+class ValidationCacheMismatch(RuntimeError):
+    """Raised when decision_policy_validation_cache.npz does not hold the
+    variant (or the y-alignment) a caller actually requested. Callers
+    MUST treat this as "no usable cache" and regenerate -- never fall
+    back to silently trusting the file's contents anyway."""
+
+
+def load_cached_validation_data(expected_variant: str, y_check: np.ndarray | None = None):
+    """The ONLY safe way to read decision_policy_validation_cache.npz.
+
+    Raises ValidationCacheMismatch (rather than returning stale/wrong
+    data) if:
+      - the cache file doesn't exist,
+      - it predates this provenance fix and has no "variant" field,
+      - its "variant" doesn't match `expected_variant`, or
+      - `y_check` is given and doesn't match the cached labels
+        (i.e. the cache belongs to a different dataset/df).
+
+    A function requesting one variant must never silently consume data
+    generated for the other.
+    """
+    if expected_variant not in VALID_VALIDATION_VARIANTS:
+        raise ValueError(f"expected_variant must be one of {VALID_VALIDATION_VARIANTS}, "
+                          f"got {expected_variant!r}")
+    if not CACHE_PATH.exists():
+        raise ValidationCacheMismatch(f"{CACHE_PATH.name} does not exist.")
+
+    data = np.load(CACHE_PATH, allow_pickle=False)
+    cached_variant = str(data["validation_variant"]) if "validation_variant" in data.files else None
+    if cached_variant is None:
+        raise ValidationCacheMismatch(
+            f"{CACHE_PATH.name} has no 'validation_variant' tag (pre-Phase-4C "
+            f"cache, or corrupted) -- cannot confirm it holds '{expected_variant}' "
+            f"data. Regenerate it."
+        )
+    if cached_variant != expected_variant:
+        raise ValidationCacheMismatch(
+            f"{CACHE_PATH.name} holds validation_variant={cached_variant!r}, but "
+            f"'{expected_variant}' was requested. Refusing to silently reuse a "
+            f"cache built for a different score variant -- regenerate via "
+            f"{'get_validation_data()' if expected_variant == 'cascade' else 'get_validation_data_fused()'}."
+        )
+    if y_check is not None:
+        if len(data["y"]) != len(y_check) or not np.array_equal(data["y"], y_check):
+            raise ValidationCacheMismatch(
+                f"{CACHE_PATH.name}'s cached labels don't match the current "
+                f"dataset (different row count or different fraud labels) -- "
+                f"this cache is stale for the current df. Regenerate it."
+            )
+    return data["y"], data["proba"], data["dollars"]
+
+
+# ---------------------------------------------------------------------------
 # Step 1 -- validation data: out-of-fold cascade scores + true $ exposure
 # ---------------------------------------------------------------------------
 def get_validation_data(random_state: int = cwg.RANDOM_STATE):
@@ -93,18 +163,11 @@ def get_validation_data(random_state: int = cwg.RANDOM_STATE):
 
     # Cache OOF scores so downstream analysis/plots don't have to pay for
     # a full cascade retrain (5-fold CV incl. a fresh GCN each fold) again.
-    cache_path = Path(__file__).parent / "decision_policy_validation_cache.npz"
-    np.savez(cache_path, y=y, proba=proba, dollars=dollars)
+    # Tagged "cascade" (Phase 4C, B-2) so a reader expecting the fused
+    # score can never silently consume this instead.
+    np.savez(CACHE_PATH, y=y, proba=proba, dollars=dollars, validation_variant="cascade")
 
     return df, y, proba, dollars
-
-
-def load_cached_validation_data():
-    """Fast path for re-analysis: loads the (y, proba, dollars) cached by
-    the last get_validation_data() run instead of retraining the cascade."""
-    cache_path = Path(__file__).parent / "decision_policy_validation_cache.npz"
-    data = np.load(cache_path)
-    return data["y"], data["proba"], data["dollars"]
 
 
 def get_validation_data_fused(random_state: int = cwg.RANDOM_STATE):
@@ -144,8 +207,9 @@ def get_validation_data_fused(random_state: int = cwg.RANDOM_STATE):
     ])
     assert len(dollars) == len(df) == len(fused_proba) == len(y), "misaligned validation arrays"
 
-    cache_path = Path(__file__).parent / "decision_policy_validation_cache.npz"
-    np.savez(cache_path, y=y, proba=fused_proba, dollars=dollars)
+    # Tagged "fused" (Phase 4C, B-2) -- see get_validation_data()'s cache
+    # write above for why this tag exists.
+    np.savez(CACHE_PATH, y=y, proba=fused_proba, dollars=dollars, validation_variant="fused")
 
     return df, y, fused_proba, dollars, fusion_result
 

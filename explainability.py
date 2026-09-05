@@ -229,29 +229,29 @@ def build_reference_artifacts() -> ReferenceArtifacts:
     # decision_policy.get_validation_data_fused(), so oof_final here is the
     # Stage 5 FUSED score -- byte-identical to what decision_policy.py's
     # frozen thresholds and miss_collector.py's misses.jsonl are based on.
+    # Phase 4C, B-2: this file needs the Stage 5 FUSED score too (see
+    # comment above and the module docstring). The old check here only
+    # verified y-alignment, which cannot distinguish a "cascade"-variant
+    # cache from a "fused" one -- confirmed root cause of case_reports.json
+    # disagreeing with decision_policy_results.json / misses.jsonl.
+    import decision_policy as dp
     cache_path = Path(__file__).parent / "decision_policy_validation_cache.npz"
-    if cache_path.exists():
+    try:
+        _, oof_final, _ = dp.load_cached_validation_data("fused", y_check=y)
         print("Loading cached out-of-fold Stage 5 fused scores "
               "(decision_policy_validation_cache.npz)...")
-        cached = np.load(cache_path)
-        assert len(cached["y"]) == len(df) and np.array_equal(cached["y"], y), (
-            "Cached validation arrays don't align with this df -- delete "
-            "decision_policy_validation_cache.npz and rerun to regenerate."
-        )
-        oof_final = cached["proba"]
         # The cache only stores the final (post-graph) score. Pre-graph
         # OOF is only needed to detect "rescued by graph"; recompute
         # ONLY that via a fresh OOF run since it's not cached separately.
         print("Running Stage 1+2+3 OOF cascade to recover the pre-graph "
               "OOF score too (needed to detect graph rescues)...")
         oof_stage_1_2, _, _ = cwg.run_three_stage_cascade(df, A, connected_mask)
-    else:
-        print("No cached OOF scores found -- running the full Risk Fusion "
-              "pipeline now via decision_policy.get_validation_data_fused() "
+    except dp.ValidationCacheMismatch as e:
+        print(f"No usable cached OOF scores ({e}) -- running the full Risk "
+              "Fusion pipeline now via decision_policy.get_validation_data_fused() "
               "(a couple of minutes, fresh GCN + autoencoder + fusion LR per "
               "fold) so oof_final is the same Stage 5 fused score decision_policy.py "
               "and miss_collector.py use, not a raw stage1+2+3 max() score...")
-        import decision_policy as dp
         _, _, oof_final, _, _ = dp.get_validation_data_fused()
         oof_stage_1_2, _, _ = cwg.run_three_stage_cascade(df, A, connected_mask)
 
@@ -680,8 +680,17 @@ def main():
         print(f"  [{label}] -> trace {case_reports[label]['trace_id']}: "
         f"{case_reports[label]['stage6_decision_policy']['decision']}")
 
+    # Phase 4C, B-3: case_reports.json previously carried no provenance
+    # at all, unlike decision_policy_results.json / risk_fusion_results.json
+    # / results.json (which all call stamp_artifact()). case_reports.json
+    # IS a plain dict (keyed by case label), so stamp_artifact()'s normal
+    # additive "_artifact_metadata" key applies directly -- no new
+    # metadata mechanism needed. consistency_check.py explicitly skips
+    # this key when iterating case labels.
+    from artifact_metadata import stamp_artifact
+    case_reports_stamped = stamp_artifact(dict(case_reports), Path(__file__).parent)
     with open(OUT_DIR / "case_reports.json", "w") as f:
-        json.dump(case_reports, f, indent=2)
+        json.dump(case_reports_stamped, f, indent=2, default=str)
     print(f"  saved {OUT_DIR / 'case_reports.json'}")
 
     with open(OUT_DIR / "case_reports.md", "w") as f:

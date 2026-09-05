@@ -1,0 +1,161 @@
+{
+  "verdict": "PASS",
+  "freeze_procedure_note": "This audit does NOT require the current working tree to be clean -- that would be a false failure during ordinary development, where artifacts are routinely regenerated against uncommitted changes. check_provenance_agreement (Phase 4C, reused here as section D) reports a dirty tree as an explicit WARNING, not a FAIL. Before an actual release/freeze: (1) commit all pending changes, (2) regenerate decision_policy_results.json, misses.jsonl, and blue_team_output/explainability/case_reports.json from that clean commit (in that order: decision_policy.py, then miss_collector.py and/or explainability.py), (3) re-run this audit and consistency_check.py against the freshly regenerated artifacts, and only then tag/freeze. Regenerating from a dirty tree and freezing anyway defeats the point of git_commit provenance stamping.",
+  "checks": [
+    {
+      "name": "a1_threshold_ordering_and_bounds",
+      "passed": true,
+      "details": [
+        "t_review=0.0933 < t_block=0.9643, both in [0, 1]."
+      ]
+    },
+    {
+      "name": "a2_liability_breakdown_complete",
+      "passed": true,
+      "details": [
+        "liability_breakdown present for all 3 required families: ['ACCOUNT_TAKEOVER', 'AUTHORIZED_PUSH_PAYMENT', 'MULE_NETWORK']."
+      ]
+    },
+    {
+      "name": "a3_prevalence_represented_in_cost_model",
+      "passed": true,
+      "details": [
+        "corrected.cost_model.assumed_production_fraud_rate=0.006 is represented and sane."
+      ]
+    },
+    {
+      "name": "a4_final_policy_is_prevalence_corrected",
+      "passed": true,
+      "details": [
+        "'naive' uses no reweighting (assumed_production_fraud_rate=null) and 'corrected' (the deployed policy) uses assumed_production_fraud_rate=0.006 -- the two are a genuine, documented contrast."
+      ]
+    },
+    {
+      "name": "a5_nested_fold_honest_disclosure",
+      "passed": true,
+      "details": [
+        "nested_fold_honest_estimate present with 5 outer fold(s) covering all 1556 rows exactly once, and methodology_note discloses the threshold-selection-optimism limitation of the single full-population 'corrected' pair."
+      ]
+    },
+    {
+      "name": "threshold_agreement",
+      "passed": true,
+      "details": [
+        "All 1 distinct threshold pair(s) in misses.jsonl match decision_policy_results.json['corrected']."
+      ]
+    },
+    {
+      "name": "case_reports_threshold_agreement",
+      "passed": true,
+      "details": [
+        "Every case_reports.json entry with its own stage4 thresholds matches decision_policy_results.json['corrected']."
+      ]
+    },
+    {
+      "name": "miss_completeness",
+      "passed": true,
+      "details": [
+        "case_reports.json's example trace (atk-693a3017) is present in misses.jsonl, as expected."
+      ]
+    },
+    {
+      "name": "shared_trace_score_agreement",
+      "passed": null,
+      "details": [
+        "No trace_id appears in both misses.jsonl and case_reports.json -- skipped."
+      ]
+    },
+    {
+      "name": "decision_label_agreement",
+      "passed": null,
+      "details": [
+        "No trace_id appears in both misses.jsonl and case_reports.json -- skipped."
+      ]
+    },
+    {
+      "name": "c1_cache_self_identifying_variant",
+      "passed": true,
+      "details": [
+        "decision_policy_validation_cache.npz self-identifies as validation_variant='fused'."
+      ]
+    },
+    {
+      "name": "c2_cache_variant_cross_consumption_guard",
+      "passed": true,
+      "details": [
+        "A cache tagged validation_variant='fused' is correctly REFUSED (ValidationCacheMismatch) when 'cascade' is requested, and correctly ACCEPTED when 'fused' is requested."
+      ]
+    },
+    {
+      "name": "c3_cache_variant_matches_decision_policy_score_source",
+      "passed": true,
+      "details": [
+        "Cache variant ('fused') is consistent with decision_policy_results.json's recorded score_source ('risk_fusion_stacked_lr')."
+      ]
+    },
+    {
+      "name": "provenance_agreement",
+      "passed": true,
+      "details": [
+        "All stamped artifacts agree on git_commit=62fdb9aa093dd03049a2dbf8d20bdb45a0474849.",
+        "WARNING (not a failure): generated with a dirty working tree: ['decision_policy_results.json', 'misses.jsonl', 'case_reports.json']. Not exactly reproducible from the commit hash alone; regenerate from a clean tree before freezing."
+      ]
+    },
+    {
+      "name": "e1_schema_offline_stages_typed_unavailable",
+      "passed": true,
+      "details": [
+        "ScoreResponse.stage3_graph/stage4_autoencoder/stage5_fusion are all typed StageUnavailable (available defaults False); stage1_2 is typed StageScore."
+      ]
+    },
+    {
+      "name": "e2_score_trace_offline_stages_unavailable_at_runtime",
+      "passed": true,
+      "details": [
+        "score_trace() on a real ATO corpus trace reports stage3_graph/stage4_autoencoder/stage5_fusion as available=False (with a reason each), stage1_2 as available=True, and decision='BLOCK'."
+      ]
+    },
+    {
+      "name": "f1_stage4_decision_threshold_single_source_of_truth",
+      "passed": true,
+      "details": [
+        "All 4 consumer(s) agree on DECISION_THRESHOLD=0.5: [\"blue_team_pipeline.CONFIG['DECISION_THRESHOLD']\", 'cascade_with_graph.DECISION_THRESHOLD', 'cascade_with_autoencoder.DECISION_THRESHOLD', 'web_prototype/api ModelRegistry.decision_threshold']."
+      ]
+    },
+    {
+      "name": "g1_misses_jsonl_structurally_valid",
+      "passed": true,
+      "details": [
+        "All 7 miss record(s) carry the required fields and are internally consistent (ALLOW, score < t_review <= t_block)."
+      ]
+    },
+    {
+      "name": "g2_miss_attack_family_labels_valid",
+      "passed": true,
+      "details": [
+        "Every miss's attack_family is one of the supported families: ['ACCOUNT_TAKEOVER', 'AUTHORIZED_PUSH_PAYMENT', 'MULE_NETWORK']."
+      ]
+    },
+    {
+      "name": "g3_supported_attack_families_unchanged",
+      "passed": true,
+      "details": [
+        "decision_policy.LIABILITY_SIDE still covers exactly ['ACCOUNT_TAKEOVER', 'AUTHORIZED_PUSH_PAYMENT', 'MULE_NETWORK']."
+      ]
+    },
+    {
+      "name": "h1_stable_fold_id_deterministic",
+      "passed": true,
+      "details": [
+        "stable_fold_id(trace_id, seed) is deterministic for a fixed seed and seed-sensitive across seeds."
+      ]
+    },
+    {
+      "name": "h2_stable_kfold_split_deterministic",
+      "passed": true,
+      "details": [
+        "stable_kfold_split is deterministic for a fixed (df, seed) and each trace_id's fold assignment is invariant to row order/position."
+      ]
+    }
+  ]
+}
