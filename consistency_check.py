@@ -1,0 +1,408 @@
+"""
+consistency_check.py
+=====================
+Cross-artifact consistency check: miss_collector.py <-> decision_policy.py
+<-> explainability.py
+
+WHAT THIS CHECKS AND WHY
+-------------------------
+Three separate scripts each independently arrive at (or read) the Stage 6
+decision thresholds and the Stage 5 fused score for the same underlying
+traces:
+
+    decision_policy.py   -- COMPUTES t_review/t_block via optimize_thresholds()
+                             and writes them to decision_policy_results.json.
+    miss_collector.py    -- RECOMPUTES t_review/t_block via its own fresh
+                             call to dp.optimize_thresholds(), independently
+                             of decision_policy_results.json, then writes
+                             every fraud trace resolving to ALLOW to
+                             misses.jsonl.
+    explainability.py    -- READS t_review/t_block from
+                             decision_policy_results.json (see
+                             _decision_thresholds()) if present, and writes
+                             one hand-picked example of each case type
+                             (including "fraud_case_that_slipped_through_
+                             as_allow") to case_reports.json.
+
+Because miss_collector.py does NOT read decision_policy_results.json --
+it recomputes its own thresholds from a fresh optimize_thresholds() call
+-- and because optimize_thresholds() re-runs a grid search over whatever
+OOF scores happen to be in decision_policy_validation_cache.npz at that
+moment (itself overwritten by whichever of get_validation_data() /
+get_validation_data_fused() last ran), these three artifacts can silently
+drift out of sync with each other: same trace, three different reported
+scores and thresholds, depending on which script last regenerated which
+file. This script is the machine-checkable version of "do these agree,"
+so drift shows up as an explicit FAIL instead of only being noticed by a
+human eyeballing three JSON files side by side.
+
+CHECKS PERFORMED
+-----------------
+1. threshold_agreement -- decision_policy_results.json's "corrected"
+   t_review/t_block vs. the t_review/t_block actually stamped onto every
+   record in misses.jsonl. These come from two independent
+   optimize_thresholds() calls and are NOT guaranteed to match.
+2. case_reports_threshold_agreement -- same comparison, but against every
+   case_reports.json entry that carries its own stage4.t_review/t_block
+   (a third independent source: explainability.py's cached read of
+   decision_policy_results.json, OR its own fallback computation if that
+   file didn't exist when it ran).
+3. shared_trace_score_agreement -- for any trace_id that appears in BOTH
+   misses.jsonl and case_reports.json, the reported final score must
+   match within a small numerical tolerance. A mismatch here means the
+   two files were generated from genuinely different OOF score arrays,
+   not just different threshold choices.
+4. decision_label_agreement -- for that same shared trace_id, the
+   decision label (ALLOW/REVIEW/BLOCK) implied by miss_collector.py
+   (always ALLOW, by construction -- that's the whole file's selection
+   criterion) must match case_reports.json's own recorded stage4.decision
+   for that trace.
+5. miss_completeness -- if case_reports.json's
+   "fraud_case_that_slipped_through_as_allow" entry names a trace_id,
+   that trace_id should appear somewhere in misses.jsonl (misses.jsonl is
+   supposed to be the exhaustive list of every fraud trace that resolves
+   to ALLOW; case_reports.json's entry is one hand-picked example from
+   that same population, not a different one).
+
+This script reads existing output files -- it does NOT rerun the
+pipeline itself. Run miss_collector.py, decision_policy.py, and
+explainability.py first (in whatever order/frequency your workflow uses)
+before running this.
+
+Run:
+    python3 consistency_check.py
+Exit code 0 if every check passes, 1 if any check fails.
+"""
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).parent
+MISSES_PATH = REPO_ROOT / "misses.jsonl"
+DECISION_POLICY_PATH = REPO_ROOT / "decision_policy_results.json"
+CASE_REPORTS_PATH = REPO_ROOT / "case_reports.json"
+
+SCORE_TOLERANCE = 1e-6
+THRESHOLD_TOLERANCE = 1e-6
+
+
+def _load_jsonl(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    records = []
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                records.append(json.loads(line))
+    return records
+
+
+def _load_json(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    with open(path) as f:
+        return json.load(f)
+
+
+def check_threshold_agreement(misses: list[dict], decision_policy: dict | None) -> dict:
+    """decision_policy_results.json's corrected thresholds vs. every
+    threshold pair stamped into misses.jsonl."""
+    check = {"name": "threshold_agreement", "passed": True, "details": []}
+
+    if decision_policy is None:
+        check["passed"] = None
+        check["details"].append("decision_policy_results.json not found -- skipped.")
+        return check
+    if not misses:
+        check["passed"] = None
+        check["details"].append("misses.jsonl not found or empty -- skipped.")
+        return check
+
+    dp_t_review = float(decision_policy["corrected"]["t_review"])
+    dp_t_block = float(decision_policy["corrected"]["t_block"])
+
+    mismatches = []
+    seen_pairs = set()
+    for m in misses:
+        pair = (m.get("t_review"), m.get("t_block"))
+        seen_pairs.add(pair)
+    for t_review, t_block in seen_pairs:
+        if t_review is None or t_block is None:
+            continue
+        review_ok = abs(t_review - dp_t_review) <= THRESHOLD_TOLERANCE
+        block_ok = abs(t_block - dp_t_block) <= THRESHOLD_TOLERANCE
+        if not (review_ok and block_ok):
+            mismatches.append((t_review, t_block))
+
+    if mismatches:
+        check["passed"] = False
+        check["details"].append(
+            f"decision_policy_results.json['corrected'] = "
+            f"(t_review={dp_t_review}, t_block={dp_t_block}), but misses.jsonl "
+            f"contains {len(mismatches)} distinct threshold pair(s) that don't "
+            f"match: {mismatches}. This means miss_collector.py's independent "
+            f"optimize_thresholds() call landed on a different policy than "
+            f"decision_policy.py's own frozen result -- misses.jsonl was very "
+            f"likely generated from a stale or differently-cached OOF score "
+            f"array (decision_policy_validation_cache.npz) than "
+            f"decision_policy_results.json was."
+        )
+    else:
+        check["details"].append(
+            f"All {len(seen_pairs)} distinct threshold pair(s) in misses.jsonl "
+            f"match decision_policy_results.json['corrected']."
+        )
+    return check
+
+
+def check_case_reports_threshold_agreement(case_reports: dict | None, decision_policy: dict | None) -> dict:
+    check = {"name": "case_reports_threshold_agreement", "passed": True, "details": []}
+
+    if case_reports is None:
+        check["passed"] = None
+        check["details"].append("case_reports.json not found -- skipped.")
+        return check
+    if decision_policy is None:
+        check["passed"] = None
+        check["details"].append("decision_policy_results.json not found -- skipped.")
+        return check
+
+    dp_t_review = float(decision_policy["corrected"]["t_review"])
+    dp_t_block = float(decision_policy["corrected"]["t_block"])
+
+    mismatches = []
+    for case_name, case in case_reports.items():
+        stage4 = case.get("stage4") if isinstance(case, dict) else None
+        if not stage4 or "t_review" not in stage4 or "t_block" not in stage4:
+            continue
+        t_review, t_block = float(stage4["t_review"]), float(stage4["t_block"])
+        review_ok = abs(t_review - dp_t_review) <= THRESHOLD_TOLERANCE
+        block_ok = abs(t_block - dp_t_block) <= THRESHOLD_TOLERANCE
+        if not (review_ok and block_ok):
+            mismatches.append((case_name, t_review, t_block))
+
+    if mismatches:
+        check["passed"] = False
+        check["details"].append(
+            f"decision_policy_results.json['corrected'] = "
+            f"(t_review={dp_t_review}, t_block={dp_t_block}), but case_reports.json "
+            f"has {len(mismatches)} case(s) stamped with different thresholds: "
+            + "; ".join(f"{name} -> (t_review={tr}, t_block={tb})" for name, tr, tb in mismatches)
+            + ". explainability.py's _decision_thresholds() reads "
+              "decision_policy_results.json when it exists -- a mismatch here "
+              "means case_reports.json was generated BEFORE the current "
+              "decision_policy_results.json (or before it existed at all, "
+              "triggering explainability.py's no-REVIEW-band fallback), and is "
+              "now describing a policy that's no longer the frozen one."
+        )
+    else:
+        check["details"].append(
+            "Every case_reports.json entry with its own stage4 thresholds "
+            "matches decision_policy_results.json['corrected']."
+        )
+    return check
+
+
+def check_shared_trace_consistency(misses: list[dict], case_reports: dict | None) -> tuple[dict, dict]:
+    """For trace_ids appearing in both misses.jsonl and case_reports.json:
+    scores must agree (shared_trace_score_agreement) and the decision
+    label must agree (decision_label_agreement)."""
+    score_check = {"name": "shared_trace_score_agreement", "passed": True, "details": []}
+    label_check = {"name": "decision_label_agreement", "passed": True, "details": []}
+
+    if case_reports is None:
+        score_check["passed"] = label_check["passed"] = None
+        score_check["details"].append("case_reports.json not found -- skipped.")
+        label_check["details"].append("case_reports.json not found -- skipped.")
+        return score_check, label_check
+    if not misses:
+        score_check["passed"] = label_check["passed"] = None
+        score_check["details"].append("misses.jsonl not found or empty -- skipped.")
+        label_check["details"].append("misses.jsonl not found or empty -- skipped.")
+        return score_check, label_check
+
+    misses_by_trace = {m["trace_id"]: m for m in misses if "trace_id" in m}
+
+    score_mismatches = []
+    label_mismatches = []
+    n_shared = 0
+    for case_name, case in case_reports.items():
+        if not isinstance(case, dict):
+            continue
+        trace_id = case.get("trace_id")
+        stage4 = case.get("stage4")
+        if trace_id is None or trace_id not in misses_by_trace or not stage4:
+            continue
+        n_shared += 1
+        miss = misses_by_trace[trace_id]
+
+        case_score = stage4.get("final_score")
+        miss_score = miss.get("final_score")
+        if case_score is not None and miss_score is not None:
+            if abs(float(case_score) - float(miss_score)) > SCORE_TOLERANCE:
+                score_mismatches.append((trace_id, case_name, case_score, miss_score))
+
+        case_decision = stage4.get("decision")
+        miss_decision = miss.get("final_decision")
+        if case_decision is not None and miss_decision is not None:
+            if case_decision != miss_decision:
+                label_mismatches.append((trace_id, case_name, case_decision, miss_decision))
+
+    if n_shared == 0:
+        score_check["passed"] = label_check["passed"] = None
+        score_check["details"].append(
+            "No trace_id appears in both misses.jsonl and case_reports.json -- skipped."
+        )
+        label_check["details"].append(
+            "No trace_id appears in both misses.jsonl and case_reports.json -- skipped."
+        )
+        return score_check, label_check
+
+    if score_mismatches:
+        score_check["passed"] = False
+        score_check["details"].append(
+            f"{len(score_mismatches)}/{n_shared} shared trace(s) have disagreeing "
+            f"final scores between case_reports.json and misses.jsonl: " + "; ".join(
+                f"{tid} ({case_name}): case_reports={cs}, misses.jsonl={ms}"
+                for tid, case_name, cs, ms in score_mismatches
+            ) + ". Same trace, two different reported OOF scores means the two "
+              "files were built from genuinely different score arrays, not just "
+              "different thresholds -- check which cache/run each file actually "
+              "reflects."
+        )
+    else:
+        score_check["details"].append(
+            f"All {n_shared} shared trace(s) have matching final scores."
+        )
+
+    if label_mismatches:
+        label_check["passed"] = False
+        label_check["details"].append(
+            f"{len(label_mismatches)}/{n_shared} shared trace(s) have disagreeing "
+            f"decisions: " + "; ".join(
+                f"{tid} ({case_name}): case_reports={cd}, misses.jsonl(implied)={md}"
+                for tid, case_name, cd, md in label_mismatches
+            ) + ". misses.jsonl only ever contains ALLOW by construction -- a "
+              "case_reports.json entry disagreeing means the two pipelines "
+              "reached a different final decision for the identical trace."
+        )
+    else:
+        label_check["details"].append(
+            f"All {n_shared} shared trace(s) have matching decision labels."
+        )
+
+    return score_check, label_check
+
+
+def check_miss_completeness(misses: list[dict], case_reports: dict | None) -> dict:
+    """case_reports.json's hand-picked 'fraud_case_that_slipped_through_as_allow'
+    example should be one of the traces misses.jsonl independently collected."""
+    check = {"name": "miss_completeness", "passed": True, "details": []}
+
+    if case_reports is None:
+        check["passed"] = None
+        check["details"].append("case_reports.json not found -- skipped.")
+        return check
+
+    allow_case = case_reports.get("fraud_case_that_slipped_through_as_allow")
+    if not allow_case:
+        check["passed"] = None
+        check["details"].append(
+            "case_reports.json has no 'fraud_case_that_slipped_through_as_allow' "
+            "entry -- skipped."
+        )
+        return check
+
+    trace_id = allow_case.get("trace_id")
+    if not misses:
+        check["passed"] = False
+        check["details"].append(
+            f"case_reports.json names {trace_id} as a fraud case that slipped "
+            f"through as ALLOW, but misses.jsonl is missing or empty -- the "
+            f"exhaustive miss list and the hand-picked example disagree about "
+            f"whether ANY fraud slipped through."
+        )
+        return check
+
+    miss_trace_ids = {m.get("trace_id") for m in misses}
+    if trace_id not in miss_trace_ids:
+        check["passed"] = False
+        check["details"].append(
+            f"case_reports.json's example trace ({trace_id}) does not appear "
+            f"anywhere in misses.jsonl's {len(misses)} collected miss(es). "
+            f"misses.jsonl is supposed to be the exhaustive set of fraud "
+            f"traces resolving to ALLOW, so the example should be a member "
+            f"of it, not a case found by a different threshold/score."
+        )
+    else:
+        check["details"].append(
+            f"case_reports.json's example trace ({trace_id}) is present in "
+            f"misses.jsonl, as expected."
+        )
+    return check
+
+
+def main() -> int:
+    misses = _load_jsonl(MISSES_PATH)
+    decision_policy = _load_json(DECISION_POLICY_PATH)
+    case_reports = _load_json(CASE_REPORTS_PATH)
+
+    checks = [
+        check_threshold_agreement(misses, decision_policy),
+        check_case_reports_threshold_agreement(case_reports, decision_policy),
+        check_miss_completeness(misses, case_reports),
+    ]
+    score_check, label_check = check_shared_trace_consistency(misses, case_reports)
+    checks.append(score_check)
+    checks.append(label_check)
+
+    print("=" * 72)
+    print("CONSISTENCY CHECK -- miss_collector.py / decision_policy.py / explainability.py")
+    print("=" * 72)
+
+    any_fail = False
+    any_run = False
+    for c in checks:
+        if c["passed"] is None:
+            status = "SKIPPED"
+        elif c["passed"]:
+            status = "PASS"
+            any_run = True
+        else:
+            status = "FAIL"
+            any_run = True
+            any_fail = True
+        print(f"\n[{status}] {c['name']}")
+        for line in c["details"]:
+            print(f"    {line}")
+
+    print("\n" + "=" * 72)
+    if not any_run:
+        print("No checks could run -- generate misses.jsonl, decision_policy_results.json, "
+              "and/or case_reports.json first (run miss_collector.py / decision_policy.py / "
+              "explainability.py).")
+        return 0
+    if any_fail:
+        print("VERDICT: FAIL -- one or more artifacts have drifted out of sync. "
+              "See failed checks above.")
+    else:
+        print("VERDICT: PASS -- all runnable checks agree.")
+    print("=" * 72)
+
+    output = {
+        "verdict": "FAIL" if any_fail else "PASS",
+        "checks": checks,
+    }
+    out_path = REPO_ROOT / "consistency_check_results.json"
+    with open(out_path, "w") as f:
+        json.dump(output, f, indent=2, default=str)
+    print(f"\nFull results written to {out_path}")
+
+    return 1 if any_fail else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
