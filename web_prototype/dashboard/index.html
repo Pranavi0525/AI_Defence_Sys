@@ -218,7 +218,7 @@
       <div class="name">AI Defense Lab</div>
       <div class="sub">Red Team / Blue Team payment fraud console</div>
     </div>
-    <input id="apiBase" class="api-input" value="http://localhost:8000" spellcheck="false" />
+    <input id="apiBase" class="api-input" value="" spellcheck="false" placeholder="http://localhost:8000" />
     <div class="health-pill"><span id="healthDot" class="dot"></span><span id="healthText">checking backend…</span></div>
     <button class="run-btn ghost" id="refreshBtn">Refresh</button>
     <button class="run-btn" id="runBtn">Run pipeline</button>
@@ -313,10 +313,36 @@
 
 </div>
 
+<script src="config.js"></script>
 <script>
 const $ = (sel) => document.querySelector(sel);
 const apiBaseInput = $('#apiBase');
-const getBase = () => apiBaseInput.value.replace(/\/$/, '');
+
+// Resolution order for the API base URL, most specific first:
+//   1. Whatever the user has typed into the input field right now.
+//   2. A value saved earlier in this browser (localStorage).
+//   3. window.AI_DEFENSE_API_BASE from config.js (set at deploy time,
+//      no rebuild required -- see config.js's own comments).
+//   4. Nothing. The dashboard shows a clear "set your API URL" state
+//      rather than silently falling back to localhost.
+const API_BASE_STORAGE_KEY = 'ai_defense_api_base';
+
+(function initApiBase() {
+  const saved = localStorage.getItem(API_BASE_STORAGE_KEY);
+  const configured = (window.AI_DEFENSE_API_BASE || '').trim();
+  apiBaseInput.value = saved || configured || '';
+})();
+
+apiBaseInput.addEventListener('change', () => {
+  const val = apiBaseInput.value.trim();
+  if (val) {
+    localStorage.setItem(API_BASE_STORAGE_KEY, val);
+  } else {
+    localStorage.removeItem(API_BASE_STORAGE_KEY);
+  }
+});
+
+const getBase = () => apiBaseInput.value.trim().replace(/\/$/, '');
 
 const STAGE_CATALOG = [
   { id: 'stage1_2', label: 'Stage 1+2', sub: 'Rules + XGBoost' },
@@ -333,7 +359,9 @@ function money(x){ return (x==null) ? '—' : '$'+Number(x).toLocaleString(undef
 function fmtTime(ts){ return ts ? new Date(ts*1000).toLocaleString() : '—'; }
 
 async function fetchJSON(path, opts){
-  const res = await fetch(getBase() + path, opts);
+  const base = getBase();
+  if (!base) throw new Error('API_BASE_UNSET');
+  const res = await fetch(base + path, opts);
   if(!res.ok) throw new Error(path + ' -> ' + res.status);
   return res.json();
 }
@@ -343,6 +371,11 @@ async function fetchJSON(path, opts){
 // ---------------------------------------------------------------------
 async function checkHealth(){
   const dot = $('#healthDot'), text = $('#healthText');
+  if (!getBase()) {
+    dot.className = 'dot bad';
+    text.textContent = 'set your API URL above (no backend URL configured)';
+    return false;
+  }
   try{
     await fetchJSON('/api/health');
     dot.className = 'dot ok';
@@ -350,7 +383,7 @@ async function checkHealth(){
     return true;
   }catch(e){
     dot.className = 'dot bad';
-    text.textContent = 'backend unreachable — start uvicorn on ' + getBase();
+    text.textContent = 'backend unreachable at ' + getBase();
     return false;
   }
 }

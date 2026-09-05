@@ -1,0 +1,45 @@
+# render.yaml -- Render Blueprint for the AI Defense backend.
+#
+# Verified locally (this repo, this commit) before writing this file:
+#   - `pip install -r requirements.txt` succeeds cleanly.
+#   - `python3 web_prototype/run_api.py --host 0.0.0.0 --port <N>` starts
+#     the real FastAPI app and loads the real model artifact.
+#   - GET /healthz and /readyz respond correctly.
+#   - ENVIRONMENT=production + CORS_ALLOWED_ORIGINS=<origin> is accepted;
+#     ENVIRONMENT=production with no CORS_ALLOWED_ORIGINS is correctly
+#     REJECTED at startup (settings.py fails loud, not silently insecure).
+#
+# IMPORTANT, confirmed by reading the code (not assumed): settings.py
+# computes host/port from env vars, but run_api.py's uvicorn.run() call
+# only honors its own --host/--port CLI arguments -- it does NOT read
+# settings.host/settings.port. That's why startCommand below passes
+# --host 0.0.0.0 --port $PORT explicitly; without that, the process
+# would bind to 127.0.0.1:8000 and Render's health checks would fail to
+# reach it.
+#
+# To deploy: in the Render dashboard, "New +" -> "Blueprint", point it at
+# this repo/branch. Render will read this file automatically. You still
+# need to fill in CORS_ALLOWED_ORIGINS below (or in the dashboard) with
+# your actual deployed frontend URL once you know it.
+
+services:
+  - type: web
+    name: ai-defense-api
+    runtime: python
+    plan: free
+    branch: master
+    buildCommand: pip install -r requirements.txt
+    startCommand: "python3 web_prototype/run_api.py --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /healthz
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ALLOWED_ORIGINS
+        # Fill this in once the Vercel frontend URL is known, e.g.:
+        # https://ai-defense-lab.vercel.app
+        # Multiple origins: comma-separated, no spaces.
+        sync: false
+      - key: LOG_LEVEL
+        value: INFO
+      - key: PYTHON_VERSION
+        value: "3.12.3"

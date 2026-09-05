@@ -41,6 +41,8 @@ data/raw/
 # Environment
 .env
 .env.*
+!.env.example
+!web_prototype/api/.env.example
 
 # OS
 Thumbs.db
