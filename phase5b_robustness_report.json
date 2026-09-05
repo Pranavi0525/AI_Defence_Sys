@@ -1353,8 +1353,8 @@
     "canonical_corpus_modified": false
   },
   "provenance": {
-    "git_commit": "42d829eccb57bd49664b97e60d402c9263b3d70f",
-    "git_dirty": true,
+    "git_commit": "11e9e5ed805509c32cf2a87d9a5602b6fded60be",
+    "git_dirty": false,
     "python_version": "3.14.4",
     "package_versions": {
       "numpy": "2.4.4",
