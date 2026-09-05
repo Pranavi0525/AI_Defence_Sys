@@ -376,6 +376,43 @@ These figures are evaluation results on the project's synthetic corpus and shoul
 
 ---
 
+## Decision-Policy Sensitivity
+
+The decision policy was tested under different assumptions about production fraud prevalence and review-operation cost.
+
+Across the tested ranges:
+
+- Production fraud rate: **0.2%–2.0%**
+- Review-operation cost: **–**
+
+the selected block threshold remained stable at:
+
+```text
+t_block = 0.9643
+```
+
+The block-threshold span across both sensitivity sweeps was:
+
+```text
+0.9643 - 0.9643
+span = 0.000
+```
+
+At the reference sensitivity setting of **0.6% production fraud rate** and ** review-operation cost**, the evaluated policy produced:
+
+| Decision | Share |
+|---|---:|
+| Allow | 72.9% |
+| Review | 5.0% |
+| Block | 22.1% |
+
+Fraud recall when combining Review + Block was **98.1%** under this sensitivity setting.
+
+The review threshold was more sensitive to the operating assumptions than the block threshold. This indicates that, within the tested range, the high-risk boundary was stable while the amount of traffic routed to manual review could change.
+
+These are sensitivity-analysis results on the project's synthetic evaluation population and are not claims about real-world fraud prevalence, operating cost, or production performance.
+
+---
 # 7. Liability-Aware Decisions
 
 The system does not treat every fraud family as having identical operational responsibility.
