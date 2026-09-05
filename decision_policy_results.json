@@ -1,7 +1,7 @@
 {
   "naive": {
-    "t_review": 0.0589,
-    "t_block": 0.0976,
+    "t_review": 0.0588,
+    "t_block": 0.0982,
     "allow_rate": 0.6947,
     "review_rate": 0.0341,
     "block_rate": 0.2712,
@@ -63,8 +63,8 @@
     }
   },
   "corrected": {
-    "t_review": 0.0976,
-    "t_block": 0.9651,
+    "t_review": 0.0982,
+    "t_block": 0.9652,
     "allow_rate": 0.7288,
     "review_rate": 0.0501,
     "block_rate": 0.2211,
@@ -78,7 +78,7 @@
     "fraud_recall_blocked_plus_review": 0.9813,
     "dollars_fraud_allowed_through": 11779.67,
     "dollars_fraud_total": 7304745.04,
-    "expected_cost_at_assumed_prevalence": 1152.43,
+    "expected_cost_at_assumed_prevalence": 1177.72,
     "liability_breakdown": {
       "ACCOUNT_TAKEOVER": {
         "liable_side": "SENDING",
@@ -86,8 +86,8 @@
         "sending_liability_share": 1.0,
         "receiving_liability_share": 0.0,
         "n_fraud_traces": 97,
-        "n_blocked": 91,
-        "n_reviewed": 4,
+        "n_blocked": 90,
+        "n_reviewed": 5,
         "n_allowed_through": 2,
         "dollars_allowed_through_total": 0.0,
         "dollars_allowed_through_this_institution_liable_for": 0.0
@@ -110,8 +110,8 @@
         "sending_liability_share": 1.0,
         "receiving_liability_share": 1.0,
         "n_fraud_traces": 121,
-        "n_blocked": 103,
-        "n_reviewed": 17,
+        "n_blocked": 104,
+        "n_reviewed": 16,
         "n_allowed_through": 1,
         "dollars_allowed_through_total": 1748.23,
         "dollars_allowed_through_this_institution_liable_for": 1748.23
@@ -129,18 +129,115 @@
     "score": "risk_fusion_stacked_lr",
     "validation_population": "ring_overlay_corpus (cwg.load_all_records, same rows Stage 3/Stage 4 were validated on)",
     "fusion_avg_coefficients": {
-      "stage_1_2_score": 6.895750887885801,
-      "gcn_score": 2.4371936365657856,
-      "ae_score": 2.551862710853497,
-      "intercept": -3.843374197356046
+      "stage_1_2_score": 6.899894607729861,
+      "gcn_score": 2.4338396778632903,
+      "ae_score": 2.5206058624847296,
+      "intercept": -3.8455937800540214
     },
-    "n_graph_connected_nodes": 214,
+    "n_graph_connected_nodes": 229,
     "note": "These coefficients come from THIS run (ring-overlay corpus), not from risk_fusion_results.json's real_corpus_risk_fusion block, which is a separate no-overlay run with a structurally different (near-zero) gcn_score weight. Consumers needing to explain why the fused score moved (e.g. explainability.py) should read fusion_avg_coefficients from here, not from risk_fusion_results.json's real-corpus block."
   },
+  "nested_fold_honest_estimate": {
+    "method": "nested_kfold_threshold_selection",
+    "n_splits": 5,
+    "note": "Each row's ALLOW/REVIEW/BLOCK decision here was made using thresholds selected on the OTHER folds only -- this row's own fold never contributed to picking the pair applied to it. Compare against 'corrected' above: that block reports the single, full-population-selected policy that would actually be deployed (and is therefore the more optimistic estimate of its own future performance).",
+    "fold_thresholds": [
+      {
+        "fold": 1,
+        "t_review": 0.1246,
+        "t_block": 0.9652,
+        "n_selection_rows": 1244,
+        "n_holdout_rows": 312
+      },
+      {
+        "fold": 2,
+        "t_review": 0.1039,
+        "t_block": 0.9642,
+        "n_selection_rows": 1244,
+        "n_holdout_rows": 312
+      },
+      {
+        "fold": 3,
+        "t_review": 0.7636,
+        "t_block": 0.9665,
+        "n_selection_rows": 1245,
+        "n_holdout_rows": 311
+      },
+      {
+        "fold": 4,
+        "t_review": 0.0967,
+        "t_block": 0.9645,
+        "n_selection_rows": 1245,
+        "n_holdout_rows": 311
+      },
+      {
+        "fold": 5,
+        "t_review": 0.1085,
+        "t_block": 0.9645,
+        "n_selection_rows": 1246,
+        "n_holdout_rows": 310
+      }
+    ],
+    "allow_rate": 0.7352,
+    "review_rate": 0.0469,
+    "block_rate": 0.2179,
+    "legit_blocked": 1,
+    "legit_blocked_rate": 0.0008,
+    "legit_reviewed_rate": 0.0389,
+    "fraud_blocked": 338,
+    "fraud_reviewed": 27,
+    "fraud_allowed": 9,
+    "fraud_recall_blocked_only": 0.9037,
+    "fraud_recall_blocked_plus_review": 0.9759,
+    "dollars_fraud_allowed_through": 62944.43,
+    "dollars_fraud_total": 7304745.04,
+    "expected_cost_at_assumed_prevalence": 1534.16,
+    "liability_breakdown": {
+      "ACCOUNT_TAKEOVER": {
+        "liable_side": "SENDING",
+        "acting_side": "SENDING",
+        "sending_liability_share": 1.0,
+        "receiving_liability_share": 0.0,
+        "n_fraud_traces": 97,
+        "n_blocked": 90,
+        "n_reviewed": 5,
+        "n_allowed_through": 2,
+        "dollars_allowed_through_total": 0.0,
+        "dollars_allowed_through_this_institution_liable_for": 0.0
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "liable_side": "SHARED_50_50",
+        "acting_side": "BOTH",
+        "sending_liability_share": 0.5,
+        "receiving_liability_share": 0.5,
+        "n_fraud_traces": 156,
+        "n_blocked": 147,
+        "n_reviewed": 3,
+        "n_allowed_through": 6,
+        "dollars_allowed_through_total": 61196.2,
+        "dollars_allowed_through_this_institution_liable_for": 30598.1
+      },
+      "MULE_NETWORK": {
+        "liable_side": "RECEIVING",
+        "acting_side": "RECEIVING",
+        "sending_liability_share": 1.0,
+        "receiving_liability_share": 1.0,
+        "n_fraud_traces": 121,
+        "n_blocked": 101,
+        "n_reviewed": 19,
+        "n_allowed_through": 1,
+        "dollars_allowed_through_total": 1748.23,
+        "dollars_allowed_through_this_institution_liable_for": 1748.23
+      }
+    }
+  },
+  "methodology_note": {
+    "threshold_selection_optimism": "The 'corrected' block above selects (t_review, t_block) by grid search over expected cost computed on the FULL validation population, then reports allow/review/block rates, recall, cost, and liability_breakdown on that SAME population. proba is legitimately out-of-fold w.r.t. the base/fusion models, but the threshold pair itself is a free parameter fit to this exact sample and judged on it -- a separate, additional source of optimism (moderate severity; does not affect the API, which uses a fixed DECISION_THRESHOLD=0.5 on Stage 1+2 only and does not consume these thresholds -- see web_prototype/api/inference.py). 'nested_fold_honest_estimate' below is a genuinely out-of-sample estimate of the same policy's performance: thresholds are selected on 4 folds and applied only to the held-out 5th, rotated across all 5. See reports/stage_leakage_audit_risk_fusion_decision_policy.md, Finding 2, for the full writeup."
+  },
   "_artifact_metadata": {
-    "generated_at_utc": "2026-09-04T05:29:03.382998+00:00",
-    "git_commit": "unknown (not a git checkout, or git unavailable)",
-    "git_dirty": "unknown",
+    "generated_at_utc": "2026-09-05T06:39:55.939538+00:00",
+    "git_commit": "a5a540313c6142c1999bcd5a419d8cf8c6e4a98e",
+    "git_dirty": true,
     "python_version": "3.12.3",
     "platform": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39",
     "package_versions": {

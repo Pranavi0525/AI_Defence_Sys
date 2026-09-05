@@ -462,6 +462,185 @@ def optimize_thresholds(
 
 
 # ---------------------------------------------------------------------------
+# Step 4b -- nested (fold-honest) threshold estimate
+# ---------------------------------------------------------------------------
+# `optimize_thresholds()` above selects (t_review, t_block) and
+# `policy_stats()` reports performance on the SAME rows -- a real
+# methodological gap (see reports/stage_leakage_audit_risk_fusion_decision_policy.md,
+# "Finding 2"). `proba` is legitimately out-of-fold w.r.t. the base
+# models, but the threshold PAIR is itself a free parameter fit to this
+# exact validation population, then judged on that same population --
+# a second, separate optimism problem on top of (not fixed by) base-model
+# OOF-ness.
+#
+# The fix below is a nested/outer rotation, reusing the IDENTICAL fold
+# partition already used to produce `proba` (via
+# `blue_team_pipeline.stable_kfold_split(df, "fraud", n_splits, RANDOM_STATE)`,
+# the single source of truth `compute_stage_1_2_cascade` itself calls).
+# For each outer fold: thresholds are selected on the OTHER folds only,
+# then applied to score ONLY that fold's held-out rows. Every row ends
+# up with exactly one nested decision, made by a threshold pair that
+# never saw that row during selection -- the threshold-selection analog
+# of an out-of-fold prediction.
+#
+# IMPORTANT what this number IS and IS NOT an estimate of: each outer
+# fold in general selects a DIFFERENT (t_review, t_block) pair (see
+# `fold_thresholds` in the returned dict), so the aggregated numbers
+# below are a fold-honest estimate of the OUT-OF-SAMPLE PERFORMANCE OF
+# THE THRESHOLD-SELECTION PROCEDURE itself (i.e. "if you keep re-running
+# this grid search on fresh data, how well should you expect the pair it
+# picks to generalize") -- NOT literally the future performance of the
+# single, full-population-selected pair reported in the "corrected"
+# block. Those are two different, complementary quantities. This is
+# purely an additional, reported estimate: it does not change
+# `optimize_thresholds`, `policy_stats`, or the thresholds actually
+# written to `decision_policy_results.json`'s "corrected" block (that
+# single pair, selected once on the full population, remains the policy
+# that would actually be deployed).
+def nested_threshold_estimate(
+    df: pd.DataFrame, y: np.ndarray, proba: np.ndarray, dollars: np.ndarray,
+    cost: CostModel, n_splits: int = 5, n_candidates: int = 60,
+    attack_family: np.ndarray | None = None,
+) -> dict:
+    """Fold-honest estimate of the out-of-sample performance of the
+    threshold-SELECTION PROCEDURE (not of one single fixed pair): select
+    thresholds on n_splits-1 folds, evaluate only on the held-out fold,
+    rotate, concatenate. Different outer folds may select different
+    (t_review, t_block) pairs -- see the returned 'fold_thresholds' list.
+    Returns a dict shaped like policy_stats()'s output (plus per-fold
+    thresholds) but every number is genuinely out-of-sample with respect
+    to threshold selection, not just base-model scoring."""
+    folds = btp.stable_kfold_split(df, "fraud", n_splits, btp.CONFIG["RANDOM_STATE"])
+
+    n = len(y)
+    is_block = np.zeros(n, dtype=bool)
+    is_review = np.zeros(n, dtype=bool)
+    fold_thresholds = []
+
+    for fold_i, (select_idx, holdout_idx) in enumerate(folds, start=1):
+        fam_select = attack_family[select_idx] if attack_family is not None else None
+        selected = optimize_thresholds(
+            y[select_idx], proba[select_idx], dollars[select_idx], cost,
+            n_candidates=n_candidates, attack_family=fam_select,
+        )
+        t_review, t_block = selected["t_review"], selected["t_block"]
+        fold_thresholds.append({
+            "fold": fold_i, "t_review": t_review, "t_block": t_block,
+            "n_selection_rows": int(len(select_idx)), "n_holdout_rows": int(len(holdout_idx)),
+        })
+
+        p_holdout = proba[holdout_idx]
+        fold_is_block = p_holdout >= t_block
+        fold_is_review = (p_holdout >= t_review) & ~fold_is_block
+        is_block[holdout_idx] = fold_is_block
+        is_review[holdout_idx] = fold_is_review
+
+    is_allow = ~is_block & ~is_review
+    fraud = y == 1
+    legit = ~fraud
+
+    weights = sample_weights(y, cost.assumed_production_fraud_rate)
+    if attack_family is not None:
+        share = np.array([exposure_share(fam, cost) for fam in attack_family])
+    else:
+        share = np.ones(n)
+    liable_dollars = dollars * share
+
+    c = np.zeros(n)
+    c[is_allow & fraud] = liable_dollars[is_allow & fraud]
+    c[is_review] = cost.review_ops_cost
+    c[is_review & fraud] += liable_dollars[is_review & fraud] * (1 - cost.review_catch_rate)
+    c[is_block & legit] = cost.legit_block_friction_cost
+    nested_expected_cost = float(np.sum(c * weights))
+
+    fraud_caught = int((is_block & fraud).sum()) + int((is_review & fraud).sum())
+
+    result = {
+        "method": "nested_kfold_threshold_selection",
+        "n_splits": n_splits,
+        "note": "Each row's ALLOW/REVIEW/BLOCK decision here was made using "
+                "thresholds selected on the OTHER folds only -- this row's "
+                "own fold never contributed to picking the pair applied to "
+                "it. Different outer folds may select different "
+                "(t_review, t_block) pairs (see fold_thresholds), so these "
+                "aggregated numbers estimate the out-of-sample performance "
+                "of the THRESHOLD-SELECTION PROCEDURE itself, not the "
+                "future performance of one single fixed pair. Compare "
+                "against 'corrected' above: that block reports the single, "
+                "full-population-selected policy that would actually be "
+                "deployed (and is therefore the more optimistic estimate "
+                "of its own future performance).",
+        "fold_thresholds": fold_thresholds,
+        "allow_rate": round(float(is_allow.mean()), 4),
+        "review_rate": round(float(is_review.mean()), 4),
+        "block_rate": round(float(is_block.mean()), 4),
+        "legit_blocked": int((is_block & legit).sum()),
+        "legit_blocked_rate": round(float((is_block & legit).sum() / max(legit.sum(), 1)), 4),
+        "legit_reviewed_rate": round(float((is_review & legit).sum() / max(legit.sum(), 1)), 4),
+        "fraud_blocked": int((is_block & fraud).sum()),
+        "fraud_reviewed": int((is_review & fraud).sum()),
+        "fraud_allowed": int((is_allow & fraud).sum()),
+        "fraud_recall_blocked_only": round(float((is_block & fraud).sum() / max(fraud.sum(), 1)), 4),
+        "fraud_recall_blocked_plus_review": round(float(fraud_caught / max(fraud.sum(), 1)), 4),
+        "dollars_fraud_allowed_through": round(float(dollars[is_allow & fraud].sum()), 2),
+        "dollars_fraud_total": round(float(dollars[fraud].sum()), 2),
+        "expected_cost_at_assumed_prevalence": round(nested_expected_cost, 2),
+    }
+    if attack_family is not None:
+        result["liability_breakdown"] = _liability_breakdown_from_masks(
+            y, dollars, attack_family, is_block, is_review, is_allow, cost
+        )
+    return result
+
+
+def _liability_breakdown_from_masks(
+    y: np.ndarray, dollars: np.ndarray, attack_family: np.ndarray,
+    is_block: np.ndarray, is_review: np.ndarray, is_allow: np.ndarray,
+    cost: CostModel,
+) -> dict:
+    """Same per-family read-out as liability_breakdown(), but takes
+    precomputed ALLOW/REVIEW/BLOCK masks directly instead of a single
+    (t_review, t_block) pair -- needed because nested_threshold_estimate()
+    applies a DIFFERENT threshold pair per fold, so there is no single
+    scalar pair to recompute masks from. Kept as a standalone function
+    (rather than refactoring liability_breakdown() to share this body) so
+    the existing, already-tested liability_breakdown() is left completely
+    untouched."""
+    fraud = y == 1
+    breakdown = {}
+    for fam in sorted(set(attack_family[fraud])):
+        fam_mask = (attack_family == fam) & fraud
+        n_fam = int(fam_mask.sum())
+        if n_fam == 0:
+            continue
+        side = liable_side(fam)
+        share = exposure_share(fam, cost)
+        if side == "SHARED_50_50":
+            receiving_share = 1 - share
+        elif side == "SENDING":
+            receiving_share = 0.0
+        elif side == "RECEIVING":
+            receiving_share = 1.0
+        else:
+            receiving_share = 0.0
+        breakdown[fam] = {
+            "liable_side": side,
+            "acting_side": acting_side(fam),
+            "sending_liability_share": round(share, 3),
+            "receiving_liability_share": round(receiving_share, 3),
+            "n_fraud_traces": n_fam,
+            "n_blocked": int((fam_mask & is_block).sum()),
+            "n_reviewed": int((fam_mask & is_review).sum()),
+            "n_allowed_through": int((fam_mask & is_allow).sum()),
+            "dollars_allowed_through_total": round(float(dollars[fam_mask & is_allow].sum()), 2),
+            "dollars_allowed_through_this_institution_liable_for": round(
+                float(dollars[fam_mask & is_allow].sum() * share), 2
+            ),
+        }
+    return breakdown
+
+
+# ---------------------------------------------------------------------------
 # Step 5 -- diagnostic: reproduce and explain the block-everyone failure
 # ---------------------------------------------------------------------------
 def diagnose_prevalence_bug(
@@ -510,6 +689,20 @@ def main():
     print(json.dumps(corrected, indent=2))
 
     print("\n" + "=" * 72)
+    print("NESTED (FOLD-HONEST) THRESHOLD ESTIMATE -- see Finding 2, "
+          "reports/stage_leakage_audit_risk_fusion_decision_policy.md")
+    print("=" * 72)
+    nested = nested_threshold_estimate(
+        df, y, proba, dollars, cost, n_splits=cwg.N_SPLITS, attack_family=attack_family
+    )
+    print(f"   allow/review/block rate: "
+          f"{nested['allow_rate']:.1%} / {nested['review_rate']:.1%} / {nested['block_rate']:.1%}")
+    print(f"   fraud recall (block+review): {nested['fraud_recall_blocked_plus_review']:.1%}")
+    print(f"   expected cost (nested): {nested['expected_cost_at_assumed_prevalence']:.2f} "
+          f"vs. same-population 'corrected' estimate: "
+          f"{corrected['expected_cost_at_assumed_prevalence']:.2f}")
+
+    print("\n" + "=" * 72)
     print("WHO SHOULD ACT (liable_side / acting_side by attack family)")
     print("=" * 72)
     for fam, row in corrected.get("liability_breakdown", {}).items():
@@ -533,7 +726,37 @@ def main():
                 "risk_fusion_results.json's real-corpus block.",
     }
 
-    output = {"naive": naive, "corrected": corrected, "score_source": score_source}
+    methodology_note = {
+        "threshold_selection_optimism": (
+            "The 'corrected' block above selects (t_review, t_block) by "
+            "grid search over expected cost computed on the FULL validation "
+            "population, then reports allow/review/block rates, recall, "
+            "cost, and liability_breakdown on that SAME population. proba "
+            "is legitimately out-of-fold w.r.t. the base/fusion models, but "
+            "the threshold pair itself is a free parameter fit to this "
+            "exact sample and judged on it -- a separate, additional source "
+            "of optimism (moderate severity; does not affect the API, which "
+            "uses a fixed DECISION_THRESHOLD=0.5 on Stage 1+2 only and does "
+            "not consume these thresholds -- see web_prototype/api/inference.py). "
+            "'nested_fold_honest_estimate' below is a fold-honest estimate "
+            "of the OUT-OF-SAMPLE PERFORMANCE OF THE THRESHOLD-SELECTION "
+            "PROCEDURE itself, not literally the future performance of the "
+            "single full-population-selected 'corrected' pair above: "
+            "thresholds are re-selected on 4 folds and applied only to the "
+            "held-out 5th, rotated across all 5, and different outer folds "
+            "may pick different pairs (see its 'fold_thresholds' list). See "
+            "reports/stage_leakage_audit_risk_fusion_decision_policy.md, "
+            "Finding 2, for the full writeup."
+        ),
+    }
+
+    output = {
+        "naive": naive,
+        "corrected": corrected,
+        "score_source": score_source,
+        "nested_fold_honest_estimate": nested,
+        "methodology_note": methodology_note,
+    }
     from artifact_metadata import stamp_artifact
     output = stamp_artifact(
         output,
