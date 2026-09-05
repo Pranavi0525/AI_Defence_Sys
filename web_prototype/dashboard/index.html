@@ -208,6 +208,146 @@
   }
   .empty-note{ font-size:13px; color:var(--text-dim); padding:18px 0; }
   .src{ font-family:var(--mono); font-size:10.5px; color:var(--text-faint); margin-top:8px; }
+
+  /* ---------- accessibility ---------- */
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible{
+    outline:2px solid var(--signal); outline-offset:2px;
+  }
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+  }
+
+  /* ---------- top nav ---------- */
+  .top-nav{ display:flex; gap:4px; padding:0 24px; max-width:1180px; margin:0 auto; overflow-x:auto; }
+  .top-nav a{
+    color:var(--text-dim); text-decoration:none; font-size:12.5px; font-weight:500;
+    padding:9px 12px; border-bottom:2px solid transparent; white-space:nowrap;
+  }
+  .top-nav a:hover{ color:var(--text); }
+
+  /* ---------- readiness pill ---------- */
+  .health-pill.warn .dot{ background:var(--review); box-shadow:0 0 8px var(--review); }
+
+  /* ---------- workspace tabs ---------- */
+  .ws-tabs{ display:flex; gap:6px; border-bottom:1px solid var(--line); margin-bottom:18px; }
+  .ws-tab{
+    font-family:var(--sans); font-size:13px; font-weight:600; color:var(--text-dim);
+    background:transparent; border:none; padding:10px 4px; margin-right:16px; cursor:pointer;
+    border-bottom:2px solid transparent;
+  }
+  .ws-tab[aria-selected="true"]{ color:var(--text); border-bottom-color:var(--signal); }
+  .ws-panel[hidden]{ display:none; }
+
+  /* ---------- scoring form ---------- */
+  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:14px; }
+  fieldset.form-group{
+    border:1px solid var(--line); border-radius:10px; padding:16px 18px 18px; margin:0 0 16px;
+    background:var(--bg-panel);
+  }
+  fieldset.form-group legend{
+    font-size:12px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase;
+    color:var(--text-dim); padding:0 6px;
+  }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field label{ font-size:12.5px; color:var(--text-dim); }
+  .field .hint{ font-size:11px; color:var(--text-faint); }
+  .field input[type=text], .field input[type=number], .field select{
+    font-family:var(--sans); font-size:13.5px; background:var(--bg-panel-raised);
+    border:1px solid var(--line); color:var(--text); border-radius:6px; padding:8px 10px;
+  }
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--signal-dim); }
+  .checkbox-row{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text); }
+  .checkbox-row input{ width:16px; height:16px; }
+  .sub-fields{ margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); display:none; }
+  .sub-fields.open{ display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:12px; }
+
+  textarea.json-editor{
+    width:100%; min-height:280px; font-family:var(--mono); font-size:12px; line-height:1.5;
+    background:#080c11; color:var(--text); border:1px solid var(--line); border-radius:8px;
+    padding:14px; resize:vertical; tab-size:2;
+  }
+  textarea.json-editor:focus{ outline:none; border-color:var(--signal-dim); }
+  .json-error{ color:var(--block); font-size:12.5px; margin-top:8px; font-family:var(--mono); display:none; }
+
+  .score-actions{ display:flex; align-items:center; gap:12px; margin-top:16px; flex-wrap:wrap; }
+  button.run-btn.wide{ padding:11px 22px; font-size:14px; }
+  button.run-btn[disabled]{ opacity:0.7; }
+
+  /* ---------- result panel ---------- */
+  .result-empty{
+    border:1px dashed var(--line); border-radius:10px; padding:36px 20px; text-align:center;
+    color:var(--text-dim); font-size:13.5px;
+  }
+  .decision-banner{
+    display:flex; align-items:center; gap:16px; border-radius:10px; padding:20px 22px;
+    border:1px solid var(--line); background:var(--bg-panel);
+  }
+  .decision-badge{
+    font-family:var(--mono); font-weight:700; font-size:15px; letter-spacing:0.03em;
+    padding:8px 16px; border-radius:8px; flex:none; display:flex; align-items:center; gap:8px;
+  }
+  .decision-badge.allow{ background:rgba(62,207,142,0.12); color:var(--allow); border:1px solid var(--allow); }
+  .decision-badge.review{ background:rgba(232,178,61,0.12); color:var(--review); border:1px solid var(--review); }
+  .decision-badge.block{ background:rgba(232,84,61,0.12); color:var(--block); border:1px solid var(--block); }
+  .decision-badge.unknown{ background:var(--bg-panel-raised); color:var(--text-dim); border:1px solid var(--line); }
+  .decision-meta{ font-size:13px; color:var(--text-dim); line-height:1.6; }
+  .decision-meta b{ color:var(--text); }
+
+  .meter-wrap{ margin-top:6px; }
+  .meter-track{ height:10px; border-radius:5px; background:var(--bg-panel-raised); overflow:hidden; border:1px solid var(--line); position:relative; }
+  .meter-fill{ height:100%; border-radius:5px; transition:width .4s ease; }
+  .meter-fill.allow{ background:var(--allow); } .meter-fill.review{ background:var(--review); } .meter-fill.block{ background:var(--block); }
+  .meter-labels{ display:flex; justify-content:space-between; font-size:10.5px; color:var(--text-faint); margin-top:4px; font-family:var(--mono); }
+
+  .evidence-hierarchy{ display:flex; flex-direction:column; gap:12px; margin-top:16px; }
+  .evidence-row{ display:flex; gap:14px; align-items:flex-start; }
+  .evidence-row .num{
+    flex:none; width:22px; height:22px; border-radius:50%; background:var(--bg-panel-raised);
+    border:1px solid var(--line); color:var(--text-dim); font-family:var(--mono); font-size:11px;
+    display:flex; align-items:center; justify-content:center; margin-top:2px;
+  }
+  .evidence-row .body{ flex:1; }
+  .evidence-row .body .h{ font-size:13.5px; font-weight:600; color:var(--text); }
+  .evidence-row .body .d{ font-size:12.5px; color:var(--text-dim); margin-top:2px; }
+
+  .stage-pill-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .stage-pill{
+    font-family:var(--mono); font-size:11.5px; border:1px solid var(--line); border-radius:8px;
+    padding:8px 12px; color:var(--text-dim); background:var(--bg-panel-raised); min-width:150px;
+  }
+  .stage-pill.ran{ border-color:var(--signal-dim); color:var(--text); }
+  .stage-pill .lbl{ font-weight:700; color:var(--text); display:block; margin-bottom:2px; }
+
+  details.tech-details{ margin-top:18px; border:1px solid var(--line); border-radius:10px; background:var(--bg-panel); overflow:hidden; }
+  details.tech-details summary{
+    cursor:pointer; padding:12px 16px; font-size:13px; font-weight:600; color:var(--text-dim);
+    list-style:none; display:flex; align-items:center; gap:8px;
+  }
+  details.tech-details summary::-webkit-details-marker{ display:none; }
+  details.tech-details summary::before{ content:'▸'; font-size:11px; }
+  details.tech-details[open] summary::before{ content:'▾'; }
+  details.tech-details pre{
+    margin:0; padding:14px 16px; border-top:1px solid var(--line); font-size:11.5px;
+    font-family:var(--mono); color:var(--text-dim); overflow-x:auto; max-height:340px; background:#080c11;
+  }
+
+  .banner-msg{ border-radius:8px; padding:12px 16px; font-size:13px; margin-bottom:16px; display:flex; gap:10px; align-items:flex-start; }
+  .banner-msg.error{ background:rgba(232,84,61,0.08); border:1px solid var(--block); color:#ffb3a3; }
+  .banner-msg.warn{ background:rgba(232,178,61,0.08); border:1px solid var(--review); color:#f4d79a; }
+  .banner-msg ul{ margin:6px 0 0; padding-left:18px; }
+
+  @keyframes shimmer{ 0%{ background-position:-200px 0; } 100%{ background-position:200px 0; } }
+  .skeleton{
+    height:14px; border-radius:4px; background:linear-gradient(90deg, var(--bg-panel-raised) 25%, var(--line) 37%, var(--bg-panel-raised) 63%);
+    background-size:400px 100%; animation:shimmer 1.4s infinite linear;
+  }
+
+  @media (max-width:640px){
+    .decision-banner{ flex-direction:column; align-items:flex-start; }
+    .top-inner{ padding:12px 16px; }
+    .shell{ padding:0 16px 60px; }
+  }
 </style>
 </head>
 <body>
@@ -215,22 +355,147 @@
 <header class="top">
   <div class="top-inner">
     <div class="brand">
-      <div class="name">AI Defense Lab</div>
-      <div class="sub">Red Team / Blue Team payment fraud console</div>
+      <div class="name">AI Defense System</div>
+      <div class="sub">AI Risk Manager — fraud defence console</div>
     </div>
-    <input id="apiBase" class="api-input" value="" spellcheck="false" placeholder="http://localhost:8000" />
-    <div class="health-pill"><span id="healthDot" class="dot"></span><span id="healthText">checking backend…</span></div>
+    <input id="apiBase" class="api-input" value="" spellcheck="false" placeholder="https://ai-defense-api.onrender.com" aria-label="Backend API base URL" />
+    <div class="health-pill" id="healthPill" role="status" aria-live="polite"><span id="healthDot" class="dot"></span><span id="healthText">checking backend…</span></div>
     <button class="run-btn ghost" id="refreshBtn">Refresh</button>
     <button class="run-btn" id="runBtn">Run pipeline</button>
   </div>
+  <nav class="top-nav" aria-label="Sections">
+    <a href="#scoring">Transaction Scoring</a>
+    <a href="#architecture">Pipeline Evaluation</a>
+    <a href="#feedback">Feedback Loop</a>
+    <a href="#run">Run Control</a>
+    <a href="#health">System Health</a>
+  </nav>
 </header>
 
 <div class="shell">
 
   <div class="hero">
-    <h1>One closed loop: attack, detect, explain, adapt.</h1>
-    <p>Every number below is read live from this backend's output files — nothing on this page is hardcoded. Trigger a stage and watch it update.</p>
+    <h1>AI Risk Manager — investigate and decide on transaction risk.</h1>
+    <p>Score a transaction against the live Stage 1+2 model below, or review the full closed-loop pipeline's offline evaluation. Every value on this page is read from the backend response or its output files — nothing is invented.</p>
   </div>
+
+  <!-- ============ TRANSACTION SCORING WORKSPACE ============ -->
+  <section id="scoring">
+    <div class="section-head">
+      <h2>Transaction risk workspace</h2>
+      <div class="desc">Builds a real <code class="mono">ObservableAttackTrace</code> and sends it to <code class="mono">POST /api/score</code> on the live backend. Stage 1+2 (rules + XGBoost) actually runs; stages 3–5 are honestly reported as not available online, exactly as the API returns them.</div>
+    </div>
+
+    <div class="ws-tabs" role="tablist" aria-label="Trace input mode">
+      <button class="ws-tab" id="tabBuilder" role="tab" aria-selected="true" aria-controls="panelBuilder">Guided builder</button>
+      <button class="ws-tab" id="tabJson" role="tab" aria-selected="false" aria-controls="panelJson">Raw trace JSON</button>
+    </div>
+
+    <div id="panelBuilder" class="ws-panel" role="tabpanel" aria-labelledby="tabBuilder">
+      <form id="scoreForm">
+        <fieldset class="form-group">
+          <legend>Trace identity</legend>
+          <div class="form-grid">
+            <div class="field"><label for="f_trace_id">Trace ID</label><input type="text" id="f_trace_id" required></div>
+            <div class="field"><label for="f_customer_id">Customer ID</label><input type="text" id="f_customer_id" required></div>
+            <div class="field"><label for="f_account_id">Account ID</label><input type="text" id="f_account_id" required></div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-group">
+          <legend>Transaction</legend>
+          <div class="form-grid">
+            <div class="field"><label for="f_amount">Amount</label><input type="number" id="f_amount" min="0.01" step="0.01" value="1250.00" required></div>
+            <div class="field"><label for="f_currency">Currency</label><input type="text" id="f_currency" value="USD" maxlength="3" required></div>
+            <div class="field"><label for="f_txn_type">Transaction type</label>
+              <select id="f_txn_type">
+                <option value="purchase">purchase</option>
+                <option value="withdrawal">withdrawal</option>
+                <option value="payment">payment</option>
+                <option value="refund">refund</option>
+                <option value="transfer">transfer</option>
+              </select>
+            </div>
+            <div class="field"><label for="f_channel">Channel</label>
+              <select id="f_channel">
+                <option value="online">online</option>
+                <option value="mobile">mobile</option>
+                <option value="atm">atm</option>
+                <option value="branch">branch</option>
+                <option value="pos">pos</option>
+              </select>
+            </div>
+            <div class="field"><label for="f_status">Transaction status</label>
+              <select id="f_status">
+                <option value="completed">completed</option>
+                <option value="pending">pending</option>
+                <option value="failed">failed</option>
+              </select>
+            </div>
+            <div class="field"><label for="f_merchant_category">Merchant category <span class="hint">(optional)</span></label><input type="text" id="f_merchant_category" placeholder="e.g. electronics"></div>
+            <div class="field"><label for="f_merchant_country">Merchant country <span class="hint">(optional)</span></label><input type="text" id="f_merchant_country" placeholder="e.g. US"></div>
+            <div class="field"><label for="f_minutes_after_login">Minutes after login</label><input type="number" id="f_minutes_after_login" min="0" value="12"></div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-group">
+          <legend>Behavioral / session context</legend>
+          <label class="checkbox-row"><input type="checkbox" id="f_include_session" checked> Include a session login event for this trace</label>
+          <div class="sub-fields open" id="sessionFields">
+            <div class="field"><label for="f_auth_method">Auth method</label>
+              <select id="f_auth_method"><option value="password">password</option><option value="otp">otp</option><option value="biometric">biometric</option></select>
+            </div>
+            <div class="field"><label for="f_auth_success">Auth outcome</label>
+              <select id="f_auth_success"><option value="true">success</option><option value="false">failed</option></select>
+            </div>
+            <div class="field"><label for="f_login_attempts">Login attempt count</label><input type="number" id="f_login_attempts" min="0" value="1"></div>
+            <div class="field"><label for="f_geo_country">Geo country <span class="hint">(optional)</span></label><input type="text" id="f_geo_country" placeholder="e.g. US"></div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-group">
+          <legend>Device / network signals</legend>
+          <label class="checkbox-row"><input type="checkbox" id="f_include_device"> New / unrecognized device registered this session</label>
+          <div class="sub-fields" id="deviceFields">
+            <div class="field"><label for="f_device_type">Device type</label>
+              <select id="f_device_type"><option value="desktop">desktop</option><option value="mobile">mobile</option><option value="tablet">tablet</option></select>
+            </div>
+            <div class="field"><label for="f_os">OS <span class="hint">(optional)</span></label><input type="text" id="f_os" placeholder="e.g. Android 14"></div>
+            <div class="field"><label for="f_browser">Browser <span class="hint">(optional)</span></label><input type="text" id="f_browser" placeholder="e.g. Chrome"></div>
+          </div>
+          <label class="checkbox-row" style="margin-top:12px"><input type="checkbox" id="f_include_beneficiary"> New beneficiary added this session</label>
+          <div class="sub-fields" id="beneficiaryFields">
+            <div class="field"><label for="f_relationship_type">Relationship type</label>
+              <select id="f_relationship_type"><option value="other">other</option><option value="family">family</option><option value="business">business</option></select>
+            </div>
+            <div class="field"><label for="f_is_verified">Beneficiary verified</label>
+              <select id="f_is_verified"><option value="false">not verified</option><option value="true">verified</option></select>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+
+    <div id="panelJson" class="ws-panel" role="tabpanel" aria-labelledby="tabJson" hidden>
+      <p style="font-size:12.5px;color:var(--text-dim);margin-top:0">
+        Edit the exact <code class="mono">ObservableAttackTrace</code> payload that will be POSTed to <code class="mono">/api/score</code>. This is the same schema the guided builder produces — nothing here is simplified or fabricated.
+      </p>
+      <textarea id="jsonEditor" class="json-editor" spellcheck="false" aria-label="Raw ObservableAttackTrace JSON"></textarea>
+      <div class="json-error" id="jsonError" role="alert"></div>
+    </div>
+
+    <div class="score-actions">
+      <button type="button" class="run-btn wide" id="scoreBtn">Score Transaction</button>
+      <button type="button" class="run-btn ghost" id="loadExampleBtn">Load real example trace</button>
+      <span id="scoreStatusText" style="font-size:12.5px;color:var(--text-dim)" role="status" aria-live="polite"></span>
+    </div>
+
+    <div style="margin-top:28px">
+      <div id="scoreResult" aria-live="polite">
+        <div class="result-empty">No transaction scored yet. Fill in the form (or load the real example trace) and click <b>Score Transaction</b>.</div>
+      </div>
+    </div>
+  </section>
 
   <!-- ============ PIPELINE ARCHITECTURE ============ -->
   <section id="architecture">
@@ -306,8 +571,22 @@
     </div>
   </section>
 
+  <!-- ============ SYSTEM HEALTH ============ -->
+  <section id="health">
+    <div class="section-head">
+      <h2>System health</h2>
+      <div class="desc">Live liveness (<code class="mono">/healthz</code>) and readiness (<code class="mono">/readyz</code>) checks against the configured backend.</div>
+    </div>
+    <div class="grid" id="systemHealthGrid">
+      <div class="card"><div class="k">API</div><div class="v" id="healthApiVal">—</div></div>
+      <div class="card"><div class="k">Model</div><div class="v" id="healthModelVal">—</div></div>
+      <div class="card"><div class="k">Model version</div><div class="v" id="healthVersionVal" style="font-size:15px">—</div></div>
+      <div class="card"><div class="k">Backend URL</div><div class="v" id="healthUrlVal" style="font-size:12.5px;font-family:var(--mono);word-break:break-all">—</div></div>
+    </div>
+  </section>
+
   <footer>
-    <span>AI Defense Lab</span>
+    <span>AI Defense System</span>
     <span id="lastUpdated">not loaded yet</span>
   </footer>
 
@@ -358,35 +637,479 @@ function num(x){ return (x==null) ? '—' : x.toLocaleString(); }
 function money(x){ return (x==null) ? '—' : '$'+Number(x).toLocaleString(undefined,{maximumFractionDigits:0}); }
 function fmtTime(ts){ return ts ? new Date(ts*1000).toLocaleString() : '—'; }
 
-async function fetchJSON(path, opts){
+// A structured fetch error carries the HTTP status and parsed JSON body
+// (when available) so callers can render specific, human-readable
+// messages instead of a raw "Error: 422" or a stack trace.
+class ApiError extends Error{
+  constructor(kind, status, body){
+    super(kind);
+    this.kind = kind;       // 'timeout' | 'network' | 'http' | 'no_base'
+    this.status = status || null;
+    this.body = body || null;
+  }
+}
+
+async function fetchJSON(path, opts, timeoutMs){
   const base = getBase();
-  if (!base) throw new Error('API_BASE_UNSET');
-  const res = await fetch(base + path, opts);
-  if(!res.ok) throw new Error(path + ' -> ' + res.status);
-  return res.json();
+  if (!base) throw new ApiError('no_base');
+  const controller = new AbortController();
+  const timer = timeoutMs ? setTimeout(() => controller.abort(), timeoutMs) : null;
+  let res;
+  try{
+    res = await fetch(base + path, { ...(opts||{}), signal: controller.signal });
+  }catch(e){
+    if (timer) clearTimeout(timer);
+    if (e.name === 'AbortError') throw new ApiError('timeout');
+    throw new ApiError('network');
+  }
+  if (timer) clearTimeout(timer);
+  let body = null;
+  try{ body = await res.json(); }catch(_){ /* no/invalid JSON body */ }
+  if(!res.ok) throw new ApiError('http', res.status, body);
+  return body;
 }
 
 // ---------------------------------------------------------------------
-// Health check
+// Health check -- liveness (/healthz) AND readiness (/readyz), since the
+// two mean different things: the process can be up but the model not
+// loaded. Render's free tier also sleeps after inactivity, so the first
+// check after idle time gets a longer timeout and a "waking up" message
+// instead of being reported as a hard failure.
 // ---------------------------------------------------------------------
+let modelReady = false;
+
 async function checkHealth(){
-  const dot = $('#healthDot'), text = $('#healthText');
+  const pill = $('#healthPill'), dot = $('#healthDot'), text = $('#healthText');
+  const apiVal = $('#healthApiVal'), modelVal = $('#healthModelVal'),
+        versionVal = $('#healthVersionVal'), urlVal = $('#healthUrlVal');
+
+  urlVal.textContent = getBase() || 'not configured';
+
   if (!getBase()) {
+    pill.className = 'health-pill';
     dot.className = 'dot bad';
     text.textContent = 'set your API URL above (no backend URL configured)';
+    apiVal.textContent = 'Not configured'; modelVal.textContent = '—'; versionVal.textContent = '—';
+    modelReady = false;
     return false;
   }
+
+  pill.className = 'health-pill';
+  dot.className = 'dot';
+  text.textContent = 'checking backend…';
+
   try{
-    await fetchJSON('/api/health');
-    dot.className = 'dot ok';
-    text.textContent = 'backend connected';
-    return true;
+    await fetchJSON('/healthz', undefined, 12000);
+    apiVal.textContent = 'Connected';
   }catch(e){
-    dot.className = 'dot bad';
-    text.textContent = 'backend unreachable at ' + getBase();
+    apiVal.textContent = 'Unavailable';
+    modelReady = false;
+    pill.className = 'health-pill'; dot.className = 'dot bad';
+    if (e.kind === 'timeout'){
+      text.textContent = 'Backend is waking up. This may take a few seconds…';
+      modelVal.textContent = 'Waking up'; versionVal.textContent = '—';
+    } else {
+      text.textContent = 'Unable to reach the risk API. Check the backend URL or try again.';
+      modelVal.textContent = 'Unknown'; versionVal.textContent = '—';
+    }
+    return false;
+  }
+
+  try{
+    const ready = await fetchJSON('/readyz', undefined, 12000);
+    modelReady = !!ready.ready;
+    if (ready.ready){
+      modelVal.textContent = 'Ready';
+      versionVal.textContent = ready.model_version || '—';
+      pill.className = 'health-pill'; dot.className = 'dot ok';
+      text.textContent = 'API connected · model ready';
+    } else {
+      modelVal.textContent = 'Not ready';
+      versionVal.textContent = '—';
+      pill.className = 'health-pill warn'; dot.className = 'dot';
+      text.textContent = 'API connected, model not ready — scoring unavailable';
+    }
+    return ready.ready;
+  }catch(e){
+    // readyz returns HTTP 503 (not-ready) as valid JSON, which ApiError still carries.
+    if (e.kind === 'http' && e.body){
+      modelReady = false;
+      modelVal.textContent = 'Not ready';
+      versionVal.textContent = '—';
+      pill.className = 'health-pill warn'; dot.className = 'dot';
+      text.textContent = 'API connected, model not ready: ' + (e.body.error || 'unknown error');
+      return false;
+    }
+    modelReady = false;
+    modelVal.textContent = 'Unknown';
+    pill.className = 'health-pill'; dot.className = 'dot bad';
+    text.textContent = 'Unable to reach the risk API. Check the backend URL or try again.';
     return false;
   }
 }
+
+// =======================================================================
+// TRANSACTION SCORING WORKSPACE
+// Builds a real ObservableAttackTrace and POSTs it to /api/score.
+// Nothing here invents API fields: every field sent maps 1:1 onto
+// red_team.schemas.observable.ObservableAttackTrace (extra='forbid').
+// =======================================================================
+
+// A real, unmodified trace from this repo's own Red Team ATO corpus
+// (reports/ato_corpus_raw.json[0].observable_trace) -- used for "Load
+// example", so the demo always has one known-good payload to score even
+// before anyone touches the form.
+const EXAMPLE_TRACE = {
+  "trace_id": "atk-73100246",
+  "customer_id": "ace3b175-db94-4ca5-9d87-34d64fd6b993",
+  "events": [
+    { "event_type": "DEVICE_REGISTRATION", "event_id": "b6e69647-aeab-80aa-babc-f6c47d31fd3c", "timestamp": "2025-01-02T09:19:04", "customer_id": "ace3b175-db94-4ca5-9d87-34d64fd6b993", "device_id": "0a4adbf9-155a-0c7c-ab94-c89369dbe0d1", "device_type": "desktop", "os": null, "browser": null, "fingerprint": "atk_fp_226", "action": "register", "previous_device_id": null },
+    { "event_type": "SESSION_LOGIN", "event_id": "6cd3b751-21ba-d9a1-caa3-3b18fa138589", "timestamp": "2025-01-02T09:19:04", "customer_id": "ace3b175-db94-4ca5-9d87-34d64fd6b993", "account_id": "fcfcd05b-e4bd-4c25-a3f4-3465c1c62e05", "session_id": "97ec30a6-87ba-c83d-3baa-98d5caab6a8f", "device_id": "0a4adbf9-155a-0c7c-ab94-c89369dbe0d1", "geo_country": null, "geo_city": null, "auth_method": "password", "auth_success": true, "login_attempt_count": 1 },
+    { "event_type": "TRANSACTION", "event_id": "88ba8e90-8409-2c60-7ee5-884be3e621af", "timestamp": "2025-01-02T09:35:04", "customer_id": "ace3b175-db94-4ca5-9d87-34d64fd6b993", "account_id": "fcfcd05b-e4bd-4c25-a3f4-3465c1c62e05", "amount": "33647.49", "currency": "USD", "transaction_type": "purchase", "merchant_category": null, "merchant_country": null, "channel": "online", "transaction_status": "failed" },
+    { "event_type": "BENEFICIARY_ADDITION", "event_id": "eebde20a-47cd-c4fe-e595-829b338a9c96", "timestamp": "2025-01-02T09:35:04", "customer_id": "ace3b175-db94-4ca5-9d87-34d64fd6b993", "beneficiary_id": "00a4db75-a50b-614d-e4c5-ae9da2aad211", "relationship_type": "other", "is_verified": false, "action": "add" }
+  ],
+  "observation_window": ["2025-01-02T09:19:04", "2025-01-02T09:35:04"]
+};
+
+function uuidLike(){
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8);
+    return v.toString(16);
+  });
+}
+
+function seedIdentityFields(){
+  $('#f_trace_id').value = 'trc-' + uuidLike().slice(0,8);
+  $('#f_customer_id').value = uuidLike();
+  $('#f_account_id').value = uuidLike();
+}
+
+// ---------------------------------------------------------------------
+// Tabs: guided builder <-> raw JSON
+// ---------------------------------------------------------------------
+function setActiveTab(which){
+  const isBuilder = which === 'builder';
+  $('#tabBuilder').setAttribute('aria-selected', String(isBuilder));
+  $('#tabJson').setAttribute('aria-selected', String(!isBuilder));
+  $('#panelBuilder').hidden = !isBuilder;
+  $('#panelJson').hidden = isBuilder;
+  if (!isBuilder) {
+    // Reflect the builder's current state into the JSON editor so the two
+    // views never silently disagree about what will actually be sent.
+    try{ $('#jsonEditor').value = JSON.stringify(buildTraceFromForm(), null, 2); }catch(_e){ /* leave as-is */ }
+  }
+}
+$('#tabBuilder').addEventListener('click', () => setActiveTab('builder'));
+$('#tabJson').addEventListener('click', () => setActiveTab('json'));
+
+// ---------------------------------------------------------------------
+// Sub-field toggles
+// ---------------------------------------------------------------------
+function wireToggle(checkboxId, fieldsId){
+  const cb = $('#'+checkboxId), box = $('#'+fieldsId);
+  const sync = () => box.classList.toggle('open', cb.checked);
+  cb.addEventListener('change', sync);
+  sync();
+}
+wireToggle('f_include_session', 'sessionFields');
+wireToggle('f_include_device', 'deviceFields');
+wireToggle('f_include_beneficiary', 'beneficiaryFields');
+
+// ---------------------------------------------------------------------
+// Build a real ObservableAttackTrace from the guided form
+// ---------------------------------------------------------------------
+function buildTraceFromForm(){
+  const traceId = $('#f_trace_id').value.trim();
+  const customerId = $('#f_customer_id').value.trim();
+  const accountId = $('#f_account_id').value.trim();
+  if (!traceId || !customerId || !accountId) {
+    throw new Error('Trace ID, Customer ID, and Account ID are required.');
+  }
+
+  const deviceId = uuidLike();
+  const sessionId = uuidLike();
+  const loginTime = new Date();
+  const minutesAfter = Number($('#f_minutes_after_login').value || 0);
+  const txnTime = new Date(loginTime.getTime() + minutesAfter*60000);
+  const isoNoMs = (d) => d.toISOString().replace(/\.\d+Z$/, '');
+
+  const events = [];
+
+  if ($('#f_include_device').checked){
+    events.push({
+      event_type: 'DEVICE_REGISTRATION',
+      event_id: uuidLike(),
+      timestamp: isoNoMs(loginTime),
+      customer_id: customerId,
+      device_id: deviceId,
+      device_type: $('#f_device_type').value,
+      os: $('#f_os').value.trim() || null,
+      browser: $('#f_browser').value.trim() || null,
+      fingerprint: 'fp_' + uuidLike().slice(0,8),
+      action: 'register',
+      previous_device_id: null,
+    });
+  }
+
+  if ($('#f_include_session').checked){
+    events.push({
+      event_type: 'SESSION_LOGIN',
+      event_id: uuidLike(),
+      timestamp: isoNoMs(loginTime),
+      customer_id: customerId,
+      account_id: accountId,
+      session_id: sessionId,
+      device_id: deviceId,
+      geo_country: $('#f_geo_country').value.trim() || null,
+      geo_city: null,
+      auth_method: $('#f_auth_method').value,
+      auth_success: $('#f_auth_success').value === 'true',
+      login_attempt_count: Number($('#f_login_attempts').value || 0),
+    });
+  }
+
+  const amount = Number($('#f_amount').value);
+  if (!(amount > 0)) throw new Error('Amount must be greater than zero.');
+
+  events.push({
+    event_type: 'TRANSACTION',
+    event_id: uuidLike(),
+    timestamp: isoNoMs(txnTime),
+    customer_id: customerId,
+    account_id: accountId,
+    amount: amount.toFixed(2),
+    currency: $('#f_currency').value.trim().toUpperCase() || 'USD',
+    transaction_type: $('#f_txn_type').value,
+    merchant_category: $('#f_merchant_category').value.trim() || null,
+    merchant_country: $('#f_merchant_country').value.trim() || null,
+    channel: $('#f_channel').value,
+    transaction_status: $('#f_status').value,
+  });
+
+  if ($('#f_include_beneficiary').checked){
+    events.push({
+      event_type: 'BENEFICIARY_ADDITION',
+      event_id: uuidLike(),
+      timestamp: isoNoMs(txnTime),
+      customer_id: customerId,
+      beneficiary_id: uuidLike(),
+      relationship_type: $('#f_relationship_type').value,
+      is_verified: $('#f_is_verified').value === 'true',
+      action: 'add',
+    });
+  }
+
+  events.sort((a,b) => a.timestamp.localeCompare(b.timestamp));
+  const start = events[0].timestamp, end = events[events.length-1].timestamp;
+
+  return {
+    trace_id: traceId,
+    customer_id: customerId,
+    events,
+    observation_window: [start, end],
+  };
+}
+
+function getTraceToScore(){
+  const usingJson = $('#tabJson').getAttribute('aria-selected') === 'true';
+  if (usingJson){
+    const raw = $('#jsonEditor').value;
+    const errEl = $('#jsonError');
+    try{
+      const parsed = JSON.parse(raw);
+      errEl.style.display = 'none';
+      return parsed;
+    }catch(e){
+      errEl.style.display = 'block';
+      errEl.textContent = 'Invalid JSON: ' + e.message;
+      throw new Error('invalid_json');
+    }
+  }
+  return buildTraceFromForm();
+}
+
+$('#loadExampleBtn').addEventListener('click', () => {
+  $('#jsonEditor').value = JSON.stringify(EXAMPLE_TRACE, null, 2);
+  setActiveTab('json');
+  $('#scoreStatusText').textContent = 'Loaded the real ATO example trace from this repo\'s corpus.';
+});
+
+// ---------------------------------------------------------------------
+// Human-readable error rendering (never raw stack traces / tracebacks)
+// ---------------------------------------------------------------------
+function renderScoreError(err){
+  const el = $('#scoreResult');
+  if (err instanceof Error && (err.message === 'invalid_json')) {
+    el.innerHTML = `<div class="banner-msg error"><span>⚠</span><div>Fix the JSON in the editor above, then try again.</div></div>`;
+    return;
+  }
+  if (!(err instanceof ApiError)) {
+    el.innerHTML = `<div class="banner-msg error"><span>⚠</span><div>Transaction could not be scored.<br>${(err && err.message) ? escapeHtml(err.message) : 'Check the form and try again.'}</div></div>`;
+    return;
+  }
+  if (err.kind === 'no_base'){
+    el.innerHTML = `<div class="banner-msg warn"><span>⚠</span><div>Set the backend API URL at the top of the page before scoring a transaction.</div></div>`;
+    return;
+  }
+  if (err.kind === 'timeout'){
+    el.innerHTML = `<div class="banner-msg warn"><span>⏳</span><div><b>Backend is waking up.</b> Render's free-tier instance sleeps when idle and can take up to a minute to respond on the first request. Please retry in a moment.</div></div>`;
+    return;
+  }
+  if (err.kind === 'network'){
+    el.innerHTML = `<div class="banner-msg error"><span>⚠</span><div>Unable to reach the risk API. Check the backend URL or your connection, then try again.</div></div>`;
+    return;
+  }
+  // HTTP error with a JSON body
+  const status = err.status;
+  const body = err.body || {};
+  if (status === 422 && Array.isArray(body.detail)){
+    const items = body.detail.map(d => `${(d.loc||[]).slice(1).join('.')}: ${d.msg}`);
+    el.innerHTML = `<div class="banner-msg error"><span>⚠</span><div>Transaction could not be scored.<ul>${items.map(i=>`<li>${escapeHtml(i)}</li>`).join('')}</ul></div></div>`;
+  } else if (status === 503){
+    el.innerHTML = `<div class="banner-msg warn"><span>⏳</span><div>${escapeHtml(body.detail || 'Model artifacts are not loaded yet.')} Check System Health below and retry shortly.</div></div>`;
+  } else if (status === 429){
+    el.innerHTML = `<div class="banner-msg warn"><span>⚠</span><div>Too many requests — please wait a moment and try again.</div></div>`;
+  } else if (status >= 500){
+    el.innerHTML = `<div class="banner-msg error"><span>⚠</span><div>The backend hit an unexpected error while scoring this transaction (request ID: ${escapeHtml(body.request_id || 'n/a')}). This has been logged server-side.</div></div>`;
+  } else {
+    el.innerHTML = `<div class="banner-msg error"><span>⚠</span><div>Transaction could not be scored (HTTP ${status}). ${escapeHtml(body.detail ? JSON.stringify(body.detail) : '')}</div></div>`;
+  }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ---------------------------------------------------------------------
+// Render a real ScoreResponse
+// ---------------------------------------------------------------------
+function decisionClass(decision){
+  const d = (decision||'').toUpperCase();
+  if (d === 'ALLOW') return 'allow';
+  if (d === 'REVIEW') return 'review';
+  if (d === 'BLOCK') return 'block';
+  return 'unknown';
+}
+function decisionIcon(cls){
+  return { allow: '✓', review: '!', block: '✕', unknown: '?' }[cls];
+}
+
+function renderStagePill(label, stage){
+  if (stage && stage.available){
+    return `<div class="stage-pill ran"><span class="lbl">${label} · ran</span>${escapeHtml(stage.detail || '')}${stage.score!=null ? ' · score '+stage.score.toFixed(4) : ''}</div>`;
+  }
+  const reason = stage && stage.reason ? stage.reason : 'Not available from this endpoint.';
+  return `<div class="stage-pill"><span class="lbl">${label} · not available</span>${escapeHtml(reason)}</div>`;
+}
+
+function renderScoreResult(resp, requestTrace){
+  const cls = decisionClass(resp.decision);
+  const scorePct = (resp.risk_score*100).toFixed(2);
+
+  const topFeatures = (resp.top_contributing_features || []).slice(0, 6);
+  const featureRows = topFeatures.length
+    ? topFeatures.map((f,i) => {
+        const name = f.feature || f.name || Object.keys(f)[0] || `signal ${i+1}`;
+        const val = f.shap_value ?? f.value ?? f.importance ?? null;
+        return `<div class="evidence-row"><div class="num">${i+1}</div><div class="body"><div class="h">${escapeHtml(String(name))}</div><div class="d">${val!=null ? 'contribution: '+Number(val).toFixed(4) : 'contributing signal'}</div></div></div>`;
+      }).join('')
+    : `<div class="empty-note">${resp.stage1_2 && resp.stage1_2.ran_model === false ? 'Stage 1 auto-cleared this trace before the model ran — no feature attributions to show.' : 'Not available for this response.'}</div>`;
+
+  const thresholds = resp.reference_full_pipeline_thresholds;
+  const thresholdNote = thresholds
+    ? `Full 5-stage pipeline was tuned to review ≥ ${thresholds.t_review ?? thresholds.review ?? '—'}, block ≥ ${thresholds.t_block ?? thresholds.block ?? '—'} — shown for context only, not applied to the Stage 1+2-only score above.`
+    : 'Not available.';
+
+  $('#scoreResult').innerHTML = `
+    <div class="decision-banner">
+      <div class="decision-badge ${cls}"><span aria-hidden="true">${decisionIcon(cls)}</span> ${escapeHtml(resp.decision || 'UNKNOWN')}</div>
+      <div class="decision-meta">
+        <div><b>Trace</b> <span class="mono">${escapeHtml(resp.trace_id)}</span> · <b>Request</b> <span class="mono">${escapeHtml(resp.request_id)}</span></div>
+        <div><b>Basis:</b> ${escapeHtml(resp.decision_basis || 'not available')}</div>
+        <div><b>Model:</b> <span class="mono">${escapeHtml(resp.model_version)}</span> · <b>Latency:</b> ${resp.inference_latency_ms?.toFixed?.(1) ?? resp.inference_latency_ms} ms</div>
+      </div>
+    </div>
+
+    <div class="meter-wrap">
+      <div class="k" style="margin-top:16px">Stage 1+2 calibrated fraud probability (not a final-pipeline confidence score)</div>
+      <div class="meter-track" role="img" aria-label="Risk score ${scorePct} percent">
+        <div class="meter-fill ${cls}" style="width:${scorePct}%"></div>
+      </div>
+      <div class="meter-labels"><span>0.0</span><span>${resp.risk_score.toFixed(4)}</span><span>1.0</span></div>
+    </div>
+
+    <div class="stage-pill-row">
+      ${renderStagePill('Stage 1+2 (rules + XGBoost)', resp.stage1_2)}
+      ${renderStagePill('Stage 3 (GCN graph)', resp.stage3_graph)}
+      ${renderStagePill('Stage 4 (autoencoder)', resp.stage4_autoencoder)}
+      ${renderStagePill('Stage 5 (fusion)', resp.stage5_fusion)}
+    </div>
+
+    <div class="section-head" style="margin-top:28px;margin-bottom:0">
+      <h2 style="font-size:15px">Why this decision?</h2>
+    </div>
+    <div class="evidence-hierarchy">
+      <div class="evidence-row"><div class="num">1</div><div class="body"><div class="h">Decision: ${escapeHtml(resp.decision)}</div><div class="d">${escapeHtml(resp.decision_basis || '')}</div></div></div>
+      <div class="evidence-row"><div class="num">2</div><div class="body"><div class="h">Stage 1+2 detail</div><div class="d">${escapeHtml(resp.stage1_2?.detail || 'Not available.')}</div></div></div>
+      ${featureRows}
+      <div class="evidence-row"><div class="num">${topFeatures.length+3}</div><div class="body"><div class="h">Reference thresholds (context only)</div><div class="d">${escapeHtml(thresholdNote)}</div></div></div>
+    </div>
+
+    <details class="tech-details">
+      <summary>Technical details — raw response, request payload &amp; metadata</summary>
+      <pre>${escapeHtml(JSON.stringify({ request: requestTrace, response: resp }, null, 2))}</pre>
+    </details>
+  `;
+}
+
+function setScoreButtonState(state){
+  const btn = $('#scoreBtn');
+  btn.disabled = (state === 'loading');
+  btn.textContent = {
+    idle: 'Score Transaction',
+    loading: 'Analyzing Risk…',
+    success: 'Risk Assessment Complete',
+    failure: 'Retry Assessment',
+  }[state] || 'Score Transaction';
+}
+
+let scoringInFlight = false;
+$('#scoreBtn').addEventListener('click', async () => {
+  if (scoringInFlight) return;
+  let trace;
+  try{
+    trace = getTraceToScore();
+  }catch(e){
+    renderScoreError(e);
+    return;
+  }
+
+  scoringInFlight = true;
+  setScoreButtonState('loading');
+  $('#scoreStatusText').textContent = 'Receiving transaction → evaluating risk signals → applying risk policy…';
+  $('#scoreResult').innerHTML = `<div class="result-empty"><div class="skeleton" style="width:60%;margin:0 auto 10px"></div><div class="skeleton" style="width:40%;margin:0 auto"></div></div>`;
+
+  try{
+    const resp = await fetchJSON('/api/score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(trace),
+    }, 30000);
+    renderScoreResult(resp, trace);
+    setScoreButtonState('success');
+    $('#scoreStatusText').textContent = 'Scored ' + new Date().toLocaleTimeString();
+  }catch(e){
+    console.error(e);
+    renderScoreError(e);
+    setScoreButtonState('failure');
+    $('#scoreStatusText').textContent = '';
+  }finally{
+    scoringInFlight = false;
+    setTimeout(() => { if(!scoringInFlight) setScoreButtonState('idle'); }, 2500);
+  }
+});
+
+seedIdentityFields();
 
 // ---------------------------------------------------------------------
 // Pipeline architecture diagram
