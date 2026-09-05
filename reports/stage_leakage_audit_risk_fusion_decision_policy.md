@@ -1,8 +1,13 @@
 # Leakage Audit -- risk_fusion.py / decision_policy.py
 
-Status: AUDIT COMPLETE. Two findings below; neither has been code-fixed
-in this pass (see "Disposition" per finding) -- this document exists to
-make both visible and auditable rather than silently inherited.
+Status: AUDIT COMPLETE (original pass). Two findings below were
+documented but NOT code-fixed in the original audit pass. Finding 1 was
+subsequently remediated in **Phase 4A** (see the "Phase 4A Remediation"
+section immediately following Finding 1, added afterward -- this does
+NOT rewrite the original audit text below, which is preserved verbatim
+as the historical record of what was found and why it was left unfixed
+at the time). Finding 2 remains undisposed as of Phase 4A; it was out of
+Phase 4A's approved scope (risk_fusion.py only) and has not been touched.
 
 Scope: every place either file touches labels, computes a statistic
 across rows, or picks a value by looking at outcomes, checked for
@@ -77,10 +82,164 @@ the matrix multiplies instead of 1x) that's worth flagging to whoever
 picks this up, since it changes the function's current "compute M once,
 reuse across folds" performance characteristic.
 
-**Disposition:** documented, not fixed in this pass. Fixing it safely
-means touching the GCN/Autoencoder training loop and re-validating
-`test_risk_fusion.py`, which is more than a documentation-only change
-should carry. Recorded here as the concrete next step.
+**Original disposition (audit pass):** documented, not fixed in this
+pass. Fixing it safely means touching the GCN/Autoencoder training loop
+and re-validating `test_risk_fusion.py`, which is more than a
+documentation-only change should carry. Recorded here as the concrete
+next step.
+
+## Phase 4A Remediation -- Finding 1 (risk_fusion.py)
+
+**1. Original finding:** as documented above -- `mu`/`sigma` for feature
+standardization were computed once over the full dataset (`X_raw.mean(axis=0)`,
+`X_raw.std(axis=0)`), before the fold loop, in `compute_base_scores()`.
+
+**2. Exact location:** `risk_fusion.py`, `compute_base_scores()`,
+originally lines 124-138 in the pre-remediation file.
+
+**3. Evidence:** confirmed independently at the start of this
+remediation pass by re-reading the live file (`git diff` showed zero
+changes to `risk_fusion.py` versus the commit that introduced it,
+`7a8054d`) -- the leaking code was still present, unchanged, at the
+start of Phase 4A. The identical pattern also exists, unmodified, in
+`cascade_with_graph.py:400` and `cascade_with_autoencoder.py:101-102`
+(see item 12).
+
+**4. Why it is preprocessing leakage:** every fold's held-out (test)
+rows contributed to the `mu`/`sigma` used to standardize those same
+rows before scoring them -- a violation of fold isolation. Not a label
+leak (`mu`/`sigma` never touch `y`), but a genuine violation of the
+out-of-fold principle for the GCN and Autoencoder's input features.
+
+**5. Original disposition:** documented, not fixed (see above).
+
+**6. New remediation:** `mu`/`sigma` are now computed per fold, from
+`X_raw[train_idx]` only, and applied (frozen) to every row scored in
+that fold -- including its own held-out rows. `M` (`A_hat @ X_std`) is
+recomputed per fold from the fold-local `X_std_fold` rather than once
+outside the loop. The existing `+ 1e-8` zero-std guard is preserved,
+now applied per-fold instead of once globally. No other numerical
+policy (NaN handling via `.fillna(0)`, dtype, inf behavior) was changed.
+
+**7. Corrected data flow:**
+```python
+for fold, (train_idx, test_idx) in enumerate(folds, start=1):
+    mu = X_raw[train_idx].mean(axis=0)
+    sigma = X_raw[train_idx].std(axis=0) + 1e-8
+    X_std_fold = (X_raw - mu) / sigma   # frozen train-only stats,
+                                          # applied to ALL rows this fold touches
+    M_fold = A_hat @ X_std_fold          # recomputed per fold (5x cost, same math)
+    ...
+    train_gcn(gcn, M_fold, ...)
+    train_ae(ae, X_std_fold[legit_train_idx], ...)
+    ae.reconstruction_error(X_std_fold[test_idx])
+```
+No changes to GCN/AE architecture, hyperparameters, epochs, hidden
+dims, random seeds, adjacency construction, Stage 1/2 fold assignment,
+the fusion meta-model, or decision thresholds. `decision_policy.py`,
+`blue_team_pipeline.py`, and `retrain_round2.py` were not touched.
+
+**8. Regression test:** `test_risk_fusion_leakage.py` (new). Calls
+`risk_fusion.compute_base_scores()` itself (not a reimplementation of
+the standardization math) with the base-model internals (GCN,
+Autoencoder, Stage 1+2 cascade) monkeypatched to transparent recorders
+that capture the exact arrays production code passes them. A synthetic
+dataset places an extreme value (10,000.0) on one feature, in exactly
+one held-out row. Checks:
+   - training-fold mean/std do not shift when that held-out extreme
+     value is introduced (properties 1-3 from the remediation spec);
+   - the held-out row is transformed using the frozen training
+     mu/sigma, verified against an independently-reconstructed
+     train-only mu/sigma computed straight from raw data (property 4).
+
+**9. Proof the test catches the old bug:** the identical test class was
+run against the actual pre-fix `risk_fusion.py` (reverted via `git
+stash`, not a reimplementation) -- both checks **failed**, with the
+held-out extreme value visibly shifting the "training" standardized
+values (max abs diff ~23,498, i.e. the injected outlier leaking straight
+through). The fix was then restored via `git stash pop` and the same
+two checks **passed**. A third test in the file additionally runs the
+same property check against a byte-for-byte reconstruction of the old
+function body as a standalone regression guard (so the distinction is
+covered even if someone re-runs only this file without git access).
+
+**10. Verification results:**
+   - `pytest test_risk_fusion_leakage.py` -> **3 passed**
+   - `pytest test_risk_fusion.py` -> **7 passed** (pre-existing, unaffected)
+   - `pytest web_prototype/api/tests` -> **12 passed**
+   - `pytest -q` (repo root, default `testpaths=["tests"]`) -> **468 passed**
+   - Known limitation, reconfirmed: `pyproject.toml`'s
+     `testpaths=["tests"]` means the default run does NOT include
+     `test_risk_fusion.py`, `test_risk_fusion_leakage.py`, or
+     `web_prototype/api/tests` -- each was run explicitly, above, since
+     the default command is not the complete test suite. Additionally,
+     running `tests/`, `test_risk_fusion.py`, `test_risk_fusion_leakage.py`,
+     and `web_prototype/api/tests` together in one pytest invocation
+     fails at collection (`web_prototype/api/tests` is a package
+     literally named `tests`, colliding with the root `tests/`
+     directory) -- a pre-existing repo-structure issue, not introduced
+     here, worth a real fix in a later phase.
+
+**11. Metric impact (real corpus, before -> after, precision/recall/f1):**
+   - `stage_1_2_only`: unchanged (0.989 / 0.963 / 0.976)
+   - `stage_1_2_plus_gcn_max`: unchanged (0.989 / 0.968 / 0.978)
+   - `stage_1_2_plus_autoencoder_max`: precision 0.8605 -> 0.8545
+     (delta -0.0061), recall unchanged (0.973), f1 0.9134 -> 0.9100.
+     Confusion matrix FP 59 -> 62.
+   - `naive_max_all_three`: precision 0.8612 -> 0.8551 (delta -0.0060),
+     recall unchanged (0.979), f1 0.9161 -> 0.9127. FP 59 -> 62.
+   - `risk_fusion_stacked_lr` (production candidate): unchanged at 3
+     decimal places (0.986 / 0.965 / 0.976); confusion matrix identical
+     bit-for-bit. Fusion coefficients shifted slightly
+     (`ae_score` 2.5519 -> 2.5206, `gcn_score` 2.4371 -> 2.4338,
+     `stage_1_2_score` 6.8958 -> 6.8999, intercept -3.8434 -> -3.8456)
+     but not enough to flip any row's classification at the fixed
+     decision threshold in this corpus.
+   - No shape or dtype changes; no new NaN/inf values introduced (spot
+     checked via the successful `json.dump` round-trip and the
+     regression test's explicit finite-value assertions).
+   - Not forced back to old values -- the autoencoder is now honestly
+     stricter without its "normal" baseline having quietly seen
+     test-fold data, which is the expected, correct cost of this fix.
+
+**12. Artifacts:**
+   - `blue_team_output/risk_fusion_results.json` -- **AFFECTED,
+     REGENERATED.** Command: `PYTHONPATH=src:. python3 risk_fusion.py`
+     (run from repo root). Reflects the corrected fold-local
+     standardization.
+   - `blue_team_output_FROZEN/risk_fusion_results.json` -- **AFFECTED
+     IN PRINCIPLE, PRESERVED AS-IS.** Not regenerated; this artifact is
+     already from a different population/run than either the before-
+     or after-fix run in this pass, and `streamlit_app/app.py` reads
+     directly from this frozen path, so regenerating it is a decision
+     deferred to whoever owns that dashboard's refresh cycle, not
+     bundled into this fix.
+   - `decision_policy_results.json` (root) -- **AFFECTED, REGENERATION
+     DEFERRED.** `decision_policy.py` calls `risk_fusion.run_risk_fusion`
+     live (imports `risk_fusion as rf`, `rf.run_risk_fusion(...)`), so
+     it will pick up this fix automatically the next time it is run,
+     but it was NOT re-run in this pass (out of the approved Phase 4A
+     scope, which explicitly excludes `decision_policy.py`).
+   - `frozen_reports/decision_policy_results.json` -- **NOT AFFECTED**,
+     historical snapshot, untouched.
+   - `web_prototype/api/*` -- reads `blue_team_output/risk_fusion_results.json`
+     (the regenerated, non-frozen copy) via `web_prototype/api/reports.py`.
+     **AFFECTED, ALREADY CURRENT** as of the regeneration above; no
+     separate action needed.
+   - No other artifacts were regenerated. Nothing was committed.
+
+**13. Remaining identical patterns / limitations:** identical
+preprocessing pattern identified in two additional files.
+Remediation deferred from Phase 4A because the approved scope is
+risk_fusion.py only. Specifically: `cascade_with_graph.py:400` and
+`cascade_with_autoencoder.py:101-102` both still compute `mu`/`sigma`
+over the full dataset before their own fold loops -- confirmed
+untouched (`git diff` shows zero changes to either file in this pass).
+Finding 2 (decision_policy.py threshold selection/evaluation
+conflation) also remains fully undisposed, unchanged from the original
+audit above. The row-level-vs-customer-level fold split limitation
+(see "Not re-litigated here" section below) is also unaffected by this
+fix and remains open.
 
 ## Finding 2 -- Decision thresholds are selected and evaluated on the same rows (decision_policy.py)
 

@@ -53,8 +53,8 @@
           "precision": 0.9890710382513661,
           "recall": 0.9679144385026738,
           "f1": 0.9783783783783784,
-          "roc_auc": 0.9854445469927704,
-          "pr_auc": 0.9844343123305501,
+          "roc_auc": 0.9853913877503009,
+          "pr_auc": 0.9844401927863633,
           "confusion_matrix": [
             [
               1178,
@@ -72,39 +72,39 @@
             "precision": 0.9587628865979382,
             "recall": 0.9587628865979382,
             "f1": 0.9587628865979382,
-            "roc_auc": 0.999188863886127,
-            "pr_auc": 0.9917212736932218
+            "roc_auc": 0.9991975857798244,
+            "pr_auc": 0.9917734059004994
           },
           "AUTHORIZED_PUSH_PAYMENT": {
             "n": 1338,
             "precision": 0.974025974025974,
             "recall": 0.9615384615384616,
             "f1": 0.967741935483871,
-            "roc_auc": 0.9755331033884334,
-            "pr_auc": 0.9697042936751693
+            "roc_auc": 0.9754381968848974,
+            "pr_auc": 0.9697042936751694
           },
           "MULE_NETWORK": {
             "n": 1303,
             "precision": 0.967479674796748,
             "recall": 0.9834710743801653,
             "f1": 0.9754098360655737,
-            "roc_auc": 0.9872047657003817,
-            "pr_auc": 0.9816464432785813
+            "roc_auc": 0.987155822181203,
+            "pr_auc": 0.9816464432785815
           }
         }
       },
       "stage_1_2_plus_autoencoder_max": {
         "overall": {
           "n": 1556,
-          "precision": 0.8605200945626478,
+          "precision": 0.8544600938967136,
           "recall": 0.9732620320855615,
-          "f1": 0.9134253450439147,
-          "roc_auc": 0.9883547327560465,
-          "pr_auc": 0.9635349504175373,
+          "f1": 0.91,
+          "roc_auc": 0.9871897536125662,
+          "pr_auc": 0.9493552737185822,
           "confusion_matrix": [
             [
-              1123,
-              59
+              1120,
+              62
             ],
             [
               10,
@@ -115,42 +115,42 @@
         "by_family": {
           "ACCOUNT_TAKEOVER": {
             "n": 1279,
-            "precision": 0.6143790849673203,
+            "precision": 0.6025641025641025,
             "recall": 0.9690721649484536,
-            "f1": 0.752,
-            "roc_auc": 0.994077834179357,
-            "pr_auc": 0.9102202327474501
+            "f1": 0.7430830039525692,
+            "roc_auc": 0.9931402306068694,
+            "pr_auc": 0.8728888548453422
           },
           "AUTHORIZED_PUSH_PAYMENT": {
             "n": 1338,
-            "precision": 0.7203791469194313,
+            "precision": 0.7102803738317757,
             "recall": 0.9743589743589743,
-            "f1": 0.8283378746594006,
-            "roc_auc": 0.991615688316196,
-            "pr_auc": 0.9278417081158337
+            "f1": 0.8216216216216217,
+            "roc_auc": 0.9899968545273115,
+            "pr_auc": 0.9006904558837694
           },
           "MULE_NETWORK": {
             "n": 1303,
-            "precision": 0.6666666666666666,
+            "precision": 0.6555555555555556,
             "recall": 0.9752066115702479,
-            "f1": 0.7919463087248322,
-            "roc_auc": 0.9795625847771674,
-            "pr_auc": 0.8943532932841249
+            "f1": 0.7840531561461794,
+            "roc_auc": 0.9788004642642392,
+            "pr_auc": 0.865404592572953
           }
         }
       },
       "naive_max_all_three": {
         "overall": {
           "n": 1556,
-          "precision": 0.8611764705882353,
+          "precision": 0.8551401869158879,
           "recall": 0.9786096256684492,
-          "f1": 0.9161451814768461,
-          "roc_auc": 0.991625722739488,
-          "pr_auc": 0.9714857834108529,
+          "f1": 0.912718204488778,
+          "roc_auc": 0.9903329352045387,
+          "pr_auc": 0.9583700333669385,
           "confusion_matrix": [
             [
-              1123,
-              59
+              1120,
+              62
             ],
             [
               8,
@@ -161,27 +161,27 @@
         "by_family": {
           "ACCOUNT_TAKEOVER": {
             "n": 1279,
-            "precision": 0.6143790849673203,
+            "precision": 0.6025641025641025,
             "recall": 0.9690721649484536,
-            "f1": 0.752,
-            "roc_auc": 0.994077834179357,
-            "pr_auc": 0.9102202327474501
+            "f1": 0.7430830039525692,
+            "roc_auc": 0.9931402306068694,
+            "pr_auc": 0.8728888548453422
           },
           "AUTHORIZED_PUSH_PAYMENT": {
             "n": 1338,
-            "precision": 0.7203791469194313,
+            "precision": 0.7102803738317757,
             "recall": 0.9743589743589743,
-            "f1": 0.8283378746594006,
-            "roc_auc": 0.991615688316196,
-            "pr_auc": 0.9278417081158337
+            "f1": 0.8216216216216217,
+            "roc_auc": 0.9899968545273115,
+            "pr_auc": 0.9006904558837694
           },
           "MULE_NETWORK": {
             "n": 1303,
-            "precision": 0.6703910614525139,
+            "precision": 0.6593406593406593,
             "recall": 0.9917355371900827,
-            "f1": 0.8,
-            "roc_auc": 0.989672917453259,
-            "pr_auc": 0.9402711229534004
+            "f1": 0.7920792079207921,
+            "roc_auc": 0.9885157528212443,
+            "pr_auc": 0.9086807064162179
           }
         }
       },
@@ -191,8 +191,8 @@
           "precision": 0.9863387978142076,
           "recall": 0.9652406417112299,
           "f1": 0.9756756756756757,
-          "roc_auc": 0.9914538034872463,
-          "pr_auc": 0.9899737543723324,
+          "roc_auc": 0.991381416433671,
+          "pr_auc": 0.9898170395705831,
           "confusion_matrix": [
             [
               1177,
@@ -210,67 +210,67 @@
             "precision": 0.9494949494949495,
             "recall": 0.9690721649484536,
             "f1": 0.9591836734693877,
-            "roc_auc": 0.9978456922567027,
-            "pr_auc": 0.9863379207664474
+            "roc_auc": 0.997741029532332,
+            "pr_auc": 0.9863569800798684
           },
           "AUTHORIZED_PUSH_PAYMENT": {
             "n": 1338,
             "precision": 0.967741935483871,
             "recall": 0.9615384615384616,
             "f1": 0.9646302250803859,
-            "roc_auc": 0.9876730009978741,
-            "pr_auc": 0.9809631715551825
+            "roc_auc": 0.9875970757950454,
+            "pr_auc": 0.9805622676813364
           },
           "MULE_NETWORK": {
             "n": 1303,
             "precision": 0.9590163934426229,
             "recall": 0.9669421487603306,
             "f1": 0.9629629629629629,
-            "roc_auc": 0.9912041504104263,
-            "pr_auc": 0.9827846993211062
+            "roc_auc": 0.9911621988225587,
+            "pr_auc": 0.9825179186468134
           }
         }
       }
     },
     "fusion_fold_coefficients": [
       {
-        "stage_1_2_score": 6.627850431262476,
-        "gcn_score": 2.7421149830429963,
-        "ae_score": 2.8543002189937896,
-        "intercept": -3.7507288631145164
+        "stage_1_2_score": 6.63032818774943,
+        "gcn_score": 2.7363619340836074,
+        "ae_score": 2.831168636471834,
+        "intercept": -3.7525432402073013
       },
       {
-        "stage_1_2_score": 6.861079573298497,
-        "gcn_score": 2.759936052512614,
-        "ae_score": 2.604687568248121,
-        "intercept": -3.7703947353232667
+        "stage_1_2_score": 6.866436692651624,
+        "gcn_score": 2.755193554455639,
+        "ae_score": 2.5614047591193536,
+        "intercept": -3.769743027404113
       },
       {
-        "stage_1_2_score": 7.20020246484283,
-        "gcn_score": 2.954968950808098,
-        "ae_score": 2.3536511041669264,
-        "intercept": -4.170469112685487
+        "stage_1_2_score": 7.203527884429248,
+        "gcn_score": 2.954008251906474,
+        "ae_score": 2.338367039242247,
+        "intercept": -4.181207897
       },
       {
-        "stage_1_2_score": 6.929519697310274,
-        "gcn_score": 1.8723451349473872,
-        "ae_score": 2.522306694327724,
-        "intercept": -3.7768807024622046
+        "stage_1_2_score": 6.934102926237447,
+        "gcn_score": 1.8705185429276694,
+        "ae_score": 2.4859636787008212,
+        "intercept": -3.7751734033205384
       },
       {
-        "stage_1_2_score": 6.860102272714927,
-        "gcn_score": 1.8566030615178324,
-        "ae_score": 2.424367968530922,
-        "intercept": -3.7483975731947545
+        "stage_1_2_score": 6.865077347581559,
+        "gcn_score": 1.8531161059430599,
+        "ae_score": 2.386125198889392,
+        "intercept": -3.7493013323381557
       }
     ],
     "fusion_avg_coefficients": {
-      "stage_1_2_score": 6.895750887885801,
-      "gcn_score": 2.4371936365657856,
-      "ae_score": 2.551862710853497,
-      "intercept": -3.843374197356046
+      "stage_1_2_score": 6.899894607729861,
+      "gcn_score": 2.4338396778632903,
+      "ae_score": 2.5206058624847296,
+      "intercept": -3.8455937800540214
     },
-    "n_graph_connected_nodes": 214,
+    "n_graph_connected_nodes": 229,
     "note": "n_graph_connected_nodes reflects the REAL corpus (no ring overlay) -- if this is 0, the GCN score is 0 for every row by construction (no entity clears the fan-out threshold without the synthetic ring), and fusion_avg_coefficients' gcn_score weight should be interpreted as 'the meta-model correctly learned to ignore an always-zero feature', not 'the GCN is a weak detector.' See run_fusion_with_ring_diagnostic() for the run that proves fusion recovers a graph signal when one actually exists."
   },
   "ring_overlay_diagnostic": {
@@ -332,19 +332,19 @@
       "stage_1_2_plus_gcn_max": {
         "overall": {
           "n": 1556,
-          "precision": 0.9836065573770492,
-          "recall": 0.9045226130653267,
-          "f1": 0.9424083769633508,
-          "roc_auc": 0.9547337290945227,
-          "pr_auc": 0.9501433568168904,
+          "precision": 0.9845758354755784,
+          "recall": 0.9623115577889447,
+          "f1": 0.9733163913595934,
+          "roc_auc": 0.985663420730596,
+          "pr_auc": 0.9839918375048418,
           "confusion_matrix": [
             [
               1152,
               6
             ],
             [
-              38,
-              360
+              15,
+              383
             ]
           ]
         },
@@ -354,32 +354,32 @@
             "precision": 0.9387755102040817,
             "recall": 0.9484536082474226,
             "f1": 0.9435897435897436,
-            "roc_auc": 0.9981215390915728,
-            "pr_auc": 0.9838279953346815
+            "roc_auc": 0.9980859284582376,
+            "pr_auc": 0.9833153726376683
           },
           "AUTHORIZED_PUSH_PAYMENT": {
             "n": 1314,
             "precision": 0.9615384615384616,
             "recall": 0.9615384615384616,
             "f1": 0.9615384615384616,
-            "roc_auc": 0.9753941366635668,
-            "pr_auc": 0.9688633415493065
+            "roc_auc": 0.9752972631858643,
+            "pr_auc": 0.9688633415493064
           },
           "MULE_NETWORK": {
             "n": 1279,
             "precision": 0.9516129032258065,
             "recall": 0.9752066115702479,
             "f1": 0.963265306122449,
-            "roc_auc": 0.9870180847571333,
-            "pr_auc": 0.9804053772633595
+            "roc_auc": 0.9869110321300619,
+            "pr_auc": 0.9799223754880049
           },
           "ring_mule_synthetic": {
             "n": 1182,
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1": 0.0,
-            "roc_auc": 0.48231505469199765,
-            "pr_auc": 0.022696343327620036
+            "precision": 0.7931034482758621,
+            "recall": 0.9583333333333334,
+            "f1": 0.8679245283018868,
+            "roc_auc": 0.996545768566494,
+            "pr_auc": 0.7046778354093156
           }
         }
       },
@@ -389,8 +389,8 @@
           "precision": 0.8564705882352941,
           "recall": 0.914572864321608,
           "f1": 0.8845686512758202,
-          "roc_auc": 0.9588931271209241,
-          "pr_auc": 0.92750241775835,
+          "roc_auc": 0.9593639614306421,
+          "pr_auc": 0.9270324433905257,
           "confusion_matrix": [
             [
               1097,
@@ -408,51 +408,51 @@
             "precision": 0.6038961038961039,
             "recall": 0.9587628865979382,
             "f1": 0.7410358565737052,
-            "roc_auc": 0.9924149350996208,
-            "pr_auc": 0.8816652199651436
+            "roc_auc": 0.9924950590246248,
+            "pr_auc": 0.8834255218989859
           },
           "AUTHORIZED_PUSH_PAYMENT": {
             "n": 1314,
             "precision": 0.7149532710280374,
             "recall": 0.9807692307692307,
             "f1": 0.827027027027027,
-            "roc_auc": 0.9922667286656924,
-            "pr_auc": 0.9236155775360859
+            "roc_auc": 0.9901521190381295,
+            "pr_auc": 0.9212757126215173
           },
           "MULE_NETWORK": {
             "n": 1279,
             "precision": 0.6573033707865169,
             "recall": 0.9669421487603306,
             "f1": 0.782608695652174,
-            "roc_auc": 0.9860117900626615,
-            "pr_auc": 0.8829737655435409
+            "roc_auc": 0.987053768966157,
+            "pr_auc": 0.880677520900512
           },
           "ring_mule_synthetic": {
             "n": 1182,
             "precision": 0.016129032258064516,
             "recall": 0.041666666666666664,
             "f1": 0.023255813953488372,
-            "roc_auc": 0.4697574841681059,
-            "pr_auc": 0.01862762190935576
+            "roc_auc": 0.48573330454807134,
+            "pr_auc": 0.01909775357048385
           }
         }
       },
       "naive_max_all_three": {
         "overall": {
           "n": 1556,
-          "precision": 0.8571428571428571,
-          "recall": 0.9195979899497487,
-          "f1": 0.8872727272727273,
-          "roc_auc": 0.9599085670146935,
-          "pr_auc": 0.9338046158437776,
+          "precision": 0.8641425389755011,
+          "recall": 0.9748743718592965,
+          "f1": 0.9161747343565525,
+          "roc_auc": 0.9901298374428272,
+          "pr_auc": 0.9651947479606703,
           "confusion_matrix": [
             [
               1097,
               61
             ],
             [
-              32,
-              366
+              10,
+              388
             ]
           ]
         },
@@ -462,129 +462,129 @@
             "precision": 0.6038961038961039,
             "recall": 0.9587628865979382,
             "f1": 0.7410358565737052,
-            "roc_auc": 0.9924149350996208,
-            "pr_auc": 0.8816652199651436
+            "roc_auc": 0.9924950590246248,
+            "pr_auc": 0.8834255218989859
           },
           "AUTHORIZED_PUSH_PAYMENT": {
             "n": 1314,
             "precision": 0.7149532710280374,
             "recall": 0.9807692307692307,
             "f1": 0.827027027027027,
-            "roc_auc": 0.9922667286656924,
-            "pr_auc": 0.9236155775360859
+            "roc_auc": 0.9900967627651565,
+            "pr_auc": 0.9212526874901803
           },
           "MULE_NETWORK": {
             "n": 1279,
             "precision": 0.6611111111111111,
             "recall": 0.9834710743801653,
             "f1": 0.7906976744186046,
-            "roc_auc": 0.9894303372871437,
-            "pr_auc": 0.9264763529067567
+            "roc_auc": 0.9905579582922964,
+            "pr_auc": 0.9286204803354123
           },
           "ring_mule_synthetic": {
             "n": 1182,
-            "precision": 0.016129032258064516,
-            "recall": 0.041666666666666664,
-            "f1": 0.023255813953488372,
-            "roc_auc": 0.46936168681635004,
-            "pr_auc": 0.018613048557204533
+            "precision": 0.27380952380952384,
+            "recall": 0.9583333333333334,
+            "f1": 0.42592592592592593,
+            "roc_auc": 0.9786269430051814,
+            "pr_auc": 0.3176240452027377
           }
         }
       },
       "risk_fusion_stacked_lr": {
         "overall": {
           "n": 1556,
-          "precision": 0.9783783783783784,
-          "recall": 0.9095477386934674,
-          "f1": 0.9427083333333334,
-          "roc_auc": 0.9619459560323205,
-          "pr_auc": 0.9565255806365619,
+          "precision": 0.9846547314578005,
+          "recall": 0.9673366834170855,
+          "f1": 0.9759188846641318,
+          "roc_auc": 0.9938487775665893,
+          "pr_auc": 0.9903624797017437,
           "confusion_matrix": [
             [
-              1150,
-              8
+              1152,
+              6
             ],
             [
-              36,
-              362
+              13,
+              385
             ]
           ]
         },
         "by_family": {
           "ACCOUNT_TAKEOVER": {
             "n": 1255,
-            "precision": 0.9215686274509803,
+            "precision": 0.94,
             "recall": 0.9690721649484536,
-            "f1": 0.9447236180904522,
-            "roc_auc": 0.9984153268165874,
-            "pr_auc": 0.9859902830596295
+            "f1": 0.9543147208121827,
+            "roc_auc": 0.9982639816249133,
+            "pr_auc": 0.9855851554588951
           },
           "AUTHORIZED_PUSH_PAYMENT": {
             "n": 1314,
-            "precision": 0.949685534591195,
-            "recall": 0.967948717948718,
-            "f1": 0.9587301587301588,
-            "roc_auc": 0.9944422301935255,
-            "pr_auc": 0.9825154261616754
+            "precision": 0.9615384615384616,
+            "recall": 0.9615384615384616,
+            "f1": 0.9615384615384616,
+            "roc_auc": 0.9899085514370489,
+            "pr_auc": 0.9821262172481502
           },
           "MULE_NETWORK": {
             "n": 1279,
-            "precision": 0.936,
-            "recall": 0.9669421487603306,
-            "f1": 0.9512195121951219,
-            "roc_auc": 0.9922565266418304,
-            "pr_auc": 0.9740766278482285
+            "precision": 0.9516129032258065,
+            "recall": 0.9752066115702479,
+            "f1": 0.963265306122449,
+            "roc_auc": 0.9949828002112505,
+            "pr_auc": 0.9760335299685576
           },
           "ring_mule_synthetic": {
             "n": 1182,
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1": 0.0,
-            "roc_auc": 0.45050734024179623,
-            "pr_auc": 0.018544947931282876
+            "precision": 0.7931034482758621,
+            "recall": 0.9583333333333334,
+            "f1": 0.8679245283018868,
+            "roc_auc": 0.9958981001727116,
+            "pr_auc": 0.6694721425224961
           }
         }
       }
     },
     "fusion_fold_coefficients": [
       {
-        "stage_1_2_score": 6.181122063956615,
-        "gcn_score": 1.0632118956535035,
-        "ae_score": 1.7281826173670665,
-        "intercept": -2.7675041743486193
+        "stage_1_2_score": 6.724462764872801,
+        "gcn_score": 5.42583063400232,
+        "ae_score": 2.449151740547727,
+        "intercept": -3.690086217295747
       },
       {
-        "stage_1_2_score": 5.976181373585572,
-        "gcn_score": 1.8766233465800453,
-        "ae_score": 1.9037848167656053,
-        "intercept": -2.8442304432658942
+        "stage_1_2_score": 6.598986374543355,
+        "gcn_score": 5.709478191870459,
+        "ae_score": 2.6016542536186966,
+        "intercept": -3.787592788437458
       },
       {
-        "stage_1_2_score": 6.2361617417312925,
-        "gcn_score": 1.5906653031333997,
-        "ae_score": 1.226277686782075,
-        "intercept": -2.6841188505714695
+        "stage_1_2_score": 6.780264175819989,
+        "gcn_score": 5.529882176870718,
+        "ae_score": 1.8294509616095265,
+        "intercept": -3.516845228664026
       },
       {
-        "stage_1_2_score": 6.003328741095341,
-        "gcn_score": 1.8503388800624636,
-        "ae_score": 1.8610126330195957,
-        "intercept": -2.7645307065114517
+        "stage_1_2_score": 6.706051242742994,
+        "gcn_score": 5.882067123157911,
+        "ae_score": 2.6671139753085744,
+        "intercept": -3.817982387456589
       },
       {
-        "stage_1_2_score": 5.958863999987262,
-        "gcn_score": 1.8724488908326595,
-        "ae_score": 1.9871292010514456,
-        "intercept": -2.807237739441431
+        "stage_1_2_score": 6.5315271354144775,
+        "gcn_score": 5.6745784156154,
+        "ae_score": 2.665163688175152,
+        "intercept": -3.666600488193821
       }
     ],
     "fusion_avg_coefficients": {
-      "stage_1_2_score": 6.071131584071216,
-      "gcn_score": 1.6506576632524144,
-      "ae_score": 1.7412773909971577,
-      "intercept": -2.7735243828277736
+      "stage_1_2_score": 6.668258338678723,
+      "gcn_score": 5.644367308303361,
+      "ae_score": 2.4425069238519357,
+      "intercept": -3.695821422009528
     },
-    "n_graph_connected_nodes": 214,
+    "n_graph_connected_nodes": 252,
     "note": "n_graph_connected_nodes reflects the REAL corpus (no ring overlay) -- if this is 0, the GCN score is 0 for every row by construction (no entity clears the fan-out threshold without the synthetic ring), and fusion_avg_coefficients' gcn_score weight should be interpreted as 'the meta-model correctly learned to ignore an always-zero feature', not 'the GCN is a weak detector.' See run_fusion_with_ring_diagnostic() for the run that proves fusion recovers a graph signal when one actually exists.",
     "ring_only_risk_fusion_metrics": {
       "n": 24,
@@ -595,8 +595,8 @@
           0
         ],
         [
-          24,
-          0
+          1,
+          23
         ]
       ]
     },
@@ -605,9 +605,9 @@
     "diagnostic_purpose": "This run uses the deliberately-injected quiet ring overlay (NOT real Red Team output -- see quiet_ring_overlay.py) purely to verify the fusion meta-model can recover a graph signal when one exists. The genuine MULE_NETWORK corpus remains untouched."
   },
   "_artifact_metadata": {
-    "generated_at_utc": "2026-09-04T05:28:56.009629+00:00",
-    "git_commit": "unknown (not a git checkout, or git unavailable)",
-    "git_dirty": "unknown",
+    "generated_at_utc": "2026-09-05T06:19:10.121094+00:00",
+    "git_commit": "95b5c21a8e3ff1772b52bc9a1d6e3928ae48798c",
+    "git_dirty": true,
     "python_version": "3.12.3",
     "platform": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39",
     "package_versions": {

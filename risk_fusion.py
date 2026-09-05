@@ -124,9 +124,6 @@ def compute_base_scores(df: pd.DataFrame, A: np.ndarray, connected_mask: np.ndar
     X_raw = df[feature_cols].fillna(0).values.astype(float)
     y = df["fraud"].values.astype(int)
 
-    mu, sigma = X_raw.mean(axis=0), X_raw.std(axis=0) + 1e-8
-    X_std = (X_raw - mu) / sigma
-
     stage_1_2_proba, escalate, folds = btp.compute_stage_1_2_cascade(
         df, feature_cols, btp.CONFIG, n_splits=n_splits
     )
@@ -135,16 +132,26 @@ def compute_base_scores(df: pd.DataFrame, A: np.ndarray, connected_mask: np.ndar
     ae_score = np.zeros(len(df))
 
     A_hat = normalize_adjacency(A)
-    M = A_hat @ X_std  # message-passed features, fixed for the whole run
 
     for fold, (train_idx, test_idx) in enumerate(folds, start=1):
+        # Standardization stats are fit on THIS fold's train_idx only
+        # (preprocessing leakage fix: previously mu/sigma were computed
+        # once over the entire dataset before the fold loop, so every
+        # fold's held-out rows influenced the scale used to standardize
+        # themselves -- see reports/stage_leakage_audit_risk_fusion_decision_policy.md).
+        # Same +1e-8 zero-std guard as before, now applied per fold.
+        mu = X_raw[train_idx].mean(axis=0)
+        sigma = X_raw[train_idx].std(axis=0) + 1e-8
+        X_std_fold = (X_raw - mu) / sigma
+        M_fold = A_hat @ X_std_fold  # message-passed features, recomputed per fold
+
         # --- Stage 3: GCN, transductive, trained only on this fold's
         # train labels, scored over connected test rows only ---
         train_mask = np.zeros(len(df), dtype=bool)
         train_mask[train_idx] = True
-        gcn = OneLayerGCN(in_dim=X_std.shape[1], hidden_dim=GCN_HIDDEN_DIM,
+        gcn = OneLayerGCN(in_dim=X_std_fold.shape[1], hidden_dim=GCN_HIDDEN_DIM,
                            seed=RANDOM_STATE + fold)
-        train_gcn(gcn, M, y.astype(float), train_mask, epochs=GCN_EPOCHS, lr=GCN_LR)
+        train_gcn(gcn, M_fold, y.astype(float), train_mask, epochs=GCN_EPOCHS, lr=GCN_LR)
         for i in test_idx:
             if connected_mask[i]:
                 gcn_score[i] = gcn.p[i]
@@ -152,11 +159,11 @@ def compute_base_scores(df: pd.DataFrame, A: np.ndarray, connected_mask: np.ndar
         # --- Stage 4: Autoencoder, trained only on this fold's
         # train-split LEGITIMATE rows ---
         legit_train_idx = train_idx[y[train_idx] == 0]
-        ae = Autoencoder(in_dim=X_std.shape[1], hidden_dim=AE_HIDDEN_DIM,
+        ae = Autoencoder(in_dim=X_std_fold.shape[1], hidden_dim=AE_HIDDEN_DIM,
                           seed=RANDOM_STATE + fold)
-        train_ae(ae, X_std[legit_train_idx], epochs=AE_EPOCHS, lr=AE_LR)
-        normal_train_err = ae.reconstruction_error(X_std[legit_train_idx])
-        test_err = ae.reconstruction_error(X_std[test_idx])
+        train_ae(ae, X_std_fold[legit_train_idx], epochs=AE_EPOCHS, lr=AE_LR)
+        normal_train_err = ae.reconstruction_error(X_std_fold[legit_train_idx])
+        test_err = ae.reconstruction_error(X_std_fold[test_idx])
         ae_scores = error_to_score(test_err, normal_train_err, high_percentile=HIGH_PERCENTILE)
         for local_i, global_i in enumerate(test_idx):
             ae_score[global_i] = float(ae_scores[local_i])
