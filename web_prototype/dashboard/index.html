@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Defense Lab — Payment Fraud Console</title>
+<title>AI Defense Lab â€” Payment Fraud Console</title>
 <style>
   :root{
     --bg: #0d131b;
@@ -325,8 +325,8 @@
     list-style:none; display:flex; align-items:center; gap:8px;
   }
   details.tech-details summary::-webkit-details-marker{ display:none; }
-  details.tech-details summary::before{ content:'▸'; font-size:11px; }
-  details.tech-details[open] summary::before{ content:'▾'; }
+  details.tech-details summary::before{ content:'â–¸'; font-size:11px; }
+  details.tech-details[open] summary::before{ content:'â–¾'; }
   details.tech-details pre{
     margin:0; padding:14px 16px; border-top:1px solid var(--line); font-size:11.5px;
     font-family:var(--mono); color:var(--text-dim); overflow-x:auto; max-height:340px; background:#080c11;
@@ -356,10 +356,10 @@
   <div class="top-inner">
     <div class="brand">
       <div class="name">AI Defense System</div>
-      <div class="sub">AI Risk Manager — fraud defence console</div>
+      <div class="sub">AI Risk Manager â€” fraud defence console</div>
     </div>
     <input id="apiBase" class="api-input" value="" spellcheck="false" placeholder="https://ai-defense-api.onrender.com" aria-label="Backend API base URL" />
-    <div class="health-pill" id="healthPill" role="status" aria-live="polite"><span id="healthDot" class="dot"></span><span id="healthText">checking backend…</span></div>
+    <div class="health-pill" id="healthPill" role="status" aria-live="polite"><span id="healthDot" class="dot"></span><span id="healthText">checking backendâ€¦</span></div>
     <button class="run-btn ghost" id="refreshBtn">Refresh</button>
     <button class="run-btn" id="runBtn">Run pipeline</button>
   </div>
@@ -375,15 +375,15 @@
 <div class="shell">
 
   <div class="hero">
-    <h1>AI Risk Manager — investigate and decide on transaction risk.</h1>
-    <p>Score a transaction against the live Stage 1+2 model below, or review the full closed-loop pipeline's offline evaluation. Every value on this page is read from the backend response or its output files — nothing is invented.</p>
+    <h1>AI Risk Manager â€” investigate and decide on transaction risk.</h1>
+    <p>Score a transaction against the live Stage 1+2 model below, or review the full closed-loop pipeline's offline evaluation. Every value on this page is read from the backend response or its output files â€” nothing is invented.</p>
   </div>
 
   <!-- ============ TRANSACTION SCORING WORKSPACE ============ -->
   <section id="scoring">
     <div class="section-head">
       <h2>Transaction risk workspace</h2>
-      <div class="desc">Builds a real <code class="mono">ObservableAttackTrace</code> and sends it to <code class="mono">POST /api/score</code> on the live backend. Stage 1+2 (rules + XGBoost) actually runs; stages 3–5 are honestly reported as not available online, exactly as the API returns them.</div>
+      <div class="desc">Builds a real <code class="mono">ObservableAttackTrace</code> and sends it to <code class="mono">POST /api/score</code> on the live backend. Stage 1+2 (rules + XGBoost) actually runs; stages 3â€“5 are honestly reported as not available online, exactly as the API returns them.</div>
     </div>
 
     <div class="ws-tabs" role="tablist" aria-label="Trace input mode">
@@ -478,7 +478,7 @@
 
     <div id="panelJson" class="ws-panel" role="tabpanel" aria-labelledby="tabJson" hidden>
       <p style="font-size:12.5px;color:var(--text-dim);margin-top:0">
-        Edit the exact <code class="mono">ObservableAttackTrace</code> payload that will be POSTed to <code class="mono">/api/score</code>. This is the same schema the guided builder produces — nothing here is simplified or fabricated.
+        Edit the exact <code class="mono">ObservableAttackTrace</code> payload that will be POSTed to <code class="mono">/api/score</code>. This is the same schema the guided builder produces â€” nothing here is simplified or fabricated.
       </p>
       <textarea id="jsonEditor" class="json-editor" spellcheck="false" aria-label="Raw ObservableAttackTrace JSON"></textarea>
       <div class="json-error" id="jsonError" role="alert"></div>
@@ -501,12 +501,12 @@
   <section id="architecture">
     <div class="section-head">
       <h2>Detection pipeline</h2>
-      <div class="desc">Red Team generates traces → Blue Team scores them through four stages → fusion and policy decide the outcome.</div>
+      <div class="desc">Red Team generates traces â†’ Blue Team scores them through four stages â†’ fusion and policy decide the outcome.</div>
     </div>
     <div class="flow" id="flowDiagram"></div>
     <div class="loop-banner">
-      <span class="icon">↺</span>
-      <span class="text"><b>Feedback loop</b> — misses the cascade lets through get collected, turned into hard examples, and used to retrain Stage 2. See <a href="#feedback">Feedback loop</a> below.</span>
+      <span class="icon">â†º</span>
+      <span class="text"><b>Feedback loop</b> â€” misses the cascade lets through get collected, turned into hard examples, and used to retrain Stage 2. See <a href="#feedback">Feedback loop</a> below.</span>
     </div>
   </section>
 
@@ -550,7 +550,7 @@
   <section id="feedback">
     <div class="section-head">
       <h2>Feedback loop</h2>
-      <div class="desc">Not a detection stage — this is what happens after: collect what got through, generate hard examples, retrain, compare.</div>
+      <div class="desc">Not a detection stage â€” this is what happens after: collect what got through, generate hard examples, retrain, compare.</div>
     </div>
     <div id="feedbackBody"></div>
   </section>
@@ -559,11 +559,11 @@
   <section id="run">
     <div class="section-head">
       <h2>Run control</h2>
-      <div class="desc">Triggers the real scripts as subprocesses. A full run retrains Stage 3/4 per fold — budget ~10–12 minutes.</div>
+      <div class="desc">Triggers the real scripts as subprocesses. A full run retrains Stage 3/4 per fold â€” budget ~10â€“12 minutes.</div>
     </div>
     <div class="run-panel">
       <div class="metric-row" style="margin-bottom:2px;">
-        <span style="font-size:13px;color:var(--text-dim)">Quick demo: run just the sensitivity analysis (~2s) to prove the button is live —</span>
+        <span style="font-size:13px;color:var(--text-dim)">Quick demo: run just the sensitivity analysis (~2s) to prove the button is live â€”</span>
         <button class="run-btn ghost" id="quickRunBtn" style="padding:5px 12px;font-size:12.5px;">Run sensitivity only</button>
       </div>
       <div class="stage-list" id="stageList"></div>
@@ -578,10 +578,10 @@
       <div class="desc">Live liveness (<code class="mono">/healthz</code>) and readiness (<code class="mono">/readyz</code>) checks against the configured backend.</div>
     </div>
     <div class="grid" id="systemHealthGrid">
-      <div class="card"><div class="k">API</div><div class="v" id="healthApiVal">—</div></div>
-      <div class="card"><div class="k">Model</div><div class="v" id="healthModelVal">—</div></div>
-      <div class="card"><div class="k">Model version</div><div class="v" id="healthVersionVal" style="font-size:15px">—</div></div>
-      <div class="card"><div class="k">Backend URL</div><div class="v" id="healthUrlVal" style="font-size:12.5px;font-family:var(--mono);word-break:break-all">—</div></div>
+      <div class="card"><div class="k">API</div><div class="v" id="healthApiVal">â€”</div></div>
+      <div class="card"><div class="k">Model</div><div class="v" id="healthModelVal">â€”</div></div>
+      <div class="card"><div class="k">Model version</div><div class="v" id="healthVersionVal" style="font-size:15px">â€”</div></div>
+      <div class="card"><div class="k">Backend URL</div><div class="v" id="healthUrlVal" style="font-size:12.5px;font-family:var(--mono);word-break:break-all">â€”</div></div>
     </div>
   </section>
 
@@ -607,9 +607,23 @@ const apiBaseInput = $('#apiBase');
 const API_BASE_STORAGE_KEY = 'ai_defense_api_base';
 
 (function initApiBase() {
-  const saved = localStorage.getItem(API_BASE_STORAGE_KEY);
+  const saved = (localStorage.getItem(API_BASE_STORAGE_KEY) || '').trim();
   const configured = (window.AI_DEFENSE_API_BASE || '').trim();
-  apiBaseInput.value = saved || configured || '';
+  const hostname = window.location.hostname;
+
+  // On the deployed Vercel site, always prefer the configured production API.
+  // This prevents an old localhost value saved in the browser from breaking
+  // the production dashboard.
+  const isLocalFrontend =
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '::1';
+
+  if (isLocalFrontend) {
+    apiBaseInput.value = saved || configured || '';
+  } else {
+    apiBaseInput.value = configured || saved || '';
+  }
 })();
 
 apiBaseInput.addEventListener('change', () => {
@@ -632,10 +646,10 @@ const STAGE_CATALOG = [
   { id: 'explainability', label: 'Explain', sub: 'SHAP' },
 ];
 
-function pct(x, digits=1){ return (x==null) ? '—' : (x*100).toFixed(digits)+'%'; }
-function num(x){ return (x==null) ? '—' : x.toLocaleString(); }
-function money(x){ return (x==null) ? '—' : '$'+Number(x).toLocaleString(undefined,{maximumFractionDigits:0}); }
-function fmtTime(ts){ return ts ? new Date(ts*1000).toLocaleString() : '—'; }
+function pct(x, digits=1){ return (x==null) ? 'â€”' : (x*100).toFixed(digits)+'%'; }
+function num(x){ return (x==null) ? 'â€”' : x.toLocaleString(); }
+function money(x){ return (x==null) ? 'â€”' : '$'+Number(x).toLocaleString(undefined,{maximumFractionDigits:0}); }
+function fmtTime(ts){ return ts ? new Date(ts*1000).toLocaleString() : 'â€”'; }
 
 // A structured fetch error carries the HTTP status and parsed JSON body
 // (when available) so callers can render specific, human-readable
@@ -689,14 +703,14 @@ async function checkHealth(){
     pill.className = 'health-pill';
     dot.className = 'dot bad';
     text.textContent = 'set your API URL above (no backend URL configured)';
-    apiVal.textContent = 'Not configured'; modelVal.textContent = '—'; versionVal.textContent = '—';
+    apiVal.textContent = 'Not configured'; modelVal.textContent = 'â€”'; versionVal.textContent = 'â€”';
     modelReady = false;
     return false;
   }
 
   pill.className = 'health-pill';
   dot.className = 'dot';
-  text.textContent = 'checking backend…';
+  text.textContent = 'checking backendâ€¦';
 
   try{
     await fetchJSON('/healthz', undefined, 12000);
@@ -706,11 +720,11 @@ async function checkHealth(){
     modelReady = false;
     pill.className = 'health-pill'; dot.className = 'dot bad';
     if (e.kind === 'timeout'){
-      text.textContent = 'Backend is waking up. This may take a few seconds…';
-      modelVal.textContent = 'Waking up'; versionVal.textContent = '—';
+      text.textContent = 'Backend is waking up. This may take a few secondsâ€¦';
+      modelVal.textContent = 'Waking up'; versionVal.textContent = 'â€”';
     } else {
       text.textContent = 'Unable to reach the risk API. Check the backend URL or try again.';
-      modelVal.textContent = 'Unknown'; versionVal.textContent = '—';
+      modelVal.textContent = 'Unknown'; versionVal.textContent = 'â€”';
     }
     return false;
   }
@@ -720,14 +734,14 @@ async function checkHealth(){
     modelReady = !!ready.ready;
     if (ready.ready){
       modelVal.textContent = 'Ready';
-      versionVal.textContent = ready.model_version || '—';
+      versionVal.textContent = ready.model_version || 'â€”';
       pill.className = 'health-pill'; dot.className = 'dot ok';
-      text.textContent = 'API connected · model ready';
+      text.textContent = 'API connected Â· model ready';
     } else {
       modelVal.textContent = 'Not ready';
-      versionVal.textContent = '—';
+      versionVal.textContent = 'â€”';
       pill.className = 'health-pill warn'; dot.className = 'dot';
-      text.textContent = 'API connected, model not ready — scoring unavailable';
+      text.textContent = 'API connected, model not ready â€” scoring unavailable';
     }
     return ready.ready;
   }catch(e){
@@ -735,7 +749,7 @@ async function checkHealth(){
     if (e.kind === 'http' && e.body){
       modelReady = false;
       modelVal.textContent = 'Not ready';
-      versionVal.textContent = '—';
+      versionVal.textContent = 'â€”';
       pill.className = 'health-pill warn'; dot.className = 'dot';
       text.textContent = 'API connected, model not ready: ' + (e.body.error || 'unknown error');
       return false;
@@ -940,23 +954,23 @@ $('#loadExampleBtn').addEventListener('click', () => {
 function renderScoreError(err){
   const el = $('#scoreResult');
   if (err instanceof Error && (err.message === 'invalid_json')) {
-    el.innerHTML = `<div class="banner-msg error"><span>⚠</span><div>Fix the JSON in the editor above, then try again.</div></div>`;
+    el.innerHTML = `<div class="banner-msg error"><span>âš </span><div>Fix the JSON in the editor above, then try again.</div></div>`;
     return;
   }
   if (!(err instanceof ApiError)) {
-    el.innerHTML = `<div class="banner-msg error"><span>⚠</span><div>Transaction could not be scored.<br>${(err && err.message) ? escapeHtml(err.message) : 'Check the form and try again.'}</div></div>`;
+    el.innerHTML = `<div class="banner-msg error"><span>âš </span><div>Transaction could not be scored.<br>${(err && err.message) ? escapeHtml(err.message) : 'Check the form and try again.'}</div></div>`;
     return;
   }
   if (err.kind === 'no_base'){
-    el.innerHTML = `<div class="banner-msg warn"><span>⚠</span><div>Set the backend API URL at the top of the page before scoring a transaction.</div></div>`;
+    el.innerHTML = `<div class="banner-msg warn"><span>âš </span><div>Set the backend API URL at the top of the page before scoring a transaction.</div></div>`;
     return;
   }
   if (err.kind === 'timeout'){
-    el.innerHTML = `<div class="banner-msg warn"><span>⏳</span><div><b>Backend is waking up.</b> Render's free-tier instance sleeps when idle and can take up to a minute to respond on the first request. Please retry in a moment.</div></div>`;
+    el.innerHTML = `<div class="banner-msg warn"><span>â³</span><div><b>Backend is waking up.</b> Render's free-tier instance sleeps when idle and can take up to a minute to respond on the first request. Please retry in a moment.</div></div>`;
     return;
   }
   if (err.kind === 'network'){
-    el.innerHTML = `<div class="banner-msg error"><span>⚠</span><div>Unable to reach the risk API. Check the backend URL or your connection, then try again.</div></div>`;
+    el.innerHTML = `<div class="banner-msg error"><span>âš </span><div>Unable to reach the risk API. Check the backend URL or your connection, then try again.</div></div>`;
     return;
   }
   // HTTP error with a JSON body
@@ -964,15 +978,15 @@ function renderScoreError(err){
   const body = err.body || {};
   if (status === 422 && Array.isArray(body.detail)){
     const items = body.detail.map(d => `${(d.loc||[]).slice(1).join('.')}: ${d.msg}`);
-    el.innerHTML = `<div class="banner-msg error"><span>⚠</span><div>Transaction could not be scored.<ul>${items.map(i=>`<li>${escapeHtml(i)}</li>`).join('')}</ul></div></div>`;
+    el.innerHTML = `<div class="banner-msg error"><span>âš </span><div>Transaction could not be scored.<ul>${items.map(i=>`<li>${escapeHtml(i)}</li>`).join('')}</ul></div></div>`;
   } else if (status === 503){
-    el.innerHTML = `<div class="banner-msg warn"><span>⏳</span><div>${escapeHtml(body.detail || 'Model artifacts are not loaded yet.')} Check System Health below and retry shortly.</div></div>`;
+    el.innerHTML = `<div class="banner-msg warn"><span>â³</span><div>${escapeHtml(body.detail || 'Model artifacts are not loaded yet.')} Check System Health below and retry shortly.</div></div>`;
   } else if (status === 429){
-    el.innerHTML = `<div class="banner-msg warn"><span>⚠</span><div>Too many requests — please wait a moment and try again.</div></div>`;
+    el.innerHTML = `<div class="banner-msg warn"><span>âš </span><div>Too many requests â€” please wait a moment and try again.</div></div>`;
   } else if (status >= 500){
-    el.innerHTML = `<div class="banner-msg error"><span>⚠</span><div>The backend hit an unexpected error while scoring this transaction (request ID: ${escapeHtml(body.request_id || 'n/a')}). This has been logged server-side.</div></div>`;
+    el.innerHTML = `<div class="banner-msg error"><span>âš </span><div>The backend hit an unexpected error while scoring this transaction (request ID: ${escapeHtml(body.request_id || 'n/a')}). This has been logged server-side.</div></div>`;
   } else {
-    el.innerHTML = `<div class="banner-msg error"><span>⚠</span><div>Transaction could not be scored (HTTP ${status}). ${escapeHtml(body.detail ? JSON.stringify(body.detail) : '')}</div></div>`;
+    el.innerHTML = `<div class="banner-msg error"><span>âš </span><div>Transaction could not be scored (HTTP ${status}). ${escapeHtml(body.detail ? JSON.stringify(body.detail) : '')}</div></div>`;
   }
 }
 
@@ -991,15 +1005,15 @@ function decisionClass(decision){
   return 'unknown';
 }
 function decisionIcon(cls){
-  return { allow: '✓', review: '!', block: '✕', unknown: '?' }[cls];
+  return { allow: 'âœ“', review: '!', block: 'âœ•', unknown: '?' }[cls];
 }
 
 function renderStagePill(label, stage){
   if (stage && stage.available){
-    return `<div class="stage-pill ran"><span class="lbl">${label} · ran</span>${escapeHtml(stage.detail || '')}${stage.score!=null ? ' · score '+stage.score.toFixed(4) : ''}</div>`;
+    return `<div class="stage-pill ran"><span class="lbl">${label} Â· ran</span>${escapeHtml(stage.detail || '')}${stage.score!=null ? ' Â· score '+stage.score.toFixed(4) : ''}</div>`;
   }
   const reason = stage && stage.reason ? stage.reason : 'Not available from this endpoint.';
-  return `<div class="stage-pill"><span class="lbl">${label} · not available</span>${escapeHtml(reason)}</div>`;
+  return `<div class="stage-pill"><span class="lbl">${label} Â· not available</span>${escapeHtml(reason)}</div>`;
 }
 
 function renderScoreResult(resp, requestTrace){
@@ -1013,20 +1027,20 @@ function renderScoreResult(resp, requestTrace){
         const val = f.shap_value ?? f.value ?? f.importance ?? null;
         return `<div class="evidence-row"><div class="num">${i+1}</div><div class="body"><div class="h">${escapeHtml(String(name))}</div><div class="d">${val!=null ? 'contribution: '+Number(val).toFixed(4) : 'contributing signal'}</div></div></div>`;
       }).join('')
-    : `<div class="empty-note">${resp.stage1_2 && resp.stage1_2.ran_model === false ? 'Stage 1 auto-cleared this trace before the model ran — no feature attributions to show.' : 'Not available for this response.'}</div>`;
+    : `<div class="empty-note">${resp.stage1_2 && resp.stage1_2.ran_model === false ? 'Stage 1 auto-cleared this trace before the model ran â€” no feature attributions to show.' : 'Not available for this response.'}</div>`;
 
   const thresholds = resp.reference_full_pipeline_thresholds;
   const thresholdNote = thresholds
-    ? `Full 5-stage pipeline was tuned to review ≥ ${thresholds.t_review ?? thresholds.review ?? '—'}, block ≥ ${thresholds.t_block ?? thresholds.block ?? '—'} — shown for context only, not applied to the Stage 1+2-only score above.`
+    ? `Full 5-stage pipeline was tuned to review â‰¥ ${thresholds.t_review ?? thresholds.review ?? 'â€”'}, block â‰¥ ${thresholds.t_block ?? thresholds.block ?? 'â€”'} â€” shown for context only, not applied to the Stage 1+2-only score above.`
     : 'Not available.';
 
   $('#scoreResult').innerHTML = `
     <div class="decision-banner">
       <div class="decision-badge ${cls}"><span aria-hidden="true">${decisionIcon(cls)}</span> ${escapeHtml(resp.decision || 'UNKNOWN')}</div>
       <div class="decision-meta">
-        <div><b>Trace</b> <span class="mono">${escapeHtml(resp.trace_id)}</span> · <b>Request</b> <span class="mono">${escapeHtml(resp.request_id)}</span></div>
+        <div><b>Trace</b> <span class="mono">${escapeHtml(resp.trace_id)}</span> Â· <b>Request</b> <span class="mono">${escapeHtml(resp.request_id)}</span></div>
         <div><b>Basis:</b> ${escapeHtml(resp.decision_basis || 'not available')}</div>
-        <div><b>Model:</b> <span class="mono">${escapeHtml(resp.model_version)}</span> · <b>Latency:</b> ${resp.inference_latency_ms?.toFixed?.(1) ?? resp.inference_latency_ms} ms</div>
+        <div><b>Model:</b> <span class="mono">${escapeHtml(resp.model_version)}</span> Â· <b>Latency:</b> ${resp.inference_latency_ms?.toFixed?.(1) ?? resp.inference_latency_ms} ms</div>
       </div>
     </div>
 
@@ -1056,7 +1070,7 @@ function renderScoreResult(resp, requestTrace){
     </div>
 
     <details class="tech-details">
-      <summary>Technical details — raw response, request payload &amp; metadata</summary>
+      <summary>Technical details â€” raw response, request payload &amp; metadata</summary>
       <pre>${escapeHtml(JSON.stringify({ request: requestTrace, response: resp }, null, 2))}</pre>
     </details>
   `;
@@ -1067,7 +1081,7 @@ function setScoreButtonState(state){
   btn.disabled = (state === 'loading');
   btn.textContent = {
     idle: 'Score Transaction',
-    loading: 'Analyzing Risk…',
+    loading: 'Analyzing Riskâ€¦',
     success: 'Risk Assessment Complete',
     failure: 'Retry Assessment',
   }[state] || 'Score Transaction';
@@ -1086,7 +1100,7 @@ $('#scoreBtn').addEventListener('click', async () => {
 
   scoringInFlight = true;
   setScoreButtonState('loading');
-  $('#scoreStatusText').textContent = 'Receiving transaction → evaluating risk signals → applying risk policy…';
+  $('#scoreStatusText').textContent = 'Receiving transaction â†’ evaluating risk signals â†’ applying risk policyâ€¦';
   $('#scoreResult').innerHTML = `<div class="result-empty"><div class="skeleton" style="width:60%;margin:0 auto 10px"></div><div class="skeleton" style="width:40%;margin:0 auto"></div></div>`;
 
   try{
@@ -1128,10 +1142,10 @@ function renderFlow(dashboard){
   const el = $('#flowDiagram');
   el.innerHTML = nodes.map((n,i) => `
     <div class="flow-node">
-      <div class="badge ${n.done?'done':'pending'}">${n.done ? '✓' : '·'}</div>
+      <div class="badge ${n.done?'done':'pending'}">${n.done ? 'âœ“' : 'Â·'}</div>
       <div class="label"><b>${n.label}</b>${n.sub}</div>
     </div>
-    ${i < nodes.length-1 ? '<div class="flow-arrow">→</div>' : ''}
+    ${i < nodes.length-1 ? '<div class="flow-arrow">â†’</div>' : ''}
   `).join('');
 }
 
@@ -1147,9 +1161,9 @@ function metricCard(title, sub, overall){
         <div class="m"><div class="n">${pct(overall.precision)}</div><div class="l">precision</div></div>
         <div class="m"><div class="n">${pct(overall.recall)}</div><div class="l">recall</div></div>
         <div class="m"><div class="n">${pct(overall.f1)}</div><div class="l">f1</div></div>
-        <div class="m"><div class="n">${overall.roc_auc?overall.roc_auc.toFixed(3):'—'}</div><div class="l">roc-auc</div></div>
+        <div class="m"><div class="n">${overall.roc_auc?overall.roc_auc.toFixed(3):'â€”'}</div><div class="l">roc-auc</div></div>
       </div>
-      <div style="font-size:11.5px;color:var(--text-faint)">n=${num(overall.n)} · confusion [[${overall.confusion_matrix[0].join(',')}],[${overall.confusion_matrix[1].join(',')}]]</div>
+      <div style="font-size:11.5px;color:var(--text-faint)">n=${num(overall.n)} Â· confusion [[${overall.confusion_matrix[0].join(',')}],[${overall.confusion_matrix[1].join(',')}]]</div>
     </div>`;
 }
 
@@ -1189,7 +1203,7 @@ function renderFusion(d){
           <div class="m"><div class="n">${coef.gcn_score.toFixed(2)}</div><div class="l">gcn</div></div>
           <div class="m"><div class="n">${coef.ae_score.toFixed(2)}</div><div class="l">autoencoder</div></div>
         </div>
-        <div style="font-size:11.5px;color:var(--text-faint)">intercept ${coef.intercept.toFixed(2)} · precision holds at ${pct(stacked.precision)} vs ${pct(naiveMax.precision)} for max() — fusion avoids the false-positive spike that letting any detector veto unconditionally causes.</div>
+        <div style="font-size:11.5px;color:var(--text-faint)">intercept ${coef.intercept.toFixed(2)} Â· precision holds at ${pct(stacked.precision)} vs ${pct(naiveMax.precision)} for max() â€” fusion avoids the false-positive spike that letting any detector veto unconditionally causes.</div>
       </div>
     </div>
     <div class="src">source: ${d.risk_fusion.source_file}</div>
@@ -1225,10 +1239,10 @@ function renderPolicy(d){
       </div>
     </div>`;
   el.innerHTML = `<div class="grid" style="grid-template-columns:1fr 1fr">
-    ${rowHtml('Corrected — reweighted to production prevalence', c)}
-    ${rowHtml('Naive — uncorrected corpus prevalence (~19%)', n)}
+    ${rowHtml('Corrected â€” reweighted to production prevalence', c)}
+    ${rowHtml('Naive â€” uncorrected corpus prevalence (~19%)', n)}
   </div>
-  <div class="src">source: ${d.decision_policy.source_file} · naive optimum blocks far more because it's implicitly told 1 in 5 customers is a fraudster — see corrected for the number that matters.</div>`;
+  <div class="src">source: ${d.decision_policy.source_file} Â· naive optimum blocks far more because it's implicitly told 1 in 5 customers is a fraudster â€” see corrected for the number that matters.</div>`;
 }
 
 // ---------------------------------------------------------------------
@@ -1258,9 +1272,9 @@ function renderExplain(d){
     const c = cases[key];
     caseHtml = `
       <div class="card" style="margin-top:16px">
-        <div class="k">Worked case — ${key.replace(/_/g,' ')}</div>
+        <div class="k">Worked case â€” ${key.replace(/_/g,' ')}</div>
         <div class="mono" style="font-size:12.5px;color:var(--text-dim);margin-top:6px">
-          trace ${c.trace_id} · ${c.attack_family} (${c.attack_difficulty}) · ${money(c.dollars_in_trace)}
+          trace ${c.trace_id} Â· ${c.attack_family} (${c.attack_difficulty}) Â· ${money(c.dollars_in_trace)}
         </div>
       </div>`;
   }
@@ -1323,12 +1337,12 @@ function renderFeedback(d){
           <div class="v">${a.hard_examples_generated_total}<small>/ ${a.hard_examples_used_for_stage2_retrain} used to retrain</small></div>
         </div>
         <div class="card">
-          <div class="k">Precision, round 1 → 2</div>
+          <div class="k">Precision, round 1 â†’ 2</div>
           <div class="v">${pct(a.round2_holdout_metrics.precision)}</div>
           <div class="delta ${deltaClass(dl.precision)}">${deltaSign(dl.precision)}${(dl.precision*100).toFixed(2)} pts vs round 1</div>
         </div>
         <div class="card">
-          <div class="k">F1, round 1 → 2</div>
+          <div class="k">F1, round 1 â†’ 2</div>
           <div class="v">${pct(a.round2_holdout_metrics.f1)}</div>
           <div class="delta ${deltaClass(dl.f1)}">${deltaSign(dl.f1)}${(dl.f1*100).toFixed(2)} pts vs round 1</div>
         </div>
@@ -1338,7 +1352,7 @@ function renderFeedback(d){
           <div class="delta flat">of ${a.misses_found.length} originally found</div>
         </div>
       </div>
-      <div class="src">source: ${d.adaptive_round2.source_file} · verdict: ${a.verdict.stage2_generalization}</div>
+      <div class="src">source: ${d.adaptive_round2.source_file} Â· verdict: ${a.verdict.stage2_generalization}</div>
     `);
   } else {
     parts.push('<div class="empty-note" style="margin-top:14px">Run the adaptive feedback loop to see round 1 vs round 2.</div>');
@@ -1362,7 +1376,7 @@ async function loadDashboard(){
     $('#lastUpdated').textContent = 'last loaded ' + new Date().toLocaleTimeString();
   }catch(e){
     console.error(e);
-    $('#lastUpdated').textContent = 'failed to load — check backend connection above';
+    $('#lastUpdated').textContent = 'failed to load â€” check backend connection above';
   }
 }
 
@@ -1372,7 +1386,7 @@ async function loadDashboard(){
 let pollTimer = null;
 
 function renderStageList(job){
-  const list = job ? job.stages : STAGE_CATALOG.map(s => ({ id: s.id, label: s.label + ' — ' + s.sub, status: 'pending' }));
+  const list = job ? job.stages : STAGE_CATALOG.map(s => ({ id: s.id, label: s.label + ' â€” ' + s.sub, status: 'pending' }));
   $('#stageList').innerHTML = list.map(s => `
     <div class="stage-row">
       <span class="status-dot ${s.status}"></span>
@@ -1381,7 +1395,7 @@ function renderStageList(job){
     </div>`).join('');
 
   if(job){
-    const logs = job.stages.flatMap(s => s.log_tail && s.log_tail.length ? [`— ${s.label} —`, ...s.log_tail] : []);
+    const logs = job.stages.flatMap(s => s.log_tail && s.log_tail.length ? [`â€” ${s.label} â€”`, ...s.log_tail] : []);
     const box = $('#logBox');
     if(logs.length){ box.style.display = 'block'; box.textContent = logs.join('\n'); box.scrollTop = box.scrollHeight; }
   }
@@ -1418,7 +1432,7 @@ async function startRun(stageIds){
     console.error(e);
     $('#runBtn').disabled = false;
     $('#quickRunBtn').disabled = false;
-    alert('Could not start run — check backend connection.');
+    alert('Could not start run â€” check backend connection.');
   }
 }
 
