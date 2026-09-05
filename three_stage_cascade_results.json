@@ -1,42 +1,42 @@
 {
   "stage_1_2_overall": {
-    "n": 1458,
-    "precision": 0.98,
-    "recall": 0.8844765342960289,
-    "f1": 0.9297912713472486,
-    "roc_auc": 0.9369683037993256,
-    "pr_auc": 0.9210224004843676,
+    "n": 1530,
+    "precision": 0.9863387978142076,
+    "recall": 0.9652406417112299,
+    "f1": 0.9756756756756757,
+    "roc_auc": 0.9840751808744888,
+    "pr_auc": 0.9831278877626753,
     "confusion_matrix": [
       [
-        1176,
+        1151,
         5
       ],
       [
-        32,
-        245
+        13,
+        361
       ]
     ]
   },
   "stage_1_2_3_overall": {
-    "n": 1458,
-    "precision": 0.9816176470588235,
-    "recall": 0.9638989169675091,
-    "f1": 0.9726775956284153,
-    "roc_auc": 0.9862152553823016,
-    "pr_auc": 0.9828582803524754,
+    "n": 1530,
+    "precision": 0.986449864498645,
+    "recall": 0.9732620320855615,
+    "f1": 0.9798115746971736,
+    "roc_auc": 0.9856699757600429,
+    "pr_auc": 0.9854772373797076,
     "confusion_matrix": [
       [
-        1176,
+        1151,
         5
       ],
       [
         10,
-        267
+        364
       ]
     ]
   },
-  "stage_1_2_ring_only": {
-    "n": 24,
+  "stage_1_2_real_mule_ring_only": {
+    "n": 121,
     "note": "single class in this slice -- metrics undefined",
     "confusion_matrix": [
       [
@@ -44,13 +44,13 @@
         0
       ],
       [
-        24,
-        0
+        5,
+        116
       ]
     ]
   },
-  "stage_1_2_3_ring_only": {
-    "n": 24,
+  "stage_1_2_3_real_mule_ring_only": {
+    "n": 121,
     "note": "single class in this slice -- metrics undefined",
     "confusion_matrix": [
       [
@@ -59,13 +59,14 @@
       ],
       [
         2,
-        22
+        119
       ]
     ]
   },
-  "fraud_cases_rescued_by_stage3": 22,
+  "fraud_cases_rescued_by_stage3": 3,
   "fraud_cases_downgraded_by_stage3_should_be_zero": 0,
-  "n_graph_connected_nodes": 24,
-  "n_ring_traces": 24,
-  "note": "downgraded is guaranteed 0 by construction (final score = max(stage_1_2, graph_score)) -- reported anyway as an explicit, checkable guardrail rather than an assumption."
+  "n_graph_connected_nodes": 223,
+  "n_real_mule_ring_traces": 121,
+  "n_real_mule_ring_traces_total_in_corpus": 121,
+  "note": "'real_mule_ring' traces are genuine Red Team MULE_NETWORK output (reports/mule_corpus_raw.json), not a synthetic overlay -- see module docstring. downgraded is guaranteed 0 by construction (final score = max(stage_1_2, graph_score)) -- reported anyway as an explicit, checkable guardrail rather than an assumption."
 }

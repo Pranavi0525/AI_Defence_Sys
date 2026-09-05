@@ -1,8 +1,6 @@
 """
 Stage 5 -- Risk Fusion
 =======================================================================
-Mastercard Innovation Challenge 2026
-
 WHAT THIS FILE DOES
 --------------------
 Combines the four Blue Team signals -- Stage 1 rules, Stage 2 XGBoost,
@@ -297,29 +295,72 @@ def run_fusion_with_ring_diagnostic(cfg: dict, n_splits: int = N_SPLITS):
     from cascade_with_graph import load_all_records, build_feature_table_and_graph
 
     print("Building ring-overlay diagnostic dataset (synthetic, clearly flagged)...")
-    all_records, ring_ids = load_all_records(cfg)
-    df, A, connected_mask = build_feature_table_and_graph(all_records, ring_ids)
 
-    result, fused_proba, y = run_risk_fusion(df, A, connected_mask, n_splits)
+    # load_all_records() returns ONE list of records.
+    all_records = load_all_records(cfg)
 
+    # Split the real corpus into attack and legitimate records.
+    # The synthetic overlay is applied ONLY to legitimate records.
+    legit_records = [
+        r for r in all_records
+        if r["attack_family"] == "legitimate"
+    ]
+
+    attack_records = [
+        r for r in all_records
+        if r["attack_family"] != "legitimate"
+    ]
+
+    # Inject the deliberately synthetic quiet-ring diagnostic.
+    # This does NOT modify the genuine Red Team MULE_NETWORK corpus.
+    legit_records, ring_ids = apply_quiet_ring_overlay(
+        legit_records,
+        n_ring=N_RING_TRACES,
+        seed=RANDOM_STATE,
+    )
+
+    # Recombine untouched real attacks + synthetic diagnostic traces.
+    diagnostic_records = attack_records + legit_records
+
+    # Evaluation-only ring membership.
+    ring_membership = {
+        trace_id: "synthetic_quiet_ring"
+        for trace_id in ring_ids
+    }
+
+    df, A, connected_mask = build_feature_table_and_graph(
+        diagnostic_records,
+        ring_membership,
+    )
+
+    result, fused_proba, y = run_risk_fusion(
+        df,
+        A,
+        connected_mask,
+        n_splits,
+    )
+
+    # Evaluate Risk Fusion specifically on the synthetic ring traces.
     ring_mask = df["is_ring"].values.astype(bool)
-    ring_overall, ring_preds = block_metrics(y[ring_mask], fused_proba[ring_mask])
+
+    ring_overall, ring_preds = block_metrics(
+        y[ring_mask],
+        fused_proba[ring_mask],
+    )
+
     result["ring_only_risk_fusion_metrics"] = ring_overall
     result["n_ring_traces"] = int(ring_mask.sum())
     result["is_synthetic_diagnostic"] = True
     result["diagnostic_purpose"] = (
         "This run uses the deliberately-injected quiet ring overlay "
         "(NOT real Red Team output -- see quiet_ring_overlay.py) purely "
-        "to verify the fusion meta-model can still recover a graph "
-        "signal when one exists, since the real corpus has none above "
-        "the noise-filtering threshold."
+        "to verify the fusion meta-model can recover a graph signal "
+        "when one exists. The genuine MULE_NETWORK corpus remains "
+        "untouched."
     )
+
     return result
 
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 def main():
     cfg = btp.CONFIG
     out_dir = cfg["REPO_ROOT"] / cfg["OUTPUT_DIR"]
@@ -330,8 +371,18 @@ def main():
     print("=" * 72)
     df = btp.build_dataset(cfg).reset_index(drop=True)
     all_records_for_graph = (
-        btp.load_attack_corpus(cfg["REPO_ROOT"] / cfg["ATO_CORPUS_PATH"], "ATO")
-        + btp.load_attack_corpus(cfg["REPO_ROOT"] / cfg["APP_CORPUS_PATH"], "APP")
+        btp.load_attack_corpus(
+            cfg["REPO_ROOT"] / cfg["ATO_CORPUS_PATH"],
+            "ATO",
+        )
+        + btp.load_attack_corpus(
+            cfg["REPO_ROOT"] / cfg["APP_CORPUS_PATH"],
+            "APP",
+        )
+        + btp.load_attack_corpus(
+            cfg["REPO_ROOT"] / cfg["MULE_CORPUS_PATH"],
+            "MULE_NETWORK",
+        )
     )
     # Rebuild legit records the same way build_dataset did internally, so we
     # have the raw `events` field (needed for graph-building) alongside the
@@ -362,6 +413,17 @@ def main():
         "real_corpus_risk_fusion": real_result,
         "ring_overlay_diagnostic": diagnostic_result,
     }
+    from artifact_metadata import stamp_artifact
+    output = stamp_artifact(
+        output,
+        cfg["REPO_ROOT"],
+        seeds={"RANDOM_STATE": cfg.get("RANDOM_STATE")},
+        dataset_files=[
+            cfg["REPO_ROOT"] / cfg["ATO_CORPUS_PATH"],
+            cfg["REPO_ROOT"] / cfg["APP_CORPUS_PATH"],
+        ],
+        feature_cols=btp.FEATURE_COLS,
+    )
     out_path = out_dir / "risk_fusion_results.json"
     with open(out_path, "w") as f:
         json.dump(output, f, indent=2, default=str)

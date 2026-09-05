@@ -41,43 +41,43 @@
     },
     "stage2": {
       "ran": true,
-      "score": 0.9829,
-      "score_if_it_had_run_anyway": 0.9923,
+      "score": 0.9967,
+      "score_if_it_had_run_anyway": 0.9953,
       "top_features": [
-        {
-          "feature": "count_beneficiary_addition",
-          "label": "number of new payees added",
-          "value": 1.0,
-          "shap_value": 3.6937,
-          "pushed_score": "up"
-        },
         {
           "feature": "amount_mean",
           "label": "average transaction amount",
           "value": 33647.49,
-          "shap_value": 1.9603,
+          "shap_value": 2.3667,
           "pushed_score": "up"
         },
         {
           "feature": "amount_max",
           "label": "largest transaction amount",
           "value": 33647.49,
-          "shap_value": 1.4761,
+          "shap_value": 1.6391,
           "pushed_score": "up"
         },
         {
           "feature": "min_time_between_transactions",
           "label": "shortest gap between two transactions",
           "value": 960.0,
-          "shap_value": -1.3848,
+          "shap_value": -1.5508,
           "pushed_score": "down"
         },
         {
-          "feature": "time_login_to_first_transaction",
-          "label": "time from login to first transaction",
-          "value": 960.0,
-          "shap_value": -0.4013,
-          "pushed_score": "down"
+          "feature": "transactions_per_hour",
+          "label": "transaction velocity (txns/hour)",
+          "value": 3.75,
+          "shap_value": 1.2404,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "count_device_registration",
+          "label": "number of new-device registrations",
+          "value": 1.0,
+          "shap_value": 1.1475,
+          "pushed_score": "up"
         }
       ]
     },
@@ -88,19 +88,19 @@
       "escalated_by_graph": false
     },
     "stage5_fusion": {
-      "final_score": 0.9949,
-      "stage_1_2_score": 0.9829,
-      "lifted_over_stage_1_2": true,
+      "final_score": 0.9952,
+      "stage_1_2_score": 0.9967,
+      "lifted_over_stage_1_2": false,
       "escalated_by_graph": false,
-      "escalated_by_fusion_other_than_graph": true
+      "escalated_by_fusion_other_than_graph": false
     },
     "stage6_decision_policy": {
-      "final_score": 0.9949,
-      "t_review": 0.1479,
-      "t_block": 0.9196,
+      "final_score": 0.9952,
+      "t_review": 0.1153,
+      "t_block": 0.9622,
       "decision": "BLOCK"
     },
-    "narrative": "Trace atk-73100246 (customer ace3b175-db94-4ca5-9d87-34d64fd6b993), true label: FRAUD [ACCOUNT_TAKEOVER, easy], $33,647.49 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: a payee was added and then paid within the same session; a new device was registered on this trace; two transactions happened under an hour apart; transaction velocity exceeded 2.5/hour. Stage 2 (XGBoost) scored it 0.983. Top contributing signals: number of new payees added (1.0) pushed the score up; average transaction amount (33647.49) pushed the score up; largest transaction amount (33647.49) pushed the score up. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.995, vs. 0.983 from Stage 1+2 alone. This is a lift over Stage 1+2 alone, but the illustrative graph score doesn't explain it, so the more likely driver is the autoencoder and/or the fusion model's reweighting, not the graph specifically. Stage 6 (decision policy): final score 0.995 vs. thresholds REVIEW>=0.148 / BLOCK>=0.920 -> decision: BLOCK."
+    "narrative": "Trace atk-73100246 (customer ace3b175-db94-4ca5-9d87-34d64fd6b993), true label: FRAUD [ACCOUNT_TAKEOVER, easy], $33,647.49 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: a payee was added and then paid within the same session; a new device was registered on this trace; two transactions happened under an hour apart; transaction velocity exceeded 2.5/hour. Stage 2 (XGBoost) scored it 0.997. Top contributing signals: average transaction amount (33647.49) pushed the score up; largest transaction amount (33647.49) pushed the score up; shortest gap between two transactions (960.0) pushed the score down. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.995, vs. 0.997 from Stage 1+2 alone. Fusion did not raise the score above Stage 1+2 alone. Stage 6 (decision policy): final score 0.995 vs. thresholds REVIEW>=0.115 / BLOCK>=0.962 -> decision: BLOCK."
   },
   "hard_app_correctly_blocked": {
     "trace_id": "atk-57b9b051",
@@ -144,42 +144,42 @@
     },
     "stage2": {
       "ran": true,
-      "score": 0.9912,
-      "score_if_it_had_run_anyway": 0.9937,
+      "score": 0.997,
+      "score_if_it_had_run_anyway": 0.9977,
       "top_features": [
         {
           "feature": "min_time_between_transactions",
           "label": "shortest gap between two transactions",
           "value": 39.0,
-          "shap_value": 6.5197,
+          "shap_value": 7.1489,
           "pushed_score": "up"
+        },
+        {
+          "feature": "failed_transaction_count",
+          "label": "number of failed transaction attempts",
+          "value": 2.0,
+          "shap_value": -1.0326,
+          "pushed_score": "down"
         },
         {
           "feature": "mean_time_between_transactions",
           "label": "average gap between transactions",
           "value": 141.0,
-          "shap_value": 0.9298,
+          "shap_value": 1.0135,
           "pushed_score": "up"
-        },
-        {
-          "feature": "amount_min",
-          "label": "smallest transaction amount",
-          "value": 1927.66,
-          "shap_value": -0.7476,
-          "pushed_score": "down"
         },
         {
           "feature": "failed_then_completed",
           "label": "a failed transaction was immediately retried and succeeded",
           "value": 1.0,
-          "shap_value": 0.1981,
+          "shap_value": 0.5383,
           "pushed_score": "up"
         },
         {
           "feature": "count_beneficiary_addition",
           "label": "number of new payees added",
           "value": 0.0,
-          "shap_value": -0.1271,
+          "shap_value": -0.34,
           "pushed_score": "down"
         }
       ]
@@ -191,27 +191,27 @@
       "escalated_by_graph": false
     },
     "stage5_fusion": {
-      "final_score": 0.9561,
-      "stage_1_2_score": 0.9912,
+      "final_score": 0.9739,
+      "stage_1_2_score": 0.997,
       "lifted_over_stage_1_2": false,
       "escalated_by_graph": false,
       "escalated_by_fusion_other_than_graph": false
     },
     "stage6_decision_policy": {
-      "final_score": 0.9561,
-      "t_review": 0.1479,
-      "t_block": 0.9196,
+      "final_score": 0.9739,
+      "t_review": 0.1153,
+      "t_block": 0.9622,
       "decision": "BLOCK"
     },
-    "narrative": "Trace atk-57b9b051 (customer 4a3172b4-c168-4e46-a2a2-f7a6442e491b), true label: FRAUD [AUTHORIZED_PUSH_PAYMENT, hard], $12,359.16 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: two transactions happened under an hour apart. Stage 2 (XGBoost) scored it 0.991. Top contributing signals: shortest gap between two transactions (39.0) pushed the score up; average gap between transactions (141.0) pushed the score up; smallest transaction amount (1927.66) pushed the score down. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.956, vs. 0.991 from Stage 1+2 alone. Fusion did not raise the score above Stage 1+2 alone. Stage 6 (decision policy): final score 0.956 vs. thresholds REVIEW>=0.148 / BLOCK>=0.920 -> decision: BLOCK."
+    "narrative": "Trace atk-57b9b051 (customer 4a3172b4-c168-4e46-a2a2-f7a6442e491b), true label: FRAUD [AUTHORIZED_PUSH_PAYMENT, hard], $12,359.16 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: two transactions happened under an hour apart. Stage 2 (XGBoost) scored it 0.997. Top contributing signals: shortest gap between two transactions (39.0) pushed the score up; number of failed transaction attempts (2.0) pushed the score down; average gap between transactions (141.0) pushed the score up. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.974, vs. 0.997 from Stage 1+2 alone. Fusion did not raise the score above Stage 1+2 alone. Stage 6 (decision policy): final score 0.974 vs. thresholds REVIEW>=0.115 / BLOCK>=0.962 -> decision: BLOCK."
   },
-  "mule_ring_member_rescued_by_fusion": {
-    "trace_id": "legit_sess_0d95e337-f3e4-4be8-b2c8-0d2030387e30",
-    "customer_id": "bf764aab-00d2-4b0f-be1c-d4a9127f615b",
+  "fraud_case_routed_to_review": {
+    "trace_id": "atk-fc93ce72",
+    "customer_id": "2444528b-4509-4809-a516-d55fbd5d508d",
     "true_label": "fraud",
-    "attack_family": "ring_mule_synthetic",
-    "attack_difficulty": "n/a",
-    "dollars_in_trace": 3466.92,
+    "attack_family": "ACCOUNT_TAKEOVER",
+    "attack_difficulty": "advanced",
+    "dollars_in_trace": 0,
     "stage1": {
       "escalated": true,
       "rules_checked": [
@@ -232,14 +232,14 @@
         {
           "rule": "two transactions happened under an hour apart",
           "feature": "min_time_between_transactions",
-          "value": 1422.0,
+          "value": 1.0,
           "threshold": 3600,
           "fired": true
         },
         {
           "rule": "transaction velocity exceeded 2.5/hour",
           "feature": "transactions_per_hour",
-          "value": 0.05,
+          "value": 0.0,
           "threshold": 2.5,
           "fired": false
         }
@@ -247,176 +247,42 @@
     },
     "stage2": {
       "ran": true,
-      "score": 0.0008,
-      "score_if_it_had_run_anyway": 0.7672,
+      "score": 0.9885,
+      "score_if_it_had_run_anyway": 0.9916,
       "top_features": [
-        {
-          "feature": "window_seconds",
-          "label": "length of the observation window",
-          "value": 445221.0,
-          "shap_value": 1.1263,
-          "pushed_score": "up"
-        },
-        {
-          "feature": "amount_cv",
-          "label": "relative spread in transaction amounts",
-          "value": 0.143,
-          "shap_value": 0.8074,
-          "pushed_score": "up"
-        },
-        {
-          "feature": "time_login_to_first_transaction",
-          "label": "time from login to first transaction",
-          "value": 16242.0,
-          "shap_value": 0.7197,
-          "pushed_score": "up"
-        },
         {
           "feature": "min_time_between_transactions",
           "label": "shortest gap between two transactions",
-          "value": 1422.0,
-          "shap_value": -0.665,
-          "pushed_score": "down"
+          "value": 1.0,
+          "shap_value": 6.2614,
+          "pushed_score": "up"
         },
         {
           "feature": "mean_time_between_transactions",
           "label": "average gap between transactions",
-          "value": 85795.8,
-          "shap_value": 0.4103,
+          "value": 1.0,
+          "shap_value": 1.2098,
           "pushed_score": "up"
-        }
-      ]
-    },
-    "stage3": {
-      "graph_connected": true,
-      "neighbors": [
-        {
-          "trace_id": "legit_sess_1d9ca222-be73-442b-af63-c7dc0dba972d",
-          "customer_id": "b6a2b4d7-5d7e-4e2c-ba8f-2f0b7dbd7027",
-          "fraud_label": 1,
-          "is_ring": true
         },
         {
-          "trace_id": "legit_sess_7236b46b-d050-4f96-93ba-6ad82c794210",
-          "customer_id": "8c4ce7e0-1e7f-4f57-a499-9365e1c19085",
-          "fraud_label": 1,
-          "is_ring": true
-        },
-        {
-          "trace_id": "legit_sess_a8ab658d-f7e8-46c6-bd78-2206088e7d36",
-          "customer_id": "ee74917d-c841-47f8-82c2-75af1d38f5fd",
-          "fraud_label": 1,
-          "is_ring": true
-        },
-        {
-          "trace_id": "legit_sess_3f7a95be-7e2b-40b6-bd0c-4b46ca40619a",
-          "customer_id": "52aca4bf-37c1-4d72-abce-c55bc73e25c7",
-          "fraud_label": 1,
-          "is_ring": true
-        },
-        {
-          "trace_id": "legit_sess_8bf99cbe-53c1-415d-991f-621905eeb52a",
-          "customer_id": "6d98d7c7-84c9-41ac-8ce1-d27f9e1b325d",
-          "fraud_label": 1,
-          "is_ring": true
-        }
-      ],
-      "graph_score": 0.8413,
-      "escalated_by_graph": true
-    },
-    "stage5_fusion": {
-      "final_score": 0.9198,
-      "stage_1_2_score": 0.0008,
-      "lifted_over_stage_1_2": true,
-      "escalated_by_graph": true,
-      "escalated_by_fusion_other_than_graph": false
-    },
-    "stage6_decision_policy": {
-      "final_score": 0.9198,
-      "t_review": 0.1479,
-      "t_block": 0.9196,
-      "decision": "BLOCK"
-    },
-    "narrative": "Trace legit_sess_0d95e337-f3e4-4be8-b2c8-0d2030387e30 (customer bf764aab-00d2-4b0f-be1c-d4a9127f615b), true label: FRAUD [ring_mule_synthetic, n/a], $3,466.92 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: two transactions happened under an hour apart. Stage 2 (XGBoost) scored it 0.001. Top contributing signals: length of the observation window (445221.0) pushed the score up; relative spread in transaction amounts (0.143) pushed the score up; time from login to first transaction (16242.0) pushed the score up. Stage 3 (graph): this trace shares an entity (device or payee) with 5 other customer(s)' traces, 5 of which are part of a flagged mule ring. Illustrative (full-fit) graph-propagated score: 0.841. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.920, vs. 0.001 from Stage 1+2 alone. This is a graph-attributable lift (graph-connected, and the illustrative graph score is elevated at 0.841). Stage 6 (decision policy): final score 0.920 vs. thresholds REVIEW>=0.148 / BLOCK>=0.920 -> decision: BLOCK."
-  },
-  "fraud_case_routed_to_review": {
-    "trace_id": "atk-cd3d4d79",
-    "customer_id": "bc42392e-9ebc-4b24-84ce-adb1994405df",
-    "true_label": "fraud",
-    "attack_family": "ACCOUNT_TAKEOVER",
-    "attack_difficulty": "hard",
-    "dollars_in_trace": 7594.14,
-    "stage1": {
-      "escalated": true,
-      "rules_checked": [
-        {
-          "rule": "a payee was added and then paid within the same session",
-          "feature": "beneficiary_added_before_transaction",
+          "feature": "count_beneficiary_addition",
+          "label": "number of new payees added",
           "value": 0.0,
-          "threshold": 1,
-          "fired": false
+          "shap_value": -0.8047,
+          "pushed_score": "down"
         },
         {
-          "rule": "a new device was registered on this trace",
-          "feature": "new_device_present",
-          "value": 0.0,
-          "threshold": 1,
-          "fired": false
-        },
-        {
-          "rule": "two transactions happened under an hour apart",
-          "feature": "min_time_between_transactions",
-          "value": 5.0,
-          "threshold": 3600,
-          "fired": true
-        },
-        {
-          "rule": "transaction velocity exceeded 2.5/hour",
           "feature": "transactions_per_hour",
-          "value": 0.11,
-          "threshold": 2.5,
-          "fired": false
-        }
-      ]
-    },
-    "stage2": {
-      "ran": true,
-      "score": 0.9816,
-      "score_if_it_had_run_anyway": 0.9837,
-      "top_features": [
-        {
-          "feature": "min_time_between_transactions",
-          "label": "shortest gap between two transactions",
-          "value": 5.0,
-          "shap_value": 6.4465,
-          "pushed_score": "up"
+          "label": "transaction velocity (txns/hour)",
+          "value": 0.0,
+          "shap_value": -0.6485,
+          "pushed_score": "down"
         },
         {
           "feature": "failed_transaction_count",
           "label": "number of failed transaction attempts",
           "value": 0.0,
-          "shap_value": 0.7379,
-          "pushed_score": "up"
-        },
-        {
-          "feature": "amount_min",
-          "label": "smallest transaction amount",
-          "value": 1615.3,
-          "shap_value": -0.6141,
-          "pushed_score": "down"
-        },
-        {
-          "feature": "mean_time_between_transactions",
-          "label": "average gap between transactions",
-          "value": 17684.667,
-          "shap_value": -0.3389,
-          "pushed_score": "down"
-        },
-        {
-          "feature": "amount_cv",
-          "label": "relative spread in transaction amounts",
-          "value": 0.123,
-          "shap_value": 0.2271,
+          "shap_value": 0.4666,
           "pushed_score": "up"
         }
       ]
@@ -428,19 +294,19 @@
       "escalated_by_graph": false
     },
     "stage5_fusion": {
-      "final_score": 0.9051,
-      "stage_1_2_score": 0.9816,
+      "final_score": 0.9598,
+      "stage_1_2_score": 0.9885,
       "lifted_over_stage_1_2": false,
       "escalated_by_graph": false,
       "escalated_by_fusion_other_than_graph": false
     },
     "stage6_decision_policy": {
-      "final_score": 0.9051,
-      "t_review": 0.1479,
-      "t_block": 0.9196,
+      "final_score": 0.9598,
+      "t_review": 0.1153,
+      "t_block": 0.9622,
       "decision": "REVIEW"
     },
-    "narrative": "Trace atk-cd3d4d79 (customer bc42392e-9ebc-4b24-84ce-adb1994405df), true label: FRAUD [ACCOUNT_TAKEOVER, hard], $7,594.14 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: two transactions happened under an hour apart. Stage 2 (XGBoost) scored it 0.982. Top contributing signals: shortest gap between two transactions (5.0) pushed the score up; number of failed transaction attempts (0.0) pushed the score up; smallest transaction amount (1615.3) pushed the score down. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.905, vs. 0.982 from Stage 1+2 alone. Fusion did not raise the score above Stage 1+2 alone. Stage 6 (decision policy): final score 0.905 vs. thresholds REVIEW>=0.148 / BLOCK>=0.920 -> decision: REVIEW."
+    "narrative": "Trace atk-fc93ce72 (customer 2444528b-4509-4809-a516-d55fbd5d508d), true label: FRAUD [ACCOUNT_TAKEOVER, advanced], $0.00 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: two transactions happened under an hour apart. Stage 2 (XGBoost) scored it 0.989. Top contributing signals: shortest gap between two transactions (1.0) pushed the score up; average gap between transactions (1.0) pushed the score up; number of new payees added (0.0) pushed the score down. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.960, vs. 0.989 from Stage 1+2 alone. Fusion did not raise the score above Stage 1+2 alone. Stage 6 (decision policy): final score 0.960 vs. thresholds REVIEW>=0.115 / BLOCK>=0.962 -> decision: REVIEW."
   },
   "fraud_case_that_slipped_through_as_allow": {
     "trace_id": "atk-693a3017",
@@ -484,42 +350,42 @@
     },
     "stage2": {
       "ran": true,
-      "score": 0.0565,
-      "score_if_it_had_run_anyway": 0.7064,
+      "score": 0.0912,
+      "score_if_it_had_run_anyway": 0.775,
       "top_features": [
         {
-          "feature": "failed_transaction_count",
-          "label": "number of failed transaction attempts",
-          "value": 0.0,
-          "shap_value": 0.8361,
+          "feature": "count_device_registration",
+          "label": "number of new-device registrations",
+          "value": 1.0,
+          "shap_value": 2.0318,
           "pushed_score": "up"
+        },
+        {
+          "feature": "transactions_per_hour",
+          "label": "transaction velocity (txns/hour)",
+          "value": 0.0,
+          "shap_value": -1.4905,
+          "pushed_score": "down"
         },
         {
           "feature": "mean_time_between_transactions",
           "label": "average gap between transactions",
           "value": 420.0,
-          "shap_value": 0.8208,
+          "shap_value": 1.1462,
           "pushed_score": "up"
         },
         {
-          "feature": "count_device_registration",
-          "label": "number of new-device registrations",
-          "value": 1.0,
-          "shap_value": 0.4656,
-          "pushed_score": "up"
-        },
-        {
-          "feature": "amount_min",
-          "label": "smallest transaction amount",
+          "feature": "count_beneficiary_addition",
+          "label": "number of new payees added",
           "value": 0.0,
-          "shap_value": 0.4183,
-          "pushed_score": "up"
+          "shap_value": -0.9467,
+          "pushed_score": "down"
         },
         {
-          "feature": "window_seconds",
-          "label": "length of the observation window",
-          "value": 420.0,
-          "shap_value": 0.4074,
+          "feature": "failed_transaction_count",
+          "label": "number of failed transaction attempts",
+          "value": 0.0,
+          "shap_value": 0.7641,
           "pushed_score": "up"
         }
       ]
@@ -531,29 +397,29 @@
       "escalated_by_graph": false
     },
     "stage5_fusion": {
-      "final_score": 0.1279,
-      "stage_1_2_score": 0.0565,
-      "lifted_over_stage_1_2": true,
+      "final_score": 0.0665,
+      "stage_1_2_score": 0.0912,
+      "lifted_over_stage_1_2": false,
       "escalated_by_graph": false,
-      "escalated_by_fusion_other_than_graph": true
+      "escalated_by_fusion_other_than_graph": false
     },
     "stage6_decision_policy": {
-      "final_score": 0.1279,
-      "t_review": 0.1479,
-      "t_block": 0.9196,
+      "final_score": 0.0665,
+      "t_review": 0.1153,
+      "t_block": 0.9622,
       "decision": "ALLOW"
     },
-    "narrative": "Trace atk-693a3017 (customer e9669dd5-9e35-4c39-901d-6ffb9e8ca7dd), true label: FRAUD [ACCOUNT_TAKEOVER, advanced], $0.00 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: a new device was registered on this trace; two transactions happened under an hour apart. Stage 2 (XGBoost) scored it 0.057. Top contributing signals: number of failed transaction attempts (0.0) pushed the score up; average gap between transactions (420.0) pushed the score up; number of new-device registrations (1.0) pushed the score up. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.128, vs. 0.057 from Stage 1+2 alone. This is a lift over Stage 1+2 alone, but the illustrative graph score doesn't explain it, so the more likely driver is the autoencoder and/or the fusion model's reweighting, not the graph specifically. Stage 6 (decision policy): final score 0.128 vs. thresholds REVIEW>=0.148 / BLOCK>=0.920 -> decision: ALLOW."
+    "narrative": "Trace atk-693a3017 (customer e9669dd5-9e35-4c39-901d-6ffb9e8ca7dd), true label: FRAUD [ACCOUNT_TAKEOVER, advanced], $0.00 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: a new device was registered on this trace; two transactions happened under an hour apart. Stage 2 (XGBoost) scored it 0.091. Top contributing signals: number of new-device registrations (1.0) pushed the score up; transaction velocity (txns/hour) (0.0) pushed the score down; average gap between transactions (420.0) pushed the score up. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.066, vs. 0.091 from Stage 1+2 alone. Fusion did not raise the score above Stage 1+2 alone. Stage 6 (decision policy): final score 0.066 vs. thresholds REVIEW>=0.115 / BLOCK>=0.962 -> decision: ALLOW."
   },
   "legitimate_case_routed_to_review": {
-    "trace_id": "legit_sess_b18f5637-0b86-4c5b-bf9d-fcf0b81e519b",
-    "customer_id": "1636f91b-1f63-4f16-9438-44ea55df3f08",
+    "trace_id": "legit_sess_dbe8f9d7-59ef-43b1-b376-ac666195f18c",
+    "customer_id": "6bec1ab7-0977-4df3-9e84-465a2e698e5f",
     "true_label": "legitimate",
     "attack_family": "legitimate",
     "attack_difficulty": "n/a",
-    "dollars_in_trace": 2479.44,
+    "dollars_in_trace": 11702.47,
     "stage1": {
-      "escalated": false,
+      "escalated": true,
       "rules_checked": [
         {
           "rule": "a payee was added and then paid within the same session",
@@ -572,58 +438,58 @@
         {
           "rule": "two transactions happened under an hour apart",
           "feature": "min_time_between_transactions",
-          "value": 364698.0,
+          "value": 1228.0,
           "threshold": 3600,
-          "fired": false
+          "fired": true
         },
         {
           "rule": "transaction velocity exceeded 2.5/hour",
           "feature": "transactions_per_hour",
-          "value": 0.02,
+          "value": 0.14,
           "threshold": 2.5,
           "fired": false
         }
       ]
     },
     "stage2": {
-      "ran": false,
-      "score": 0.0,
-      "score_if_it_had_run_anyway": 0.0057,
+      "ran": true,
+      "score": 0.0001,
+      "score_if_it_had_run_anyway": 0.0001,
       "top_features": [
         {
           "feature": "min_time_between_transactions",
           "label": "shortest gap between two transactions",
-          "value": 364698.0,
-          "shap_value": -0.8592,
+          "value": 1228.0,
+          "shap_value": -3.2314,
           "pushed_score": "down"
         },
         {
-          "feature": "amount_min",
-          "label": "smallest transaction amount",
-          "value": 1232.29,
-          "shap_value": -0.7408,
+          "feature": "failed_transaction_count",
+          "label": "number of failed transaction attempts",
+          "value": 17.0,
+          "shap_value": -1.7369,
           "pushed_score": "down"
         },
         {
-          "feature": "window_seconds",
-          "label": "length of the observation window",
-          "value": 388393.0,
-          "shap_value": -0.4688,
+          "feature": "mean_time_between_transactions",
+          "label": "average gap between transactions",
+          "value": 24245.875,
+          "shap_value": -0.8476,
           "pushed_score": "down"
         },
         {
-          "feature": "amount_cv",
-          "label": "relative spread in transaction amounts",
-          "value": 0.006,
-          "shap_value": -0.4376,
+          "feature": "count_beneficiary_addition",
+          "label": "number of new payees added",
+          "value": 0.0,
+          "shap_value": -0.5865,
           "pushed_score": "down"
         },
         {
-          "feature": "time_login_to_first_transaction",
-          "label": "time from login to first transaction",
-          "value": 23073.0,
-          "shap_value": 0.3822,
-          "pushed_score": "up"
+          "feature": "total_events",
+          "label": "total number of events observed",
+          "value": 18.0,
+          "shap_value": -0.4721,
+          "pushed_score": "down"
         }
       ]
     },
@@ -634,27 +500,27 @@
       "escalated_by_graph": false
     },
     "stage5_fusion": {
-      "final_score": 0.3002,
-      "stage_1_2_score": 0.0,
+      "final_score": 0.1513,
+      "stage_1_2_score": 0.0001,
       "lifted_over_stage_1_2": true,
       "escalated_by_graph": false,
       "escalated_by_fusion_other_than_graph": true
     },
     "stage6_decision_policy": {
-      "final_score": 0.3002,
-      "t_review": 0.1479,
-      "t_block": 0.9196,
+      "final_score": 0.1513,
+      "t_review": 0.1153,
+      "t_block": 0.9622,
       "decision": "REVIEW"
     },
-    "narrative": "Trace legit_sess_b18f5637-0b86-4c5b-bf9d-fcf0b81e519b (customer 1636f91b-1f63-4f16-9438-44ea55df3f08), true label: legitimate, $2,479.44 moved in this trace. Stage 1 (rules) did NOT escalate this trace -- none of the four trigger conditions fired, so it was auto-cleared without the ML model ever running. (For reference only, the model's score had it been escalated would have been 0.006.) Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.300, vs. 0.000 from Stage 1+2 alone. This is a lift over Stage 1+2 alone, but the illustrative graph score doesn't explain it, so the more likely driver is the autoencoder and/or the fusion model's reweighting, not the graph specifically. Stage 6 (decision policy): final score 0.300 vs. thresholds REVIEW>=0.148 / BLOCK>=0.920 -> decision: REVIEW."
+    "narrative": "Trace legit_sess_dbe8f9d7-59ef-43b1-b376-ac666195f18c (customer 6bec1ab7-0977-4df3-9e84-465a2e698e5f), true label: legitimate, $11,702.47 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: two transactions happened under an hour apart. Stage 2 (XGBoost) scored it 0.000. Top contributing signals: shortest gap between two transactions (1228.0) pushed the score down; number of failed transaction attempts (17.0) pushed the score down; average gap between transactions (24245.875) pushed the score down. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.151, vs. 0.000 from Stage 1+2 alone. This is a lift over Stage 1+2 alone, but the illustrative graph score doesn't explain it, so the more likely driver is the autoencoder and/or the fusion model's reweighting, not the graph specifically. Stage 6 (decision policy): final score 0.151 vs. thresholds REVIEW>=0.115 / BLOCK>=0.962 -> decision: REVIEW."
   },
   "ordinary_legitimate_autocleared_by_stage1": {
-    "trace_id": "legit_sess_33dfc3d1-2499-4539-b527-9adc7c316ea5",
-    "customer_id": "043b645f-3d81-45d0-bfaf-3abcd2e41897",
+    "trace_id": "legit_sess_b5aeaa44-9025-47a7-bbdc-eb27e01da8f0",
+    "customer_id": "026f4e61-d31d-477d-80b7-80f38304d715",
     "true_label": "legitimate",
     "attack_family": "legitimate",
     "attack_difficulty": "n/a",
-    "dollars_in_trace": 2978.7,
+    "dollars_in_trace": 1418.37,
     "stage1": {
       "escalated": false,
       "rules_checked": [
@@ -675,14 +541,14 @@
         {
           "rule": "two transactions happened under an hour apart",
           "feature": "min_time_between_transactions",
-          "value": 76268.0,
+          "value": 15953.0,
           "threshold": 3600,
           "fired": false
         },
         {
           "rule": "transaction velocity exceeded 2.5/hour",
           "feature": "transactions_per_hour",
-          "value": 0.06,
+          "value": 0.23,
           "threshold": 2.5,
           "fired": false
         }
@@ -691,41 +557,41 @@
     "stage2": {
       "ran": false,
       "score": 0.0,
-      "score_if_it_had_run_anyway": 0.027,
+      "score_if_it_had_run_anyway": 0.0001,
       "top_features": [
         {
           "feature": "min_time_between_transactions",
           "label": "shortest gap between two transactions",
-          "value": 76268.0,
-          "shap_value": -1.4899,
+          "value": 15953.0,
+          "shap_value": -3.5888,
           "pushed_score": "down"
         },
         {
-          "feature": "window_seconds",
-          "label": "length of the observation window",
-          "value": 186811.0,
-          "shap_value": 1.0012,
-          "pushed_score": "up"
-        },
-        {
-          "feature": "amount_cv",
-          "label": "relative spread in transaction amounts",
-          "value": 0.142,
-          "shap_value": 0.5356,
-          "pushed_score": "up"
-        },
-        {
-          "feature": "amount_max",
-          "label": "largest transaction amount",
-          "value": 1154.14,
-          "shap_value": -0.4603,
+          "feature": "failed_transaction_count",
+          "label": "number of failed transaction attempts",
+          "value": 1.0,
+          "shap_value": -1.0919,
           "pushed_score": "down"
         },
         {
-          "feature": "amount_mean",
-          "label": "average transaction amount",
-          "value": 992.9,
-          "shap_value": -0.434,
+          "feature": "mean_time_between_transactions",
+          "label": "average gap between transactions",
+          "value": 15953.0,
+          "shap_value": -0.9692,
+          "pushed_score": "down"
+        },
+        {
+          "feature": "count_beneficiary_addition",
+          "label": "number of new payees added",
+          "value": 0.0,
+          "shap_value": -0.7218,
+          "pushed_score": "down"
+        },
+        {
+          "feature": "total_events",
+          "label": "total number of events observed",
+          "value": 3.0,
+          "shap_value": -0.7122,
           "pushed_score": "down"
         }
       ]
@@ -737,18 +603,18 @@
       "escalated_by_graph": false
     },
     "stage5_fusion": {
-      "final_score": 0.0234,
+      "final_score": 0.0308,
       "stage_1_2_score": 0.0,
       "lifted_over_stage_1_2": true,
       "escalated_by_graph": false,
       "escalated_by_fusion_other_than_graph": true
     },
     "stage6_decision_policy": {
-      "final_score": 0.0234,
-      "t_review": 0.1479,
-      "t_block": 0.9196,
+      "final_score": 0.0308,
+      "t_review": 0.1153,
+      "t_block": 0.9622,
       "decision": "ALLOW"
     },
-    "narrative": "Trace legit_sess_33dfc3d1-2499-4539-b527-9adc7c316ea5 (customer 043b645f-3d81-45d0-bfaf-3abcd2e41897), true label: legitimate, $2,978.70 moved in this trace. Stage 1 (rules) did NOT escalate this trace -- none of the four trigger conditions fired, so it was auto-cleared without the ML model ever running. (For reference only, the model's score had it been escalated would have been 0.027.) Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.023, vs. 0.000 from Stage 1+2 alone. This is a lift over Stage 1+2 alone, but the illustrative graph score doesn't explain it, so the more likely driver is the autoencoder and/or the fusion model's reweighting, not the graph specifically. Stage 6 (decision policy): final score 0.023 vs. thresholds REVIEW>=0.148 / BLOCK>=0.920 -> decision: ALLOW."
+    "narrative": "Trace legit_sess_b5aeaa44-9025-47a7-bbdc-eb27e01da8f0 (customer 026f4e61-d31d-477d-80b7-80f38304d715), true label: legitimate, $1,418.37 moved in this trace. Stage 1 (rules) did NOT escalate this trace -- none of the four trigger conditions fired, so it was auto-cleared without the ML model ever running. (For reference only, the model's score had it been escalated would have been 0.000.) Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.031, vs. 0.000 from Stage 1+2 alone. This is a lift over Stage 1+2 alone, but the illustrative graph score doesn't explain it, so the more likely driver is the autoencoder and/or the fusion model's reweighting, not the graph specifically. Stage 6 (decision policy): final score 0.031 vs. thresholds REVIEW>=0.115 / BLOCK>=0.962 -> decision: ALLOW."
   }
 }

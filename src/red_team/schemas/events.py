@@ -20,7 +20,6 @@ Design decisions:
 
 from __future__ import annotations
 
-import uuid
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
@@ -35,15 +34,13 @@ from red_team.schemas.entities import (
     Session,
     Transaction,
 )
-
+from red_team.schemas.id_generator import generate_id as _default_uuid
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
-def _default_uuid() -> str:
-    """Generate a new UUID4 string."""
-    return str(uuid.uuid4())
+# _default_uuid() is the same shared, seedable generator entities.py uses --
+# see red_team/schemas/id_generator.py.
 
 
 # ---------------------------------------------------------------------------

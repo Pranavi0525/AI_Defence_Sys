@@ -1,5 +1,5 @@
 """
-Quiet Mule-Ring Overlay -- Mastercard Innovation Challenge 2026
+Quiet Mule-Ring Overlay
 =================================================================
 
 WHY THIS EXISTS

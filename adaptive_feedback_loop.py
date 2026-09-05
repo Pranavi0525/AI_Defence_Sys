@@ -82,7 +82,7 @@ from retrain_round2 import load_hard_examples  # noqa: E402  -- reuse, don't ref
 import stage1_escalation as s1e  # noqa: E402
 
 MISSES_PATH = REPO_ROOT / "misses.jsonl"
-FEATURE_TABLE_PATH = REPO_ROOT / "feature_table.csv"
+FEATURE_TABLE_PATH = REPO_ROOT / "blue_team_output" / "feature_table.csv"
 HARD_EXAMPLES_PATH = REPO_ROOT / "blue_team_output" / "hard_examples.jsonl"
 LEGACY_MISSES_PATH = REPO_ROOT / "blue_team_output" / "misses.jsonl"
 HOLDOUT_PATH = REPO_ROOT / "adaptive_eval_holdout.json"
@@ -168,14 +168,29 @@ def build_original_df(cfg: dict) -> pd.DataFrame:
     ato = load_attack_corpus(cfg["REPO_ROOT"] / cfg["ATO_CORPUS_PATH"], "ATO")
     app = load_attack_corpus(cfg["REPO_ROOT"] / cfg["APP_CORPUS_PATH"], "APP")
 
-    rows = []
-    for rec in ato + app:
+    mule_path = cfg["REPO_ROOT"] / cfg["MULE_CORPUS_PATH"]
+    if mule_path.exists():
+        mule = load_attack_corpus(mule_path, "MULE_NETWORK")
+    else:
+        print(f"  WARNING: {mule_path.name} not found, skipping MULE_NETWORK traces.")
+        mule = []
+
+    fraud_rows = []
+    for rec in ato + app + mule:
         feats = extract_features(rec)
         feats["fraud"] = rec["fraud"]
         feats["attack_family"] = rec["attack_family"]
         feats["attack_difficulty"] = rec["attack_difficulty"]
         feats["trace_id"] = rec["trace_id"]
-        rows.append(feats)
+        feats["customer_id"] = rec["customer_id"]
+        fraud_rows.append(feats)
+
+    # HESITATION_DELTA is a per-customer derived feature (see
+    # blue_team_pipeline.add_hesitation_delta) -- extract_features() alone
+    # does not compute it. The whole reconstructed fraud population is
+    # available here as a proper dataframe, so use the real function
+    # rather than a population-baseline stand-in.
+    rows = btp.add_hesitation_delta(pd.DataFrame(fraud_rows)).to_dict("records")
 
     ft = pd.read_csv(FEATURE_TABLE_PATH)
     legit_rows = ft[ft["fraud"] == 0].copy()
@@ -282,8 +297,11 @@ def stage2_retrain_check(df: pd.DataFrame, hard_ato_records: list[dict], cfg: di
         feats["attack_family"] = rec.get("attack_family", "ACCOUNT_TAKEOVER")
         feats["attack_difficulty"] = rec.get("attack_difficulty", "hard")
         feats["trace_id"] = rec.get("trace_id")
+        feats["customer_id"] = rec.get("customer_id")
         hard_ato_rows.append(feats)
-    hard_ato_df = pd.DataFrame(hard_ato_rows) if hard_ato_rows else pd.DataFrame()
+    # Same HESITATION_DELTA gap as build_original_df -- extract_features()
+    # doesn't compute it, and FEATURE_COLS (used below) requires it.
+    hard_ato_df = btp.add_hesitation_delta(pd.DataFrame(hard_ato_rows)) if hard_ato_rows else pd.DataFrame()
 
     proba_without = fit_and_score(None)
     proba_with = fit_and_score(hard_ato_df if len(hard_ato_df) else None)
@@ -444,8 +462,13 @@ def main():
         feats["attack_family"] = rec.get("attack_family", "ACCOUNT_TAKEOVER")
         feats["attack_difficulty"] = rec.get("attack_difficulty", "hard")
         feats["trace_id"] = rec.get("trace_id")
+        feats["customer_id"] = rec.get("customer_id")
         hard_ato_rows.append(feats)
-    hard_ato_df = pd.DataFrame(hard_ato_rows) if hard_ato_rows else pd.DataFrame(columns=FEATURE_COLS + ["fraud"])
+    # Same HESITATION_DELTA gap as build_original_df / stage2_retrain_check.
+    hard_ato_df = (
+        btp.add_hesitation_delta(pd.DataFrame(hard_ato_rows))
+        if hard_ato_rows else pd.DataFrame(columns=FEATURE_COLS + ["fraud"])
+    )
 
     print("\nRound 1 (v1 Stage-1, original training pool only) on untouched holdout ...")
     round1_holdout = run_round_on_holdout(holdout_df, train_pool, pd.DataFrame(columns=FEATURE_COLS + ["fraud"]),

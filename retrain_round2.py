@@ -1,7 +1,7 @@
 """
 Round-1 vs Round-2 Retraining Comparison
 ==========================================
-Mastercard Innovation Challenge 2026 -- Blue Team closed-loop, final step
+Blue Team closed-loop, final step
 
 Position in the loop:
 
@@ -43,6 +43,7 @@ import pandas as pd
 from blue_team_pipeline import (
     CONFIG, FEATURE_COLS,
     load_attack_corpus, build_legitimate_traces, extract_features,
+    add_hesitation_delta,
     cross_validated_evaluate, EvaluationHarness, block,
 )
 
@@ -131,8 +132,15 @@ def build_round_datasets(cfg: dict) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
             feats["fraud"] = rec["fraud"]
             feats["attack_family"] = rec["attack_family"]
             feats["attack_difficulty"] = rec["attack_difficulty"]
+            feats["customer_id"] = rec["customer_id"]
             rows.append(feats)
-        return pd.DataFrame(rows)
+
+        # HESITATION_DELTA is derived from the per-customer transaction
+        # pacing baseline, so customer_id must be retained until this
+        # calculation is complete. This mirrors the main pipeline.
+        df = pd.DataFrame(rows)
+        df = add_hesitation_delta(df)
+        return df
 
     print("\nExtracting features for both rounds (same extract_features() as the main pipeline)...")
     df_round1 = to_feature_df(round1_records)

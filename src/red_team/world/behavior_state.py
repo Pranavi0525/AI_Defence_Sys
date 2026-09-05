@@ -9,6 +9,7 @@ class BehavioralModelConfig(BaseModel):
     """
     device_reuse_prob: float = Field(default=0.90, description="DOMAIN_MODELED: Probability of reusing primary device.")
     beneficiary_reuse_prob: float = Field(default=0.95, description="DOMAIN_MODELED: Probability of reusing known beneficiary.")
+    beneficiary_addition_prob: float = Field(default=0.03, description="DOMAIN_MODELED: Probability, within an active session, of adding a brand-new beneficiary instead of transacting or logging out.")
     burst_prob: float = Field(default=0.10, description="DOMAIN_MODELED: Probability of entering a burst mode.")
     burst_time_multiplier: float = Field(default=0.05, description="DOMAIN_MODELED: Timing multiplier during a burst.")
     amount_variance_factor: float = Field(default=0.20, description="DOMAIN_MODELED: Standard deviation as a fraction of mean.")

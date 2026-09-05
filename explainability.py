@@ -159,7 +159,7 @@ class ReferenceArtifacts:
     all_records: list
     A: np.ndarray
     connected_mask: np.ndarray
-    ring_ids: set
+    ring_membership: set          # graph-connected trace ids (see get_graph_connected_trace_ids)
     stage2_model: XGBClassifier
     explainer: "shap.TreeExplainer"
     shap_values: np.ndarray          # (n, n_features)
@@ -190,8 +190,9 @@ def _decision_thresholds() -> tuple[float, float]:
 
 def build_reference_artifacts() -> ReferenceArtifacts:
     cfg = btp.CONFIG
-    all_records, ring_ids = cwg.load_all_records(cfg)
-    df, A, connected_mask = cwg.build_feature_table_and_graph(all_records, ring_ids)
+    all_records = cwg.load_all_records(cfg)
+    ring_membership = cwg.get_graph_connected_trace_ids(all_records)
+    df, A, connected_mask = cwg.build_feature_table_and_graph(all_records, ring_membership)
 
     X_raw = df[FEATURE_COLS].fillna(0).values.astype(float)
     y = df["fraud"].values.astype(int)
@@ -258,7 +259,7 @@ def build_reference_artifacts() -> ReferenceArtifacts:
 
     return ReferenceArtifacts(
         df=df, all_records=all_records, A=A, connected_mask=connected_mask,
-        ring_ids=ring_ids, stage2_model=stage2_model, explainer=explainer,
+        ring_membership=ring_membership, stage2_model=stage2_model, explainer=explainer,
         shap_values=shap_values, gcn_probs=gcn_probs,
         stage1_escalate=stage1_escalate,
         stage2_score_hypothetical=stage2_score_hypothetical,
@@ -362,6 +363,93 @@ def _decision(score: float, t_review: float, t_block: float) -> str:
     if score >= t_review:
         return "REVIEW"
     return "ALLOW"
+
+
+# ---------------------------------------------------------------------------
+# Case dossier -- investigator-facing summary for Review/Block decisions
+# ---------------------------------------------------------------------------
+def case_dossier(ref: "ReferenceArtifacts", idx: int, explanation: dict | None = None) -> dict | None:
+    """
+    Short investigator-facing summary for a Review/Block decision: which
+    signals fired, which side is liable under the current role-aware
+    policy (decision_policy.liable_side/acting_side), and similar past
+    cases (graph-connected fraud neighbors already computed by
+    explain_case -- this deliberately reuses Stage 3's existing signal
+    rather than adding a second similarity model).
+
+    Scope, explicitly: this is an INVESTIGATION AID. It never makes or
+    overrides the Allow/Review/Block decision -- that decision is made
+    upstream by decision_policy.py before this function is even called.
+    It exists only to help a human reviewer act faster on a decision
+    that's already been made.
+
+    Returns None for ALLOW cases -- there's nothing for an investigator
+    to review or act on there, so a dossier isn't useful.
+    """
+    if explanation is None:
+        explanation = explain_case(ref, idx)
+
+    decision = explanation["stage6_decision_policy"]["decision"]
+    if decision == "ALLOW":
+        return None
+
+    import decision_policy as dp  # local import: keeps this file's own
+
+    is_fraud = explanation["true_label"] == "fraud"
+    fam = explanation["attack_family"] if is_fraud else None
+    liable = dp.liable_side(fam) if is_fraud else "N/A"
+    acting = dp.acting_side(fam) if is_fraud else "N/A"
+
+    fired_signals = (
+        [f["label"] for f in explanation["stage2"]["top_features"][:3]]
+        if explanation["stage2"]["ran"]
+        else [r["rule"] for r in explanation["stage1"]["rules_checked"] if r["fired"]]
+    )
+
+    similar = [n for n in explanation["stage3"]["neighbors"] if n["fraud_label"] == 1][:3]
+
+    lines = [
+        f"DECISION: {decision} -- trace {explanation['trace_id']} "
+        f"(customer {explanation['customer_id']}), "
+        f"${explanation['dollars_in_trace']:,.2f} moved.",
+    ]
+    if is_fraud:
+        lines.append(
+            f"Attack family: {fam} ({explanation['attack_difficulty']}). "
+            f"Liable side under current policy: {liable} (acting side: {acting})."
+        )
+    else:
+        lines.append(
+            "True label: legitimate -- this is a false positive under the "
+            "current thresholds. Liability fields don't apply."
+        )
+    lines.append(
+        "Signals that drove this decision: "
+        + (", ".join(fired_signals) if fired_signals else "none recorded") + "."
+    )
+    if similar:
+        lines.append(
+            "Similar past cases (graph-connected fraud traces): "
+            + ", ".join(f"{s['trace_id']} (customer {s['customer_id']})" for s in similar) + "."
+        )
+    else:
+        lines.append("No graph-connected similar past cases found for this trace.")
+    lines.append(
+        "NOTE: this dossier is an investigation aid only. It summarizes why "
+        "the automated policy made its decision; it does not itself make or "
+        "override that decision."
+    )
+
+    return {
+        "trace_id": explanation["trace_id"],
+        "decision": decision,
+        "attack_family": fam,
+        "liable_side": liable,
+        "acting_side": acting,
+        "signals_fired": fired_signals,
+        "similar_past_cases": similar,
+        "dossier_text": " ".join(lines),
+    }
 
 
 def _trace_dollars(record: dict) -> float:
@@ -602,6 +690,27 @@ def main():
             f.write(f"## {label.replace('_', ' ')}\n\n")
             f.write(rep["narrative"] + "\n\n")
     print(f"  saved {OUT_DIR / 'case_reports.md'}")
+
+    print("\nBuilding investigator case dossiers (Review/Block cases only)...")
+    dossiers = {}
+    for label, idx in picks.items():
+        d = case_dossier(ref, idx, explanation=case_reports[label])
+        if d is not None:
+            dossiers[label] = d
+    with open(OUT_DIR / "case_dossier_examples.md", "w") as f:
+        f.write("# Case dossiers -- investigation aid only\n\n")
+        f.write(
+            "These summaries help a human reviewer act faster on a decision "
+            "already made by decision_policy.py. They never make or override "
+            "that decision.\n\n"
+        )
+        if not dossiers:
+            f.write("No Review/Block cases among this run's representative picks.\n")
+        for label, d in dossiers.items():
+            f.write(f"## {label.replace('_', ' ')}\n\n")
+            f.write(d["dossier_text"] + "\n\n")
+    print(f"  saved {OUT_DIR / 'case_dossier_examples.md'} "
+          f"({len(dossiers)} dossier(s))")
 
     if not picks:
         print("\nNOTE: no representative cases matched some categories -- "

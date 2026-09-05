@@ -1,309 +1,625 @@
 {
   "meta": {
-    "round1_n": 1458,
-    "round2_n": 1463,
-    "hard_examples_loaded_total": 42,
-    "hard_examples_added_to_stage2": 5,
-    "hard_examples_ato": 5,
-    "hard_examples_app": 37,
+    "round1_n": 1556,
+    "round2_n": 1562,
+    "round1_composition": {
+      "ATO": 97,
+      "APP": 156,
+      "MULE_NETWORK": 121,
+      "legitimate": 1182
+    },
+    "hard_examples_loaded_total": 53,
+    "hard_examples_added_to_stage2": 6,
+    "hard_examples_ato": 6,
+    "hard_examples_app": 42,
+    "hard_examples_mule": 0,
+    "hard_examples_mule_note": "hard_examples.jsonl currently contains no MULE_NETWORK rows (hard_example_generator.py has not been run against the MULE_NETWORK corpus yet). MULE_NETWORK traces are included, unchanged, in both Round 1 and Round 2, same as the legit population.",
     "hard_examples_app_excluded_reason": "APP hard examples are validated only as Stage-1 rule blind spots (stage1_escalation_rate == 0%), not as Stage-2 XGBoost blind spots. They are excluded from Stage-2 training/CV to avoid evaluating Stage-2 on rows it was never meant to classify."
   },
-  "methodology_note": "Identical FEATURE_COLS, XGBoost hyperparameters, 5-fold StratifiedKFold procedure, Stage-1 rule thresholds, and 0.5 decision threshold used for both rounds. Only the training data differs (5 Stage-2-validated ATO hard examples added in Round 2; 37 Stage-1-only APP hard examples were deliberately excluded from Stage-2 retraining/CV -- see hard_examples_app_excluded_reason). Original corpus files on disk were not modified.",
+  "methodology_note": "Identical FEATURE_COLS, XGBoost hyperparameters, 5-fold StratifiedKFold procedure, Stage-1 rule thresholds, and 0.5 decision threshold used for both rounds. Only the training data differs (6 Stage-2-validated ATO hard examples added in Round 2; 42 Stage-1-only APP hard examples were deliberately excluded from Stage-2 retraining/CV -- see hard_examples_app_excluded_reason). Original corpus files on disk were not modified.",
+  "population_matching_note": "cascade_comparison / single_stage_comparison below use each round's FULL population (round2 has more rows whenever hard examples were added for a family) -- useful for the overall before/after picture, but NOT what the promotion gate checks, since a denominator-size difference can look like a recall regression that isn't one. matched_cascade_comparison / matched_single_stage_comparison restrict both rounds to trace_ids present in both, and that's what promotion_gate is evaluated against. new_rows_diagnostic reports how round2's own new rows score, informationally, separate from the gate.",
   "cascade_comparison": {
     "overall": {
       "precision": {
-        "round1": 0.9801587301587301,
-        "round2": 0.9803149606299213,
-        "delta": 0.0002
+        "round1": 0.989041095890411,
+        "round2": 0.9786096256684492,
+        "delta": -0.0104
       },
       "recall": {
-        "round1": 0.9762845849802372,
-        "round2": 0.9651162790697675,
-        "delta": -0.0112
+        "round1": 0.9652406417112299,
+        "round2": 0.9631578947368421,
+        "delta": -0.0021
       },
       "f1": {
-        "round1": 0.9782178217821782,
-        "round2": 0.97265625,
-        "delta": -0.0056
+        "round1": 0.9769959404600812,
+        "round2": 0.9708222811671088,
+        "delta": -0.0062
       },
       "roc_auc": {
-        "round1": 0.9855427812310367,
-        "round2": 0.985855125607128,
-        "delta": 0.0003
+        "round1": 0.983832804003004,
+        "round2": 0.9839411345622939,
+        "delta": 0.0001
       },
       "false_positives_count": {
-        "round1": 5,
-        "round2": 5,
-        "delta": 0
+        "round1": 4,
+        "round2": 8,
+        "delta": 4
       },
       "fraud_misses_count_false_negatives": {
-        "round1": 6,
-        "round2": 9,
-        "delta": 3
+        "round1": 13,
+        "round2": 14,
+        "delta": 1
       },
-      "n_round1": 1458,
-      "n_round2": 1463
+      "n_round1": 1556,
+      "n_round2": 1562
     },
     "by_family": {
-      "AUTHORIZED_PUSH_PAYMENT": {
-        "precision": {
-          "round1": 0.967948717948718,
-          "round2": 0.967948717948718
-        },
-        "recall": {
-          "round1": 0.967948717948718,
-          "round2": 0.967948717948718
-        },
-        "f1": {
-          "round1": 0.967948717948718,
-          "round2": 0.967948717948718
-        },
-        "n_round1": 1361,
-        "n_round2": 1361
-      },
       "ACCOUNT_TAKEOVER": {
         "precision": {
-          "round1": 0.9504950495049505,
-          "round2": 0.9514563106796117
+          "round1": 0.9591836734693877,
+          "round2": 0.9252336448598131
         },
         "recall": {
-          "round1": 0.9896907216494846,
-          "round2": 0.9607843137254902
+          "round1": 0.9690721649484536,
+          "round2": 0.9611650485436893
         },
         "f1": {
-          "round1": 0.9696969696969697,
-          "round2": 0.9560975609756097
+          "round1": 0.9641025641025641,
+          "round2": 0.9428571428571428
         },
-        "n_round1": 1302,
-        "n_round2": 1307
+        "n_round1": 1279,
+        "n_round2": 1285
+      },
+      "MULE_NETWORK": {
+        "precision": {
+          "round1": 0.9669421487603306,
+          "round2": 0.936
+        },
+        "recall": {
+          "round1": 0.9669421487603306,
+          "round2": 0.9669421487603306
+        },
+        "f1": {
+          "round1": 0.9669421487603306,
+          "round2": 0.9512195121951219
+        },
+        "n_round1": 1303,
+        "n_round2": 1303
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "precision": {
+          "round1": 0.974025974025974,
+          "round2": 0.9493670886075949
+        },
+        "recall": {
+          "round1": 0.9615384615384616,
+          "round2": 0.9615384615384616
+        },
+        "f1": {
+          "round1": 0.967741935483871,
+          "round2": 0.9554140127388535
+        },
+        "n_round1": 1338,
+        "n_round2": 1338
       }
     }
   },
   "single_stage_comparison": {
     "overall": {
       "precision": {
-        "round1": 0.98046875,
-        "round2": 0.9806201550387597,
-        "delta": 0.0002
+        "round1": 0.9865229110512129,
+        "round2": 0.9763157894736842,
+        "delta": -0.0102
       },
       "recall": {
-        "round1": 0.9920948616600791,
-        "round2": 0.9806201550387597,
-        "delta": -0.0115
+        "round1": 0.9786096256684492,
+        "round2": 0.9763157894736842,
+        "delta": -0.0023
       },
       "f1": {
-        "round1": 0.9862475442043221,
-        "round2": 0.9806201550387597,
-        "delta": -0.0056
+        "round1": 0.9825503355704698,
+        "round2": 0.9763157894736842,
+        "delta": -0.0062
       },
       "roc_auc": {
-        "round1": 0.9996851065225592,
-        "round2": 0.9997523239731094,
-        "delta": 0.0001
+        "round1": 0.998943601436883,
+        "round2": 0.9987320776560691,
+        "delta": -0.0002
       },
       "false_positives_count": {
         "round1": 5,
-        "round2": 5,
-        "delta": 0
+        "round2": 9,
+        "delta": 4
       },
       "fraud_misses_count_false_negatives": {
-        "round1": 2,
-        "round2": 5,
-        "delta": 3
+        "round1": 8,
+        "round2": 9,
+        "delta": 1
       },
-      "n_round1": 1458,
-      "n_round2": 1463
+      "n_round1": 1556,
+      "n_round2": 1562
     },
     "by_family": {
-      "AUTHORIZED_PUSH_PAYMENT": {
-        "precision": {
-          "round1": 0.96875,
-          "round2": 0.96875
-        },
-        "recall": {
-          "round1": 0.9935897435897436,
-          "round2": 0.9935897435897436
-        },
-        "f1": {
-          "round1": 0.9810126582278481,
-          "round2": 0.9810126582278481
-        },
-        "n_round1": 1361,
-        "n_round2": 1361
-      },
       "ACCOUNT_TAKEOVER": {
         "precision": {
-          "round1": 0.9504950495049505,
-          "round2": 0.9514563106796117
+          "round1": 0.9494949494949495,
+          "round2": 0.9166666666666666
         },
         "recall": {
-          "round1": 0.9896907216494846,
-          "round2": 0.9607843137254902
+          "round1": 0.9690721649484536,
+          "round2": 0.9611650485436893
         },
         "f1": {
-          "round1": 0.9696969696969697,
-          "round2": 0.9560975609756097
+          "round1": 0.9591836734693877,
+          "round2": 0.9383886255924171
         },
-        "n_round1": 1302,
-        "n_round2": 1307
+        "n_round1": 1279,
+        "n_round2": 1285
+      },
+      "MULE_NETWORK": {
+        "precision": {
+          "round1": 0.9596774193548387,
+          "round2": 0.9296875
+        },
+        "recall": {
+          "round1": 0.9834710743801653,
+          "round2": 0.9834710743801653
+        },
+        "f1": {
+          "round1": 0.9714285714285714,
+          "round2": 0.9558232931726908
+        },
+        "n_round1": 1303,
+        "n_round2": 1303
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "precision": {
+          "round1": 0.9683544303797469,
+          "round2": 0.9444444444444444
+        },
+        "recall": {
+          "round1": 0.9807692307692307,
+          "round2": 0.9807692307692307
+        },
+        "f1": {
+          "round1": 0.9745222929936306,
+          "round2": 0.9622641509433962
+        },
+        "n_round1": 1338,
+        "n_round2": 1338
       }
     }
+  },
+  "matched_cascade_comparison": {
+    "n_matched": 1556,
+    "overall": {
+      "precision": {
+        "round1": 0.989041095890411,
+        "round2": 0.9783783783783784,
+        "delta": -0.0107
+      },
+      "recall": {
+        "round1": 0.9652406417112299,
+        "round2": 0.9679144385026738,
+        "delta": 0.0027
+      },
+      "f1": {
+        "round1": 0.9769959404600812,
+        "round2": 0.9731182795698925,
+        "delta": -0.0039
+      },
+      "roc_auc": {
+        "round1": 0.983832804003004,
+        "round2": 0.9837852999990951,
+        "delta": -0.0
+      },
+      "false_positives_count": {
+        "round1": 4,
+        "round2": 8,
+        "delta": 4
+      },
+      "fraud_misses_count_false_negatives": {
+        "round1": 13,
+        "round2": 12,
+        "delta": -1
+      },
+      "n_round1": 1556,
+      "n_round2": 1556
+    },
+    "by_family": {
+      "ACCOUNT_TAKEOVER": {
+        "precision": {
+          "round1": 0.9591836734693877,
+          "round2": 0.9223300970873787
+        },
+        "recall": {
+          "round1": 0.9690721649484536,
+          "round2": 0.979381443298969
+        },
+        "f1": {
+          "round1": 0.9641025641025641,
+          "round2": 0.95
+        },
+        "n_round1": 1279,
+        "n_round2": 1279
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "precision": {
+          "round1": 0.974025974025974,
+          "round2": 0.9493670886075949
+        },
+        "recall": {
+          "round1": 0.9615384615384616,
+          "round2": 0.9615384615384616
+        },
+        "f1": {
+          "round1": 0.967741935483871,
+          "round2": 0.9554140127388535
+        },
+        "n_round1": 1338,
+        "n_round2": 1338
+      },
+      "MULE_NETWORK": {
+        "precision": {
+          "round1": 0.9669421487603306,
+          "round2": 0.936
+        },
+        "recall": {
+          "round1": 0.9669421487603306,
+          "round2": 0.9669421487603306
+        },
+        "f1": {
+          "round1": 0.9669421487603306,
+          "round2": 0.9512195121951219
+        },
+        "n_round1": 1303,
+        "n_round2": 1303
+      }
+    }
+  },
+  "matched_single_stage_comparison": {
+    "n_matched": 1556,
+    "overall": {
+      "precision": {
+        "round1": 0.9865229110512129,
+        "round2": 0.976063829787234,
+        "delta": -0.0105
+      },
+      "recall": {
+        "round1": 0.9786096256684492,
+        "round2": 0.9812834224598931,
+        "delta": 0.0027
+      },
+      "f1": {
+        "round1": 0.9825503355704698,
+        "round2": 0.9786666666666667,
+        "delta": -0.0039
+      },
+      "roc_auc": {
+        "round1": 0.998943601436883,
+        "round2": 0.9988248414271108,
+        "delta": -0.0001
+      },
+      "false_positives_count": {
+        "round1": 5,
+        "round2": 9,
+        "delta": 4
+      },
+      "fraud_misses_count_false_negatives": {
+        "round1": 8,
+        "round2": 7,
+        "delta": -1
+      },
+      "n_round1": 1556,
+      "n_round2": 1556
+    },
+    "by_family": {
+      "ACCOUNT_TAKEOVER": {
+        "precision": {
+          "round1": 0.9494949494949495,
+          "round2": 0.9134615384615384
+        },
+        "recall": {
+          "round1": 0.9690721649484536,
+          "round2": 0.979381443298969
+        },
+        "f1": {
+          "round1": 0.9591836734693877,
+          "round2": 0.945273631840796
+        },
+        "n_round1": 1279,
+        "n_round2": 1279
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "precision": {
+          "round1": 0.9683544303797469,
+          "round2": 0.9444444444444444
+        },
+        "recall": {
+          "round1": 0.9807692307692307,
+          "round2": 0.9807692307692307
+        },
+        "f1": {
+          "round1": 0.9745222929936306,
+          "round2": 0.9622641509433962
+        },
+        "n_round1": 1338,
+        "n_round2": 1338
+      },
+      "MULE_NETWORK": {
+        "precision": {
+          "round1": 0.9596774193548387,
+          "round2": 0.9296875
+        },
+        "recall": {
+          "round1": 0.9834710743801653,
+          "round2": 0.9834710743801653
+        },
+        "f1": {
+          "round1": 0.9714285714285714,
+          "round2": 0.9558232931726908
+        },
+        "n_round1": 1303,
+        "n_round2": 1303
+      }
+    }
+  },
+  "new_rows_diagnostic": {
+    "n_new_rows": 6,
+    "n_new_fraud_rows": 6,
+    "n_new_fraud_rows_caught_oof": 4,
+    "n_new_fraud_rows_still_missed_oof": 2,
+    "by_family": {
+      "ACCOUNT_TAKEOVER": 6
+    },
+    "note": "These are rows round2 has that round1 never scored (e.g. newly-mined hard examples). Excluded from the promotion gate's matched-population checks; reported here for visibility only."
+  },
+  "promotion_gate": {
+    "verdict": "FAIL",
+    "recommendation": "DO NOT promote Round 2 as-is -- one or more non-regression checks failed. Investigate the failed check(s) below before retraining or promoting.",
+    "checks": [
+      {
+        "check": "zero_tolerance_new_fraud_misses",
+        "passed": true,
+        "detail": "false_negatives delta = -1 (round1=13, round2=12)"
+      },
+      {
+        "check": "overall_recall_no_regression",
+        "passed": true,
+        "detail": "recall delta = 0.0027 (round1=0.9652406417112299, round2=0.9679144385026738)"
+      },
+      {
+        "check": "false_positive_growth_within_tolerance",
+        "passed": false,
+        "detail": "false_positives round1=4 -> round2=8 (delta=4, relative_growth=1.0, tolerance=0.2, min_absolute_to_flag=3)"
+      },
+      {
+        "check": "per_family_recall_no_regression[ACCOUNT_TAKEOVER]",
+        "passed": true,
+        "detail": "ACCOUNT_TAKEOVER recall round1=0.9690721649484536 -> round2=0.979381443298969"
+      },
+      {
+        "check": "per_family_recall_no_regression[AUTHORIZED_PUSH_PAYMENT]",
+        "passed": true,
+        "detail": "AUTHORIZED_PUSH_PAYMENT recall round1=0.9615384615384616 -> round2=0.9615384615384616"
+      },
+      {
+        "check": "per_family_recall_no_regression[MULE_NETWORK]",
+        "passed": true,
+        "detail": "MULE_NETWORK recall round1=0.9669421487603306 -> round2=0.9669421487603306"
+      }
+    ],
+    "failed_checks": [
+      "false_positive_growth_within_tolerance"
+    ]
   },
   "round1_full_results": {
     "single_stage": {
       "overall": {
-        "n": 1458,
-        "precision": 0.98046875,
-        "recall": 0.9920948616600791,
-        "f1": 0.9862475442043221,
-        "roc_auc": 0.9996851065225592,
-        "pr_auc": 0.9985694283369929,
+        "n": 1556,
+        "precision": 0.9865229110512129,
+        "recall": 0.9786096256684492,
+        "f1": 0.9825503355704698,
+        "roc_auc": 0.998943601436883,
+        "pr_auc": 0.9969956417075804,
         "confusion_matrix": [
           [
-            1200,
+            1177,
             5
           ],
           [
-            2,
-            251
+            8,
+            366
           ]
         ]
       },
       "by_family": {
         "ACCOUNT_TAKEOVER": {
-          "n": 1302,
-          "precision": 0.9504950495049505,
-          "recall": 0.9896907216494846,
-          "f1": 0.9696969696969697,
-          "roc_auc": 0.9995037857723403,
-          "pr_auc": 0.9951276414373578
+          "n": 1279,
+          "precision": 0.9494949494949495,
+          "recall": 0.9690721649484536,
+          "f1": 0.9591836734693877,
+          "roc_auc": 0.9990754792680586,
+          "pr_auc": 0.991176764931228
         },
         "AUTHORIZED_PUSH_PAYMENT": {
-          "n": 1361,
-          "precision": 0.96875,
-          "recall": 0.9935897435897436,
-          "f1": 0.9810126582278481,
-          "roc_auc": 0.9997978508351953,
-          "pr_auc": 0.9984169448228352
+          "n": 1338,
+          "precision": 0.9683544303797469,
+          "recall": 0.9807692307692307,
+          "f1": 0.9745222929936306,
+          "roc_auc": 0.999067204650961,
+          "pr_auc": 0.9944789422985771
+        },
+        "MULE_NETWORK": {
+          "n": 1303,
+          "precision": 0.9596774193548387,
+          "recall": 0.9834710743801653,
+          "f1": 0.9714285714285714,
+          "roc_auc": 0.9986785249821706,
+          "pr_auc": 0.990889985330713
         }
       },
       "by_family_difficulty": {
         "ACCOUNT_TAKEOVER_easy": {
-          "n": 1227,
+          "n": 1204,
           "precision": 0.8148148148148148,
           "recall": 1.0,
           "f1": 0.8979591836734694,
-          "roc_auc": 0.9999245567710299,
-          "pr_auc": 0.9962121212121211,
+          "roc_auc": 0.9998077218889402,
+          "pr_auc": 0.9903148366784729,
           "fraud_sample_size_warning": false
         },
         "ACCOUNT_TAKEOVER_medium": {
-          "n": 1230,
+          "n": 1207,
           "precision": 0.8333333333333334,
           "recall": 1.0,
           "f1": 0.9090909090909091,
-          "roc_auc": 0.9999004149377594,
-          "pr_auc": 0.9954370370370372,
+          "roc_auc": 0.9996277495769882,
+          "pr_auc": 0.9842735042735044,
           "fraud_sample_size_warning": false
         },
         "ACCOUNT_TAKEOVER_hard": {
-          "n": 1230,
+          "n": 1207,
           "precision": 0.8333333333333334,
           "recall": 1.0,
           "f1": 0.9090909090909091,
-          "roc_auc": 0.9999336099585063,
-          "pr_auc": 0.9968615384615387,
+          "roc_auc": 0.9999661590524535,
+          "pr_auc": 0.9984615384615386,
           "fraud_sample_size_warning": false
         },
         "ACCOUNT_TAKEOVER_advanced": {
-          "n": 1230,
-          "precision": 0.8275862068965517,
-          "recall": 0.96,
-          "f1": 0.8888888888888888,
-          "roc_auc": 0.9983070539419087,
-          "pr_auc": 0.9605899070666688,
+          "n": 1207,
+          "precision": 0.8148148148148148,
+          "recall": 0.88,
+          "f1": 0.8461538461538461,
+          "roc_auc": 0.9969881556683587,
+          "pr_auc": 0.9353882071951037,
           "fraud_sample_size_warning": false
         },
         "AUTHORIZED_PUSH_PAYMENT_easy": {
-          "n": 1211,
+          "n": 1188,
           "precision": 0.5454545454545454,
           "recall": 1.0,
           "f1": 0.7058823529411765,
-          "roc_auc": 0.9997233748271093,
-          "pr_auc": 0.9484126984126984,
+          "roc_auc": 0.9998589960518894,
+          "pr_auc": 0.976190476190476,
           "fraud_sample_size_warning": true
         },
         "AUTHORIZED_PUSH_PAYMENT_medium": {
-          "n": 1255,
+          "n": 1232,
           "precision": 0.9074074074074074,
           "recall": 0.98,
           "f1": 0.9423076923076923,
-          "roc_auc": 0.9997178423236515,
-          "pr_auc": 0.9935322661661614,
+          "roc_auc": 0.9990524534686971,
+          "pr_auc": 0.9860409107379637,
           "fraud_sample_size_warning": false
         },
         "AUTHORIZED_PUSH_PAYMENT_hard": {
-          "n": 1255,
-          "precision": 0.9090909090909091,
-          "recall": 1.0,
-          "f1": 0.9523809523809523,
-          "roc_auc": 0.9997676348547719,
-          "pr_auc": 0.9944249502017025,
+          "n": 1232,
+          "precision": 0.9074074074074074,
+          "recall": 0.98,
+          "f1": 0.9423076923076923,
+          "roc_auc": 0.9983925549915398,
+          "pr_auc": 0.9825494405793033,
           "fraud_sample_size_warning": false
         },
         "AUTHORIZED_PUSH_PAYMENT_advanced": {
-          "n": 1255,
-          "precision": 0.9090909090909091,
+          "n": 1232,
+          "precision": 0.9074074074074074,
+          "recall": 0.98,
+          "f1": 0.9423076923076923,
+          "roc_auc": 0.9996615905245347,
+          "pr_auc": 0.9929591132475192,
+          "fraud_sample_size_warning": false
+        },
+        "MULE_NETWORK_easy": {
+          "n": 1216,
+          "precision": 0.8717948717948718,
           "recall": 1.0,
-          "f1": 0.9523809523809523,
-          "roc_auc": 0.9999170124481328,
-          "pr_auc": 0.9981185185185186,
+          "f1": 0.9315068493150684,
+          "roc_auc": 0.9994774559570021,
+          "pr_auc": 0.9790191310963212,
+          "fraud_sample_size_warning": false
+        },
+        "MULE_NETWORK_medium": {
+          "n": 1209,
+          "precision": 0.8333333333333334,
+          "recall": 0.9259259259259259,
+          "f1": 0.8771929824561403,
+          "roc_auc": 0.9951745315535503,
+          "pr_auc": 0.9381915877721936,
+          "fraud_sample_size_warning": false
+        },
+        "MULE_NETWORK_hard": {
+          "n": 1206,
+          "precision": 0.8275862068965517,
+          "recall": 1.0,
+          "f1": 0.9056603773584906,
+          "roc_auc": 0.9997884940778341,
+          "pr_auc": 0.9888242283079239,
+          "fraud_sample_size_warning": false
+        },
+        "MULE_NETWORK_advanced": {
+          "n": 1218,
+          "precision": 0.8780487804878049,
+          "recall": 1.0,
+          "f1": 0.935064935064935,
+          "roc_auc": 0.9998119947358527,
+          "pr_auc": 0.993521380618155,
           "fraud_sample_size_warning": false
         }
       }
     },
     "cascade": {
       "overall": {
-        "n": 1458,
-        "precision": 0.9801587301587301,
-        "recall": 0.9762845849802372,
-        "f1": 0.9782178217821782,
-        "roc_auc": 0.9855427812310367,
-        "pr_auc": 0.9826667502930168,
+        "n": 1556,
+        "precision": 0.989041095890411,
+        "recall": 0.9652406417112299,
+        "f1": 0.9769959404600812,
+        "roc_auc": 0.983832804003004,
+        "pr_auc": 0.9821288879965667,
         "confusion_matrix": [
           [
-            1200,
-            5
+            1178,
+            4
           ],
           [
-            6,
-            247
+            13,
+            361
           ]
         ]
       },
       "stage1_diagnostics": {
-        "stage1_recall_on_fraud_ceiling": 0.9802371541501976,
-        "stage1_fraud_missed_permanently": 5,
-        "stage1_legit_escalation_rate": 0.44149377593360994,
-        "stage1_legit_autoclear_rate_cost_saving": 0.5585062240663901,
+        "stage1_recall_on_fraud_ceiling": 0.9786096256684492,
+        "stage1_fraud_missed_permanently": 8,
+        "stage1_legit_escalation_rate": 0.46277495769881555,
+        "stage1_legit_autoclear_rate_cost_saving": 0.5372250423011844,
         "note": "stage1_recall_on_fraud_ceiling is the cascade's hard recall ceiling -- Stage 2 can never catch what Stage 1 auto-clears."
       },
       "by_family": {
         "ACCOUNT_TAKEOVER": {
-          "n": 1302,
-          "precision": 0.9504950495049505,
-          "recall": 0.9896907216494846,
-          "f1": 0.9696969696969697,
-          "roc_auc": 0.9996064507849596,
-          "pr_auc": 0.9958177725622713
+          "n": 1279,
+          "precision": 0.9591836734693877,
+          "recall": 0.9690721649484536,
+          "f1": 0.9641025641025641,
+          "roc_auc": 0.9993022485041951,
+          "pr_auc": 0.9927011914665281
         },
         "AUTHORIZED_PUSH_PAYMENT": {
-          "n": 1361,
-          "precision": 0.967948717948718,
-          "recall": 0.967948717948718,
-          "f1": 0.967948717948718,
-          "roc_auc": 0.9767980636237898,
-          "pr_auc": 0.9708040342938887
+          "n": 1338,
+          "precision": 0.974025974025974,
+          "recall": 0.9615384615384616,
+          "f1": 0.967741935483871,
+          "roc_auc": 0.9763628573907762,
+          "pr_auc": 0.9701238601929536
+        },
+        "MULE_NETWORK": {
+          "n": 1303,
+          "precision": 0.9669421487603306,
+          "recall": 0.9669421487603306,
+          "f1": 0.9669421487603306,
+          "roc_auc": 0.9810623540434338,
+          "pr_auc": 0.9710926344925892
         }
       }
     }
@@ -311,160 +627,237 @@
   "round2_full_results": {
     "single_stage": {
       "overall": {
-        "n": 1463,
-        "precision": 0.9806201550387597,
-        "recall": 0.9806201550387597,
-        "f1": 0.9806201550387597,
-        "roc_auc": 0.9997523239731094,
-        "pr_auc": 0.9988379531418715,
+        "n": 1562,
+        "precision": 0.9763157894736842,
+        "recall": 0.9763157894736842,
+        "f1": 0.9763157894736842,
+        "roc_auc": 0.9987320776560691,
+        "pr_auc": 0.9964467156961234,
         "confusion_matrix": [
           [
-            1200,
-            5
+            1173,
+            9
           ],
           [
-            5,
-            253
+            9,
+            371
           ]
         ]
       },
       "by_family": {
         "ACCOUNT_TAKEOVER": {
-          "n": 1307,
-          "precision": 0.9514563106796117,
-          "recall": 0.9607843137254902,
-          "f1": 0.9560975609756097,
-          "roc_auc": 0.9995850622406639,
-          "pr_auc": 0.9951976045747776
+          "n": 1285,
+          "precision": 0.9166666666666666,
+          "recall": 0.9611650485436893,
+          "f1": 0.9383886255924171,
+          "roc_auc": 0.9988254234225354,
+          "pr_auc": 0.9875236743221907
         },
         "AUTHORIZED_PUSH_PAYMENT": {
-          "n": 1361,
-          "precision": 0.96875,
-          "recall": 0.9935897435897436,
-          "f1": 0.9810126582278481,
-          "roc_auc": 0.9998616874135546,
-          "pr_auc": 0.9989424943645744
+          "n": 1338,
+          "precision": 0.9444444444444444,
+          "recall": 0.9807692307692307,
+          "f1": 0.9622641509433962,
+          "roc_auc": 0.9988692568007288,
+          "pr_auc": 0.9938077700884613
+        },
+        "MULE_NETWORK": {
+          "n": 1303,
+          "precision": 0.9296875,
+          "recall": 0.9834710743801653,
+          "f1": 0.9558232931726908,
+          "roc_auc": 0.9984757589741439,
+          "pr_auc": 0.9897449699578887
         }
       },
       "by_family_difficulty": {
         "ACCOUNT_TAKEOVER_easy": {
-          "n": 1227,
-          "precision": 0.8148148148148148,
+          "n": 1204,
+          "precision": 0.7096774193548387,
           "recall": 1.0,
-          "f1": 0.8979591836734694,
-          "roc_auc": 0.9998868351565446,
-          "pr_auc": 0.9945454545454545,
+          "f1": 0.8301886792452831,
+          "roc_auc": 0.9997692662667281,
+          "pr_auc": 0.9880421094057457,
           "fraud_sample_size_warning": false
         },
         "ACCOUNT_TAKEOVER_medium": {
-          "n": 1230,
-          "precision": 0.8333333333333334,
-          "recall": 1.0,
-          "f1": 0.9090909090909091,
-          "roc_auc": 0.9998008298755187,
-          "pr_auc": 0.9912698412698413,
+          "n": 1207,
+          "precision": 0.7272727272727273,
+          "recall": 0.96,
+          "f1": 0.8275862068965517,
+          "roc_auc": 0.9987817258883249,
+          "pr_auc": 0.965681917211329,
           "fraud_sample_size_warning": false
         },
         "ACCOUNT_TAKEOVER_hard": {
-          "n": 1230,
-          "precision": 0.8333333333333334,
+          "n": 1207,
+          "precision": 0.7352941176470589,
           "recall": 1.0,
-          "f1": 0.9090909090909091,
-          "roc_auc": 0.9999004149377593,
-          "pr_auc": 0.9954370370370371,
+          "f1": 0.847457627118644,
+          "roc_auc": 0.999932318104907,
+          "pr_auc": 0.9968615384615386,
           "fraud_sample_size_warning": false
         },
         "ACCOUNT_TAKEOVER_advanced": {
-          "n": 1235,
-          "precision": 0.8387096774193549,
-          "recall": 0.8666666666666667,
-          "f1": 0.8524590163934426,
-          "roc_auc": 0.9989211618257261,
-          "pr_auc": 0.9622271598661667,
+          "n": 1213,
+          "precision": 0.7567567567567568,
+          "recall": 0.9032258064516129,
+          "f1": 0.8235294117647058,
+          "roc_auc": 0.9972981824136238,
+          "pr_auc": 0.917164123612847,
           "fraud_sample_size_warning": false
         },
         "AUTHORIZED_PUSH_PAYMENT_easy": {
-          "n": 1211,
-          "precision": 0.5454545454545454,
+          "n": 1188,
+          "precision": 0.4,
           "recall": 1.0,
-          "f1": 0.7058823529411765,
-          "roc_auc": 1.0,
-          "pr_auc": 1.0,
+          "f1": 0.5714285714285714,
+          "roc_auc": 0.9998589960518895,
+          "pr_auc": 0.976190476190476,
           "fraud_sample_size_warning": true
         },
         "AUTHORIZED_PUSH_PAYMENT_medium": {
-          "n": 1255,
-          "precision": 0.9074074074074074,
+          "n": 1232,
+          "precision": 0.8448275862068966,
           "recall": 0.98,
-          "f1": 0.9423076923076923,
-          "roc_auc": 0.9997178423236515,
-          "pr_auc": 0.9935652952301122,
+          "f1": 0.9074074074074074,
+          "roc_auc": 0.998595600676819,
+          "pr_auc": 0.9844572181966948,
           "fraud_sample_size_warning": false
         },
         "AUTHORIZED_PUSH_PAYMENT_hard": {
-          "n": 1255,
-          "precision": 0.9090909090909091,
-          "recall": 1.0,
-          "f1": 0.9523809523809523,
-          "roc_auc": 0.9998838174273859,
-          "pr_auc": 0.9973975044563279,
+          "n": 1232,
+          "precision": 0.8448275862068966,
+          "recall": 0.98,
+          "f1": 0.9074074074074074,
+          "roc_auc": 0.9982318104906938,
+          "pr_auc": 0.982483305736277,
           "fraud_sample_size_warning": false
         },
         "AUTHORIZED_PUSH_PAYMENT_advanced": {
-          "n": 1255,
-          "precision": 0.9090909090909091,
+          "n": 1232,
+          "precision": 0.8448275862068966,
+          "recall": 0.98,
+          "f1": 0.9074074074074074,
+          "roc_auc": 0.9996615905245347,
+          "pr_auc": 0.992845597204212,
+          "fraud_sample_size_warning": false
+        },
+        "MULE_NETWORK_easy": {
+          "n": 1216,
+          "precision": 0.7906976744186046,
           "recall": 1.0,
-          "f1": 0.9523809523809523,
-          "roc_auc": 0.999966804979253,
-          "pr_auc": 0.9992307692307694,
+          "f1": 0.8831168831168831,
+          "roc_auc": 0.9992037424106698,
+          "pr_auc": 0.9715553025177041,
+          "fraud_sample_size_warning": false
+        },
+        "MULE_NETWORK_medium": {
+          "n": 1209,
+          "precision": 0.7352941176470589,
+          "recall": 0.9259259259259259,
+          "f1": 0.819672131147541,
+          "roc_auc": 0.9945478473397255,
+          "pr_auc": 0.9340617061974633,
+          "fraud_sample_size_warning": false
+        },
+        "MULE_NETWORK_hard": {
+          "n": 1206,
+          "precision": 0.7272727272727273,
+          "recall": 1.0,
+          "f1": 0.8421052631578947,
+          "roc_auc": 0.9998237450648619,
+          "pr_auc": 0.9909075616412573,
+          "fraud_sample_size_warning": false
+        },
+        "MULE_NETWORK_advanced": {
+          "n": 1218,
+          "precision": 0.8,
+          "recall": 1.0,
+          "f1": 0.8888888888888888,
+          "roc_auc": 0.999835495393871,
+          "pr_auc": 0.9943316378800251,
           "fraud_sample_size_warning": false
         }
       }
     },
     "cascade": {
       "overall": {
-        "n": 1463,
-        "precision": 0.9803149606299213,
-        "recall": 0.9651162790697675,
-        "f1": 0.97265625,
-        "roc_auc": 0.985855125607128,
-        "pr_auc": 0.9831997514233954,
+        "n": 1562,
+        "precision": 0.9786096256684492,
+        "recall": 0.9631578947368421,
+        "f1": 0.9708222811671088,
+        "roc_auc": 0.9839411345622939,
+        "pr_auc": 0.9820362824454686,
         "confusion_matrix": [
           [
-            1200,
-            5
+            1174,
+            8
           ],
           [
-            9,
-            249
+            14,
+            366
           ]
         ]
       },
       "stage1_diagnostics": {
-        "stage1_recall_on_fraud_ceiling": 0.9806201550387597,
-        "stage1_fraud_missed_permanently": 5,
-        "stage1_legit_escalation_rate": 0.44149377593360994,
-        "stage1_legit_autoclear_rate_cost_saving": 0.5585062240663901,
+        "stage1_recall_on_fraud_ceiling": 0.9789473684210527,
+        "stage1_fraud_missed_permanently": 8,
+        "stage1_legit_escalation_rate": 0.46277495769881555,
+        "stage1_legit_autoclear_rate_cost_saving": 0.5372250423011844,
         "note": "stage1_recall_on_fraud_ceiling is the cascade's hard recall ceiling -- Stage 2 can never catch what Stage 1 auto-clears."
       },
       "by_family": {
         "ACCOUNT_TAKEOVER": {
-          "n": 1307,
-          "precision": 0.9514563106796117,
-          "recall": 0.9607843137254902,
-          "f1": 0.9560975609756097,
-          "roc_auc": 0.9995850622406639,
-          "pr_auc": 0.9951976045747774
+          "n": 1285,
+          "precision": 0.9252336448598131,
+          "recall": 0.9611650485436893,
+          "f1": 0.9428571428571428,
+          "roc_auc": 0.9989568445780559,
+          "pr_auc": 0.9886363689592348
         },
         "AUTHORIZED_PUSH_PAYMENT": {
-          "n": 1361,
-          "precision": 0.967948717948718,
-          "recall": 0.967948717948718,
-          "f1": 0.967948717948718,
-          "roc_auc": 0.9768778593467391,
-          "pr_auc": 0.971454347555483
+          "n": 1338,
+          "precision": 0.9493670886075949,
+          "recall": 0.9615384615384616,
+          "f1": 0.9554140127388535,
+          "roc_auc": 0.9763791270770965,
+          "pr_auc": 0.9702614738232155
+        },
+        "MULE_NETWORK": {
+          "n": 1303,
+          "precision": 0.936,
+          "recall": 0.9669421487603306,
+          "f1": 0.9512195121951219,
+          "roc_auc": 0.9809085315545859,
+          "pr_auc": 0.9701302111929608
         }
       }
     }
+  },
+  "_artifact_metadata": {
+    "generated_at_utc": "2026-09-05T02:18:01.268469+00:00",
+    "git_commit": "unknown (not a git checkout, or git unavailable)",
+    "git_dirty": true,
+    "python_version": "3.14.4",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "package_versions": {
+      "numpy": "2.4.4",
+      "pandas": "3.0.2",
+      "sklearn": "1.8.0",
+      "xgboost": "3.2.0",
+      "pydantic": "2.13.4"
+    },
+    "seeds": {
+      "RANDOM_STATE": 42,
+      "NORMAL_WORLD_SEED": 7
+    },
+    "dataset_content_hash": {
+      "ato_corpus_raw.json": "fae8c944932167db8234990adb4b4a5c0286eb6b4e498d592efa485e91f8ed05",
+      "app_corpus_raw.json": "d44c09746a9f486ded387e2e32b411f8f0b01e2a970e049122cf84b55816de8c",
+      "hard_examples.jsonl": "0fa806e81ce91cebfc37f85c0e3a0cf7e041334f297f0d1f4461fa5aed2c0be9"
+    },
+    "feature_schema_hash": "3a8d179f5f061eb039fcee6d66420e9527ca66d7d70e066420b8ae210d4d7b06",
+    "feature_schema_n_features": 28
   }
 }

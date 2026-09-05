@@ -1,374 +1,538 @@
 {
   "single_holdout_split_80_20": {
     "overall": {
-      "n": 292,
-      "precision": 0.9807692307692307,
-      "recall": 1.0,
-      "f1": 0.9902912621359223,
-      "roc_auc": 0.9979253112033195,
-      "pr_auc": 0.9807692307692307,
+      "n": 312,
+      "precision": 1.0,
+      "recall": 0.9866666666666667,
+      "f1": 0.9932885906040269,
+      "roc_auc": 0.9933052039381155,
+      "pr_auc": 0.9898717948717949,
       "confusion_matrix": [
         [
-          240,
-          1
+          237,
+          0
         ],
         [
-          0,
-          51
+          1,
+          74
         ]
       ]
     },
     "by_family": {
-      "ACCOUNT_TAKEOVER": {
-        "n": 262,
-        "precision": 0.9545454545454546,
-        "recall": 1.0,
-        "f1": 0.9767441860465116,
-        "roc_auc": 0.9979253112033195,
-        "pr_auc": 0.9545454545454546
-      },
       "AUTHORIZED_PUSH_PAYMENT": {
-        "n": 271,
-        "precision": 0.967741935483871,
+        "n": 265,
+        "precision": 1.0,
+        "recall": 0.9642857142857143,
+        "f1": 0.9818181818181818,
+        "roc_auc": 0.9820675105485234,
+        "pr_auc": 0.9680592991913747
+      },
+      "MULE_NETWORK": {
+        "n": 264,
+        "precision": 1.0,
         "recall": 1.0,
-        "f1": 0.9836065573770492,
-        "roc_auc": 0.9979253112033195,
-        "pr_auc": 0.967741935483871
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0
+      },
+      "ACCOUNT_TAKEOVER": {
+        "n": 257,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0
       }
     },
     "by_family_difficulty": {
-      "ACCOUNT_TAKEOVER_easy": {
-        "n": 243,
-        "precision": 0.6666666666666666,
+      "AUTHORIZED_PUSH_PAYMENT_medium": {
+        "n": 247,
+        "precision": 1.0,
+        "recall": 0.9,
+        "f1": 0.9473684210526315,
+        "roc_auc": 0.949789029535865,
+        "pr_auc": 0.9040485829959515,
+        "fraud_sample_size_warning": false
+      },
+      "AUTHORIZED_PUSH_PAYMENT_hard": {
+        "n": 248,
+        "precision": 1.0,
         "recall": 1.0,
-        "f1": 0.8,
-        "roc_auc": 0.9979253112033195,
-        "pr_auc": 0.6666666666666666,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0,
+        "fraud_sample_size_warning": false
+      },
+      "AUTHORIZED_PUSH_PAYMENT_advanced": {
+        "n": 244,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0,
+        "fraud_sample_size_warning": true
+      },
+      "MULE_NETWORK_easy": {
+        "n": 241,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0,
+        "fraud_sample_size_warning": true
+      },
+      "MULE_NETWORK_medium": {
+        "n": 241,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0,
+        "fraud_sample_size_warning": true
+      },
+      "MULE_NETWORK_hard": {
+        "n": 246,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0,
+        "fraud_sample_size_warning": true
+      },
+      "MULE_NETWORK_advanced": {
+        "n": 247,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0,
+        "fraud_sample_size_warning": false
+      },
+      "ACCOUNT_TAKEOVER_easy": {
+        "n": 244,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0,
         "fraud_sample_size_warning": true
       },
       "ACCOUNT_TAKEOVER_medium": {
-        "n": 244,
-        "precision": 0.75,
+        "n": 238,
+        "precision": 1.0,
         "recall": 1.0,
-        "f1": 0.8571428571428571,
-        "roc_auc": 0.9979253112033195,
-        "pr_auc": 0.75,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0,
         "fraud_sample_size_warning": true
       },
       "ACCOUNT_TAKEOVER_hard": {
-        "n": 248,
-        "precision": 0.875,
+        "n": 241,
+        "precision": 1.0,
         "recall": 1.0,
-        "f1": 0.9333333333333333,
-        "roc_auc": 0.9979253112033195,
-        "pr_auc": 0.875,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0,
         "fraud_sample_size_warning": true
       },
       "ACCOUNT_TAKEOVER_advanced": {
-        "n": 250,
-        "precision": 0.9,
+        "n": 245,
+        "precision": 1.0,
         "recall": 1.0,
-        "f1": 0.9473684210526315,
-        "roc_auc": 0.9979253112033195,
-        "pr_auc": 0.9,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0,
         "fraud_sample_size_warning": true
-      },
-      "AUTHORIZED_PUSH_PAYMENT_medium": {
-        "n": 250,
-        "precision": 0.9,
-        "recall": 1.0,
-        "f1": 0.9473684210526315,
-        "roc_auc": 0.9979253112033195,
-        "pr_auc": 0.9,
-        "fraud_sample_size_warning": true
-      },
-      "AUTHORIZED_PUSH_PAYMENT_hard": {
-        "n": 249,
-        "precision": 0.8888888888888888,
-        "recall": 1.0,
-        "f1": 0.9411764705882353,
-        "roc_auc": 0.9979253112033195,
-        "pr_auc": 0.8888888888888888,
-        "fraud_sample_size_warning": true
-      },
-      "AUTHORIZED_PUSH_PAYMENT_advanced": {
-        "n": 254,
-        "precision": 0.9285714285714286,
-        "recall": 1.0,
-        "f1": 0.9629629629629629,
-        "roc_auc": 0.9979253112033195,
-        "pr_auc": 0.9285714285714286,
-        "fraud_sample_size_warning": false
       }
     }
   },
   "cross_validated_5fold_ALL_FEATURES_single_stage": {
     "overall": {
-      "n": 1458,
-      "precision": 0.98046875,
-      "recall": 0.9920948616600791,
-      "f1": 0.9862475442043221,
-      "roc_auc": 0.9996851065225592,
-      "pr_auc": 0.9985694283369929,
+      "n": 1556,
+      "precision": 0.9864864864864865,
+      "recall": 0.9759358288770054,
+      "f1": 0.9811827956989247,
+      "roc_auc": 0.9988123999022774,
+      "pr_auc": 0.9965886898915727,
       "confusion_matrix": [
         [
-          1200,
+          1177,
           5
         ],
         [
-          2,
-          251
+          9,
+          365
         ]
       ]
     },
     "by_family": {
       "ACCOUNT_TAKEOVER": {
-        "n": 1302,
-        "precision": 0.9504950495049505,
-        "recall": 0.9896907216494846,
-        "f1": 0.9696969696969697,
-        "roc_auc": 0.9995037857723403,
-        "pr_auc": 0.9951276414373578
+        "n": 1279,
+        "precision": 0.9489795918367347,
+        "recall": 0.9587628865979382,
+        "f1": 0.9538461538461539,
+        "roc_auc": 0.9989359289688977,
+        "pr_auc": 0.9901376818224785
       },
       "AUTHORIZED_PUSH_PAYMENT": {
-        "n": 1361,
-        "precision": 0.96875,
-        "recall": 0.9935897435897436,
-        "f1": 0.9810126582278481,
-        "roc_auc": 0.9997978508351953,
-        "pr_auc": 0.9984169448228352
+        "n": 1338,
+        "precision": 0.9683544303797469,
+        "recall": 0.9807692307692307,
+        "f1": 0.9745222929936306,
+        "roc_auc": 0.9988828148726627,
+        "pr_auc": 0.9935936178710267
+      },
+      "MULE_NETWORK": {
+        "n": 1303,
+        "precision": 0.9596774193548387,
+        "recall": 0.9834710743801653,
+        "f1": 0.9714285714285714,
+        "roc_auc": 0.9986225895316805,
+        "pr_auc": 0.9896252827195031
       }
     },
     "by_family_difficulty": {
       "ACCOUNT_TAKEOVER_easy": {
-        "n": 1227,
+        "n": 1204,
         "precision": 0.8148148148148148,
         "recall": 1.0,
         "f1": 0.8979591836734694,
-        "roc_auc": 0.9999245567710299,
-        "pr_auc": 0.9962121212121211,
+        "roc_auc": 0.9997692662667281,
+        "pr_auc": 0.9887763751400114,
         "fraud_sample_size_warning": false
       },
       "ACCOUNT_TAKEOVER_medium": {
-        "n": 1230,
-        "precision": 0.8333333333333334,
-        "recall": 1.0,
-        "f1": 0.9090909090909091,
-        "roc_auc": 0.9999004149377594,
-        "pr_auc": 0.9954370370370372,
-        "fraud_sample_size_warning": false
-      },
-      "ACCOUNT_TAKEOVER_hard": {
-        "n": 1230,
-        "precision": 0.8333333333333334,
-        "recall": 1.0,
-        "f1": 0.9090909090909091,
-        "roc_auc": 0.9999336099585063,
-        "pr_auc": 0.9968615384615387,
-        "fraud_sample_size_warning": false
-      },
-      "ACCOUNT_TAKEOVER_advanced": {
-        "n": 1230,
+        "n": 1207,
         "precision": 0.8275862068965517,
         "recall": 0.96,
         "f1": 0.8888888888888888,
-        "roc_auc": 0.9983070539419087,
-        "pr_auc": 0.9605899070666688,
+        "roc_auc": 0.9996277495769882,
+        "pr_auc": 0.9839497584541064,
+        "fraud_sample_size_warning": false
+      },
+      "ACCOUNT_TAKEOVER_hard": {
+        "n": 1207,
+        "precision": 0.8333333333333334,
+        "recall": 1.0,
+        "f1": 0.9090909090909091,
+        "roc_auc": 0.9998984771573605,
+        "pr_auc": 0.9951948717948719,
+        "fraud_sample_size_warning": false
+      },
+      "ACCOUNT_TAKEOVER_advanced": {
+        "n": 1207,
+        "precision": 0.8148148148148148,
+        "recall": 0.88,
+        "f1": 0.8461538461538461,
+        "roc_auc": 0.9965482233502538,
+        "pr_auc": 0.9314722579172229,
         "fraud_sample_size_warning": false
       },
       "AUTHORIZED_PUSH_PAYMENT_easy": {
-        "n": 1211,
+        "n": 1188,
         "precision": 0.5454545454545454,
         "recall": 1.0,
         "f1": 0.7058823529411765,
-        "roc_auc": 0.9997233748271093,
-        "pr_auc": 0.9484126984126984,
+        "roc_auc": 0.9998589960518894,
+        "pr_auc": 0.976190476190476,
         "fraud_sample_size_warning": true
       },
       "AUTHORIZED_PUSH_PAYMENT_medium": {
-        "n": 1255,
+        "n": 1232,
         "precision": 0.9074074074074074,
         "recall": 0.98,
         "f1": 0.9423076923076923,
-        "roc_auc": 0.9997178423236515,
-        "pr_auc": 0.9935322661661614,
+        "roc_auc": 0.9989340101522842,
+        "pr_auc": 0.9849504687684302,
         "fraud_sample_size_warning": false
       },
       "AUTHORIZED_PUSH_PAYMENT_hard": {
-        "n": 1255,
-        "precision": 0.9090909090909091,
-        "recall": 1.0,
-        "f1": 0.9523809523809523,
-        "roc_auc": 0.9997676348547719,
-        "pr_auc": 0.9944249502017025,
+        "n": 1232,
+        "precision": 0.9074074074074074,
+        "recall": 0.98,
+        "f1": 0.9423076923076923,
+        "roc_auc": 0.9979526226734348,
+        "pr_auc": 0.9782853642417091,
         "fraud_sample_size_warning": false
       },
       "AUTHORIZED_PUSH_PAYMENT_advanced": {
-        "n": 1255,
-        "precision": 0.9090909090909091,
+        "n": 1232,
+        "precision": 0.9074074074074074,
+        "recall": 0.98,
+        "f1": 0.9423076923076923,
+        "roc_auc": 0.9996446700507615,
+        "pr_auc": 0.9924237652393941,
+        "fraud_sample_size_warning": false
+      },
+      "MULE_NETWORK_easy": {
+        "n": 1216,
+        "precision": 0.8717948717948718,
         "recall": 1.0,
-        "f1": 0.9523809523809523,
-        "roc_auc": 0.9999170124481328,
-        "pr_auc": 0.9981185185185186,
+        "f1": 0.9315068493150684,
+        "roc_auc": 0.9994028068080023,
+        "pr_auc": 0.9735589486277387,
+        "fraud_sample_size_warning": false
+      },
+      "MULE_NETWORK_medium": {
+        "n": 1209,
+        "precision": 0.8333333333333334,
+        "recall": 0.9259259259259259,
+        "f1": 0.8771929824561403,
+        "roc_auc": 0.9952371999749325,
+        "pr_auc": 0.933612642278101,
+        "fraud_sample_size_warning": false
+      },
+      "MULE_NETWORK_hard": {
+        "n": 1206,
+        "precision": 0.8275862068965517,
+        "recall": 1.0,
+        "f1": 0.9056603773584906,
+        "roc_auc": 0.999612239142696,
+        "pr_auc": 0.9764835062003674,
+        "fraud_sample_size_warning": false
+      },
+      "MULE_NETWORK_advanced": {
+        "n": 1218,
+        "precision": 0.8780487804878049,
+        "recall": 1.0,
+        "f1": 0.935064935064935,
+        "roc_auc": 0.9997649934198158,
+        "pr_auc": 0.9915714627199611,
         "fraud_sample_size_warning": false
       }
     }
   },
   "cross_validated_5fold_ablation_no_shortcut_or_beneficiary_device_features": {
     "overall": {
-      "n": 1458,
-      "precision": 0.9761904761904762,
-      "recall": 0.9723320158102767,
-      "f1": 0.9742574257425742,
-      "roc_auc": 0.9977711446049891,
-      "pr_auc": 0.9938742617289859,
+      "n": 1556,
+      "precision": 0.981029810298103,
+      "recall": 0.9679144385026738,
+      "f1": 0.9744279946164199,
+      "roc_auc": 0.9959915669082584,
+      "pr_auc": 0.9920334434661675,
       "confusion_matrix": [
         [
-          1199,
-          6
+          1175,
+          7
         ],
         [
-          7,
-          246
+          12,
+          362
         ]
       ]
     },
     "by_family": {
       "ACCOUNT_TAKEOVER": {
-        "n": 1302,
-        "precision": 0.9387755102040817,
-        "recall": 0.9484536082474226,
-        "f1": 0.9435897435897436,
-        "roc_auc": 0.9988749625700475,
-        "pr_auc": 0.989433888059821
+        "n": 1279,
+        "precision": 0.9278350515463918,
+        "recall": 0.9278350515463918,
+        "f1": 0.9278350515463918,
+        "roc_auc": 0.9963498874875714,
+        "pr_auc": 0.9743442349852818
       },
       "AUTHORIZED_PUSH_PAYMENT": {
-        "n": 1361,
-        "precision": 0.9625,
-        "recall": 0.9871794871794872,
-        "f1": 0.9746835443037974,
-        "roc_auc": 0.9970847962549207,
-        "pr_auc": 0.9913071144133877
+        "n": 1338,
+        "precision": 0.95625,
+        "recall": 0.9807692307692307,
+        "f1": 0.9683544303797469,
+        "roc_auc": 0.9956424356805067,
+        "pr_auc": 0.9879316169654777
+      },
+      "MULE_NETWORK": {
+        "n": 1303,
+        "precision": 0.9444444444444444,
+        "recall": 0.9834710743801653,
+        "f1": 0.9635627530364372,
+        "roc_auc": 0.9961544377788033,
+        "pr_auc": 0.9870420331078975
       }
     },
     "by_family_difficulty": {
       "ACCOUNT_TAKEOVER_easy": {
-        "n": 1227,
-        "precision": 0.7777777777777778,
+        "n": 1204,
+        "precision": 0.75,
         "recall": 0.9545454545454546,
-        "f1": 0.8571428571428571,
-        "roc_auc": 0.9995096190116937,
-        "pr_auc": 0.9831168831168832,
+        "f1": 0.84,
+        "roc_auc": 0.9949623134902322,
+        "pr_auc": 0.9368437648374889,
         "fraud_sample_size_warning": false
       },
       "ACCOUNT_TAKEOVER_medium": {
-        "n": 1230,
-        "precision": 0.7931034482758621,
+        "n": 1207,
+        "precision": 0.7666666666666667,
         "recall": 0.92,
-        "f1": 0.8518518518518519,
-        "roc_auc": 0.9988713692946057,
-        "pr_auc": 0.9690909090909091,
+        "f1": 0.8363636363636363,
+        "roc_auc": 0.99668358714044,
+        "pr_auc": 0.9468790513833993,
         "fraud_sample_size_warning": false
       },
       "ACCOUNT_TAKEOVER_hard": {
-        "n": 1230,
-        "precision": 0.8064516129032258,
+        "n": 1207,
+        "precision": 0.78125,
         "recall": 1.0,
-        "f1": 0.8928571428571429,
-        "roc_auc": 0.9999668049792532,
-        "pr_auc": 0.9984615384615385,
+        "f1": 0.8771929824561403,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0,
         "fraud_sample_size_warning": false
       },
       "ACCOUNT_TAKEOVER_advanced": {
-        "n": 1230,
-        "precision": 0.7931034482758621,
-        "recall": 0.92,
-        "f1": 0.8518518518518519,
-        "roc_auc": 0.9972282157676349,
-        "pr_auc": 0.9453667251667253,
+        "n": 1207,
+        "precision": 0.75,
+        "recall": 0.84,
+        "f1": 0.7924528301886793,
+        "roc_auc": 0.9935871404399323,
+        "pr_auc": 0.9103263090676885,
         "fraud_sample_size_warning": false
       },
       "AUTHORIZED_PUSH_PAYMENT_easy": {
-        "n": 1211,
-        "precision": 0.5,
+        "n": 1188,
+        "precision": 0.46153846153846156,
         "recall": 1.0,
-        "f1": 0.6666666666666666,
-        "roc_auc": 1.0,
-        "pr_auc": 1.0,
+        "f1": 0.631578947368421,
+        "roc_auc": 0.9995769881556684,
+        "pr_auc": 0.9305555555555556,
         "fraud_sample_size_warning": true
       },
       "AUTHORIZED_PUSH_PAYMENT_medium": {
-        "n": 1255,
-        "precision": 0.8909090909090909,
+        "n": 1232,
+        "precision": 0.875,
         "recall": 0.98,
-        "f1": 0.9333333333333333,
-        "roc_auc": 0.9954107883817427,
-        "pr_auc": 0.9803289552645937,
+        "f1": 0.9245283018867925,
+        "roc_auc": 0.9930964467005077,
+        "pr_auc": 0.9768885927197989,
         "fraud_sample_size_warning": false
       },
       "AUTHORIZED_PUSH_PAYMENT_hard": {
-        "n": 1255,
-        "precision": 0.8909090909090909,
+        "n": 1232,
+        "precision": 0.875,
         "recall": 0.98,
-        "f1": 0.9333333333333333,
-        "roc_auc": 0.9955933609958507,
-        "pr_auc": 0.9827545741324921,
+        "f1": 0.9245283018867925,
+        "roc_auc": 0.9941032148900171,
+        "pr_auc": 0.9746383983213134,
         "fraud_sample_size_warning": false
       },
       "AUTHORIZED_PUSH_PAYMENT_advanced": {
-        "n": 1255,
-        "precision": 0.8928571428571429,
+        "n": 1232,
+        "precision": 0.875,
+        "recall": 0.98,
+        "f1": 0.9245283018867925,
+        "roc_auc": 0.9992554991539763,
+        "pr_auc": 0.9883970796326421,
+        "fraud_sample_size_warning": false
+      },
+      "MULE_NETWORK_easy": {
+        "n": 1216,
+        "precision": 0.8292682926829268,
         "recall": 1.0,
-        "f1": 0.9433962264150944,
-        "roc_auc": 0.9999004149377593,
-        "pr_auc": 0.997857142857143,
+        "f1": 0.9066666666666666,
+        "roc_auc": 0.9993032746093362,
+        "pr_auc": 0.9724381105944843,
+        "fraud_sample_size_warning": false
+      },
+      "MULE_NETWORK_medium": {
+        "n": 1209,
+        "precision": 0.78125,
+        "recall": 0.9259259259259259,
+        "f1": 0.847457627118644,
+        "roc_auc": 0.9838628814940151,
+        "pr_auc": 0.9261871144650691,
+        "fraud_sample_size_warning": false
+      },
+      "MULE_NETWORK_hard": {
+        "n": 1206,
+        "precision": 0.7741935483870968,
+        "recall": 1.0,
+        "f1": 0.8727272727272727,
+        "roc_auc": 0.9997532430908065,
+        "pr_auc": 0.9877718778805734,
+        "fraud_sample_size_warning": false
+      },
+      "MULE_NETWORK_advanced": {
+        "n": 1218,
+        "precision": 0.8372093023255814,
+        "recall": 1.0,
+        "f1": 0.9113924050632911,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0,
         "fraud_sample_size_warning": false
       }
     }
   },
   "cascade_stage1_rules_plus_stage2_xgboost": {
     "overall": {
-      "n": 1458,
-      "precision": 0.9801587301587301,
-      "recall": 0.9762845849802372,
-      "f1": 0.9782178217821782,
-      "roc_auc": 0.9855427812310367,
-      "pr_auc": 0.9826667502930168,
+      "n": 1556,
+      "precision": 0.989010989010989,
+      "recall": 0.9625668449197861,
+      "f1": 0.975609756097561,
+      "roc_auc": 0.9837694653311255,
+      "pr_auc": 0.9818768693514975,
       "confusion_matrix": [
         [
-          1200,
-          5
+          1178,
+          4
         ],
         [
-          6,
-          247
+          14,
+          360
         ]
       ]
     },
     "stage1_diagnostics": {
-      "stage1_recall_on_fraud_ceiling": 0.9802371541501976,
-      "stage1_fraud_missed_permanently": 5,
-      "stage1_legit_escalation_rate": 0.44149377593360994,
-      "stage1_legit_autoclear_rate_cost_saving": 0.5585062240663901,
+      "stage1_recall_on_fraud_ceiling": 0.9786096256684492,
+      "stage1_fraud_missed_permanently": 8,
+      "stage1_legit_escalation_rate": 0.46277495769881555,
+      "stage1_legit_autoclear_rate_cost_saving": 0.5372250423011844,
       "note": "stage1_recall_on_fraud_ceiling is the cascade's hard recall ceiling -- Stage 2 can never catch what Stage 1 auto-clears."
     },
     "by_family": {
       "ACCOUNT_TAKEOVER": {
-        "n": 1302,
-        "precision": 0.9504950495049505,
-        "recall": 0.9896907216494846,
-        "f1": 0.9696969696969697,
-        "roc_auc": 0.9996064507849596,
-        "pr_auc": 0.9958177725622713
+        "n": 1279,
+        "precision": 0.9587628865979382,
+        "recall": 0.9587628865979382,
+        "f1": 0.9587628865979382,
+        "roc_auc": 0.999206307673522,
+        "pr_auc": 0.991826299161898
       },
       "AUTHORIZED_PUSH_PAYMENT": {
-        "n": 1361,
-        "precision": 0.967948717948718,
-        "recall": 0.967948717948718,
-        "f1": 0.967948717948718,
-        "roc_auc": 0.9767980636237898,
-        "pr_auc": 0.9708040342938887
+        "n": 1338,
+        "precision": 0.974025974025974,
+        "recall": 0.9615384615384616,
+        "f1": 0.967741935483871,
+        "roc_auc": 0.9763194715605883,
+        "pr_auc": 0.9697042936751694
+      },
+      "MULE_NETWORK": {
+        "n": 1303,
+        "precision": 0.9669421487603306,
+        "recall": 0.9669421487603306,
+        "f1": 0.9669421487603306,
+        "roc_auc": 0.9809994266616324,
+        "pr_auc": 0.9699266401688118
       }
     }
+  },
+  "_artifact_metadata": {
+    "generated_at_utc": "2026-09-04T05:28:23.628515+00:00",
+    "git_commit": "unknown (not a git checkout, or git unavailable)",
+    "git_dirty": "unknown",
+    "python_version": "3.12.3",
+    "platform": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39",
+    "package_versions": {
+      "numpy": "2.2.4",
+      "pandas": "2.2.3",
+      "sklearn": "1.6.1",
+      "xgboost": "3.4.1",
+      "pydantic": "2.13.4"
+    },
+    "seeds": {
+      "NORMAL_WORLD_SEED": 7,
+      "RANDOM_STATE": 42
+    },
+    "dataset_content_hash": {
+      "ato_corpus_raw.json": "fae8c944932167db8234990adb4b4a5c0286eb6b4e498d592efa485e91f8ed05",
+      "app_corpus_raw.json": "d44c09746a9f486ded387e2e32b411f8f0b01e2a970e049122cf84b55816de8c"
+    },
+    "feature_schema_hash": "3a8d179f5f061eb039fcee6d66420e9527ca66d7d70e066420b8ae210d4d7b06",
+    "feature_schema_n_features": 28
   }
 }

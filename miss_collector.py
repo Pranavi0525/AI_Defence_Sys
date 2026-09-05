@@ -108,8 +108,9 @@ def get_df_and_scores(cfg: dict):
     own main() does).
     """
     print("Loading Red Team corpora + building the (unmodified) feature table...")
-    all_records, ring_ids = cwg.load_all_records(cfg)
-    df, A, connected_mask = cwg.build_feature_table_and_graph(all_records, ring_ids)
+    all_records = cwg.load_all_records(cfg)
+    ring_membership = cwg.get_graph_connected_trace_ids(all_records)
+    df, A, connected_mask = cwg.build_feature_table_and_graph(all_records, ring_membership)
     y = df["fraud"].values.astype(int)
 
     if CACHE_PATH.exists():
@@ -129,7 +130,7 @@ def get_df_and_scores(cfg: dict):
     # fused score here (not the raw Stage 1+2+3 score) keeps this file
     # consistent with decision_policy.py's own frozen thresholds, which are
     # now tuned against the fused score too.
-    _, A2, connected_mask2 = cwg.build_feature_table_and_graph(all_records, ring_ids)
+    _, A2, connected_mask2 = cwg.build_feature_table_and_graph(all_records, ring_membership)
     return df2, all_records, A2, connected_mask2, y2, proba, dollars
 
 

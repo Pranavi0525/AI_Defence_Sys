@@ -16,21 +16,20 @@ Design decisions:
 
 from __future__ import annotations
 
-import uuid
 from datetime import datetime
 from decimal import Decimal
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
+from red_team.schemas.id_generator import generate_id as _default_uuid
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
-def _default_uuid() -> str:
-    """Generate a new UUID4 string."""
-    return str(uuid.uuid4())
+# _default_uuid() is now the shared, seedable generator from id_generator.py
+# (see that module's docstring). Unseeded behavior is unchanged; call
+# red_team.schemas.id_generator.seed_ids(seed) to make IDs reproducible.
 
 
 # ---------------------------------------------------------------------------
@@ -67,6 +66,16 @@ class Account(BaseModel):
 
     account_id: str = Field(default_factory=_default_uuid, description="Unique account identifier (UUID).")
     customer_id: str = Field(..., min_length=1, description="FK → Customer.customer_id.")
+    bank_id: str = Field(
+        ..., min_length=1,
+        description=(
+            "Identifier of the bank/financial institution holding this account. "
+            "A customer's accounts are not required to share a bank_id, since "
+            "real customers bank at more than one institution. This field is what "
+            "lets a network-level (multi-bank) analysis see a mule pattern that is "
+            "invisible from any single institution's own data."
+        ),
+    )
     account_type: Literal["checking", "savings", "credit", "business"] = Field(
         ..., description="Type of financial account."
     )

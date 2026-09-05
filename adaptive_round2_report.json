@@ -1,8 +1,8 @@
 {
   "engine": "real_xgboost",
   "legit_data_source": "feature_table.csv (stable persisted legitimate traces; prevents NormalWorld UUID4 trace-id drift across rounds)",
-  "miss_source_used": "C:\\Users\\New\\Downloads\\AI_Defence_Sys-master (1)\\AI_Defence_Sys-master\\misses.jsonl",
-  "miss_source_wiring_gap_note": "Legacy C:\\Users\\New\\Downloads\\AI_Defence_Sys-master (1)\\AI_Defence_Sys-master\\blue_team_output\\misses.jsonl contains 2 rows and is not used. The adaptive loop and hard-example generator both consume the repo-root misses.jsonl (5 rows), the full-cascade miss handoff written by miss_collector.py against the Stage 5 fused score.",
+  "miss_source_used": "C:\\Users\\New\\Downloads\\AI_Defence_Sys-main\\AI_Defence_Sys-main\\misses.jsonl",
+  "miss_source_wiring_gap_note": "Legacy C:\\Users\\New\\Downloads\\AI_Defence_Sys-main\\AI_Defence_Sys-main\\blue_team_output\\misses.jsonl contains 8 rows and is not used. The adaptive loop and hard-example generator both consume the repo-root misses.jsonl (5 rows), the full-cascade miss handoff written by miss_collector.py against the Stage 5 fused score.",
   "misses_found": [
     {
       "trace_id": "atk-693a3017",
@@ -46,9 +46,9 @@
     "stage3_graph_miss": "none of the 7 real misses fall in this category -- no change made",
     "decision_policy_miss": "none of the 7 real misses fall in this category -- no change made"
   },
-  "hard_examples_generated_total": 42,
+  "hard_examples_generated_total": 43,
   "hard_examples_used_for_stage2_retrain": 5,
-  "hard_examples_used_as_stage1_evidence_only": 37,
+  "hard_examples_used_as_stage1_evidence_only": 38,
   "stage1_direct_check": {
     "n_stage1_misses_checked": 3,
     "n_newly_escalated_by_v2": 3,
@@ -79,16 +79,16 @@
       }
     ],
     "measured_cost_on_real_legit_population": {
-      "n_legit_traces": 1205,
-      "v1_legit_escalation_rate": 0.44149377593360994,
-      "v2_legit_escalation_rate": 0.44149377593360994,
-      "additional_legit_traces_escalated_by_v2": 0,
-      "additional_legit_escalation_rate": 0.0,
+      "n_legit_traces": 1156,
+      "v1_legit_escalation_rate": 0.4671280276816609,
+      "v2_legit_escalation_rate": 0.47923875432525953,
+      "additional_legit_traces_escalated_by_v2": 14,
+      "additional_legit_escalation_rate": 0.012110726643598616,
       "high_value_signal_alone_escalates_n_legit": 0,
-      "beneficiary_no_txn_signal_alone_escalates_n_legit": 0,
-      "legit_amount_max_p99": 6321.759200000002,
-      "legit_amount_max_p999": 6972.272520000007,
-      "legit_amount_max_max": 7294.71,
+      "beneficiary_no_txn_signal_alone_escalates_n_legit": 14,
+      "legit_amount_max_p99": 6290.821500000001,
+      "legit_amount_max_p999": 7109.575050000003,
+      "legit_amount_max_max": 7151.67,
       "high_value_threshold_used": 8000.0
     }
   },
@@ -100,12 +100,12 @@
     "note": "Both trained models NEVER see these two trace_ids -- explicitly excluded from the training pool regardless of the random 80/20 split, so this is a genuine out-of-sample check, not scoring a model on rows it already saw.",
     "n_hard_ato_examples_added": 5,
     "proba_without_hard_examples": {
-      "atk-693a3017": 0.1021,
-      "atk-1179705d": 0.0024
+      "atk-693a3017": 0.0836,
+      "atk-1179705d": 0.0303
     },
     "proba_with_hard_examples": {
-      "atk-693a3017": 0.9188,
-      "atk-1179705d": 0.8229
+      "atk-693a3017": 0.9088,
+      "atk-1179705d": 0.6308
     },
     "decision_threshold": 0.5,
     "now_crosses_threshold": {
@@ -119,63 +119,71 @@
     "caveat": "If most/all known misses land in the training pool for this draw, the untouched-eval aggregate metrics below are a valid REGRESSION CHECK (did anything else break?) but NOT by themselves evidence the known misses got fixed -- see the direct held-out checks (stage1_direct_check, stage2_retrain_check) for that instead."
   },
   "round1_holdout_metrics": {
-    "n": 291,
-    "precision": 0.9803921568627451,
-    "recall": 1.0,
-    "f1": 0.9900990099009901,
-    "roc_auc": 1.0,
-    "pr_auc": 1.0,
-    "confusion_matrix": [
-      [
-        240,
-        1
-      ],
-      [
-        0,
-        50
-      ]
-    ],
-    "by_family": {
-      "ACCOUNT_TAKEOVER": {
-        "n": 260,
-        "precision": 0.95,
-        "recall": 1.0,
-        "f1": 0.9743589743589743,
-        "roc_auc": 1.0,
-        "pr_auc": 1.0
-      },
-      "AUTHORIZED_PUSH_PAYMENT": {
-        "n": 272,
-        "precision": 0.96875,
-        "recall": 1.0,
-        "f1": 0.9841269841269841,
-        "roc_auc": 1.0,
-        "pr_auc": 0.9999999999999998
-      }
-    },
-    "stage1_recall_ceiling_on_holdout_fraud": 1.0,
-    "stage1_legit_escalation_rate_on_holdout": 0.4066390041493776
-  },
-  "round2_holdout_metrics": {
-    "n": 291,
+    "n": 305,
     "precision": 1.0,
-    "recall": 1.0,
-    "f1": 1.0,
+    "recall": 0.9864864864864865,
+    "f1": 0.9931972789115646,
     "roc_auc": 1.0,
-    "pr_auc": 1.0,
+    "pr_auc": 0.9999999999999999,
     "confusion_matrix": [
       [
-        241,
+        231,
         0
       ],
       [
-        0,
-        50
+        1,
+        73
       ]
     ],
     "by_family": {
       "ACCOUNT_TAKEOVER": {
-        "n": 260,
+        "n": 244,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "n": 267,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0
+      },
+      "MULE_NETWORK": {
+        "n": 256,
+        "precision": 1.0,
+        "recall": 0.96,
+        "f1": 0.9795918367346939,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0000000000000002
+      }
+    },
+    "stage1_recall_ceiling_on_holdout_fraud": 1.0,
+    "stage1_legit_escalation_rate_on_holdout": 0.4675324675324675
+  },
+  "round2_holdout_metrics": {
+    "n": 305,
+    "precision": 1.0,
+    "recall": 0.9864864864864865,
+    "f1": 0.9931972789115646,
+    "roc_auc": 1.0,
+    "pr_auc": 0.9999999999999999,
+    "confusion_matrix": [
+      [
+        231,
+        0
+      ],
+      [
+        1,
+        73
+      ]
+    ],
+    "by_family": {
+      "ACCOUNT_TAKEOVER": {
+        "n": 244,
         "precision": 1.0,
         "recall": 1.0,
         "f1": 1.0,
@@ -183,21 +191,29 @@
         "pr_auc": 0.9999999999999998
       },
       "AUTHORIZED_PUSH_PAYMENT": {
-        "n": 272,
+        "n": 267,
         "precision": 1.0,
         "recall": 1.0,
         "f1": 1.0,
         "roc_auc": 1.0,
         "pr_auc": 1.0
+      },
+      "MULE_NETWORK": {
+        "n": 256,
+        "precision": 1.0,
+        "recall": 0.96,
+        "f1": 0.9795918367346939,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0
       }
     },
     "stage1_recall_ceiling_on_holdout_fraud": 1.0,
-    "stage1_legit_escalation_rate_on_holdout": 0.4066390041493776
+    "stage1_legit_escalation_rate_on_holdout": 0.48484848484848486
   },
   "metric_deltas_round2_minus_round1": {
-    "precision": 0.0196,
+    "precision": 0.0,
     "recall": 0.0,
-    "f1": 0.0099,
+    "f1": 0.0,
     "roc_auc": 0.0,
     "pr_auc": 0.0
   },
@@ -208,7 +224,7 @@
     "decision_policy": []
   },
   "verdict": {
-    "stage1_recall_ceiling": "RAISED -- 3 of 3 real stage1_miss cases now escalate to Stage 2 under the additive v2 rules, with 0 additional legitimate traces escalated in the calibration population.",
+    "stage1_recall_ceiling": "RAISED -- 3 of 3 real stage1_miss cases now escalate to Stage 2 under the additive v2 rules, with 14 additional legitimate traces escalated in the calibration population.",
     "stage2_generalization": "FIXED in the isolated stage-aware check -- 2 of 2 original Stage-2 misses cross the decision threshold after adding validated ATO hard examples; 0 remain below threshold.",
     "untouched_eval_aggregate": "VALID regression comparison on the same persisted original-corpus holdout containing both classes. Known misses and generated hard examples are excluded from this aggregate holdout; stage-aware direct checks provide the evidence for fixing the known misses.",
     "no_thresholds_lowered_no_rules_weakened": true

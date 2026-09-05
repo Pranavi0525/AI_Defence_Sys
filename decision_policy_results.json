@@ -1,62 +1,157 @@
 {
   "naive": {
-    "t_review": 0.0766,
-    "t_block": 0.1479,
-    "allow_rate": 0.7455,
-    "review_rate": 0.0336,
-    "block_rate": 0.2209,
-    "legit_blocked": 50,
-    "legit_blocked_rate": 0.0423,
-    "legit_reviewed_rate": 0.039,
-    "fraud_blocked": 272,
+    "t_review": 0.0589,
+    "t_block": 0.0976,
+    "allow_rate": 0.6947,
+    "review_rate": 0.0341,
+    "block_rate": 0.2712,
+    "legit_blocked": 55,
+    "legit_blocked_rate": 0.0465,
+    "legit_reviewed_rate": 0.0423,
+    "fraud_blocked": 367,
     "fraud_reviewed": 3,
-    "fraud_allowed": 2,
-    "fraud_recall_blocked_only": 0.9819,
-    "fraud_recall_blocked_plus_review": 0.9928,
-    "dollars_fraud_allowed_through": 0.0,
-    "dollars_fraud_total": 6285032.41,
-    "expected_cost_at_assumed_prevalence": 9592.72,
+    "fraud_allowed": 4,
+    "fraud_recall_blocked_only": 0.9813,
+    "fraud_recall_blocked_plus_review": 0.9893,
+    "dollars_fraud_allowed_through": 1748.23,
+    "dollars_fraud_total": 7304745.04,
+    "expected_cost_at_assumed_prevalence": 11386.59,
+    "liability_breakdown": {
+      "ACCOUNT_TAKEOVER": {
+        "liable_side": "SENDING",
+        "acting_side": "SENDING",
+        "sending_liability_share": 1.0,
+        "receiving_liability_share": 0.0,
+        "n_fraud_traces": 97,
+        "n_blocked": 95,
+        "n_reviewed": 1,
+        "n_allowed_through": 1,
+        "dollars_allowed_through_total": 0.0,
+        "dollars_allowed_through_this_institution_liable_for": 0.0
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "liable_side": "SHARED_50_50",
+        "acting_side": "BOTH",
+        "sending_liability_share": 0.5,
+        "receiving_liability_share": 0.5,
+        "n_fraud_traces": 156,
+        "n_blocked": 152,
+        "n_reviewed": 2,
+        "n_allowed_through": 2,
+        "dollars_allowed_through_total": 0.0,
+        "dollars_allowed_through_this_institution_liable_for": 0.0
+      },
+      "MULE_NETWORK": {
+        "liable_side": "RECEIVING",
+        "acting_side": "RECEIVING",
+        "sending_liability_share": 1.0,
+        "receiving_liability_share": 1.0,
+        "n_fraud_traces": 121,
+        "n_blocked": 120,
+        "n_reviewed": 0,
+        "n_allowed_through": 1,
+        "dollars_allowed_through_total": 1748.23,
+        "dollars_allowed_through_this_institution_liable_for": 1748.23
+      }
+    },
     "cost_model": {
       "review_ops_cost": 12.0,
       "review_catch_rate": 0.85,
       "legit_block_friction_cost": 150.0,
-      "assumed_production_fraud_rate": null
+      "assumed_production_fraud_rate": null,
+      "app_sending_liability_share": 0.5
     }
   },
   "corrected": {
-    "t_review": 0.1479,
-    "t_block": 0.9196,
-    "allow_rate": 0.7791,
-    "review_rate": 0.0514,
-    "block_rate": 0.1694,
+    "t_review": 0.0976,
+    "t_block": 0.9651,
+    "allow_rate": 0.7288,
+    "review_rate": 0.0501,
+    "block_rate": 0.2211,
     "legit_blocked": 1,
     "legit_blocked_rate": 0.0008,
-    "legit_reviewed_rate": 0.0415,
-    "fraud_blocked": 246,
-    "fraud_reviewed": 26,
-    "fraud_allowed": 5,
-    "fraud_recall_blocked_only": 0.8881,
-    "fraud_recall_blocked_plus_review": 0.9819,
-    "dollars_fraud_allowed_through": 10031.44,
-    "dollars_fraud_total": 6285032.41,
-    "expected_cost_at_assumed_prevalence": 1553.35,
+    "legit_reviewed_rate": 0.0457,
+    "fraud_blocked": 343,
+    "fraud_reviewed": 24,
+    "fraud_allowed": 7,
+    "fraud_recall_blocked_only": 0.9171,
+    "fraud_recall_blocked_plus_review": 0.9813,
+    "dollars_fraud_allowed_through": 11779.67,
+    "dollars_fraud_total": 7304745.04,
+    "expected_cost_at_assumed_prevalence": 1152.43,
+    "liability_breakdown": {
+      "ACCOUNT_TAKEOVER": {
+        "liable_side": "SENDING",
+        "acting_side": "SENDING",
+        "sending_liability_share": 1.0,
+        "receiving_liability_share": 0.0,
+        "n_fraud_traces": 97,
+        "n_blocked": 91,
+        "n_reviewed": 4,
+        "n_allowed_through": 2,
+        "dollars_allowed_through_total": 0.0,
+        "dollars_allowed_through_this_institution_liable_for": 0.0
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "liable_side": "SHARED_50_50",
+        "acting_side": "BOTH",
+        "sending_liability_share": 0.5,
+        "receiving_liability_share": 0.5,
+        "n_fraud_traces": 156,
+        "n_blocked": 149,
+        "n_reviewed": 3,
+        "n_allowed_through": 4,
+        "dollars_allowed_through_total": 10031.44,
+        "dollars_allowed_through_this_institution_liable_for": 5015.72
+      },
+      "MULE_NETWORK": {
+        "liable_side": "RECEIVING",
+        "acting_side": "RECEIVING",
+        "sending_liability_share": 1.0,
+        "receiving_liability_share": 1.0,
+        "n_fraud_traces": 121,
+        "n_blocked": 103,
+        "n_reviewed": 17,
+        "n_allowed_through": 1,
+        "dollars_allowed_through_total": 1748.23,
+        "dollars_allowed_through_this_institution_liable_for": 1748.23
+      }
+    },
     "cost_model": {
       "review_ops_cost": 12.0,
       "review_catch_rate": 0.85,
       "legit_block_friction_cost": 150.0,
-      "assumed_production_fraud_rate": 0.006
+      "assumed_production_fraud_rate": 0.006,
+      "app_sending_liability_share": 0.5
     }
   },
   "score_source": {
     "score": "risk_fusion_stacked_lr",
     "validation_population": "ring_overlay_corpus (cwg.load_all_records, same rows Stage 3/Stage 4 were validated on)",
     "fusion_avg_coefficients": {
-      "stage_1_2_score": 5.928600817886919,
-      "gcn_score": 6.0653321598993655,
-      "ae_score": 3.166978948041145,
-      "intercept": -3.818836197625319
+      "stage_1_2_score": 6.895750887885801,
+      "gcn_score": 2.4371936365657856,
+      "ae_score": 2.551862710853497,
+      "intercept": -3.843374197356046
     },
-    "n_graph_connected_nodes": 24,
+    "n_graph_connected_nodes": 214,
     "note": "These coefficients come from THIS run (ring-overlay corpus), not from risk_fusion_results.json's real_corpus_risk_fusion block, which is a separate no-overlay run with a structurally different (near-zero) gcn_score weight. Consumers needing to explain why the fused score moved (e.g. explainability.py) should read fusion_avg_coefficients from here, not from risk_fusion_results.json's real-corpus block."
+  },
+  "_artifact_metadata": {
+    "generated_at_utc": "2026-09-04T05:29:03.382998+00:00",
+    "git_commit": "unknown (not a git checkout, or git unavailable)",
+    "git_dirty": "unknown",
+    "python_version": "3.12.3",
+    "platform": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39",
+    "package_versions": {
+      "numpy": "2.2.4",
+      "pandas": "2.2.3",
+      "sklearn": "1.6.1",
+      "xgboost": "3.4.1",
+      "pydantic": "2.13.4"
+    },
+    "seeds": {
+      "RANDOM_STATE": 42
+    }
   }
 }

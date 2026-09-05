@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from typing import List, Tuple
 
 from red_team.schemas.events import Event
+from red_team.schemas.id_generator import seed_ids
 from red_team.world.state import WorldState
 from red_team.world.persona import PersonaParameters, get_default_personas
 from red_team.world.entity_generator import EntityGenerator
@@ -19,6 +20,10 @@ class NormalWorld:
 
     def __init__(self, seed: int = 42, start_time: datetime = None):
         self.seed = seed
+        # Makes every entity_id/event_id generated from here on a
+        # deterministic function of `seed`, not just the behavioral
+        # choices -- see red_team/schemas/id_generator.py.
+        seed_ids(self.seed)
         self.start_time = start_time or datetime(2025, 1, 1, 0, 0, 0)
         self.personas = get_default_personas()
         
@@ -31,12 +36,22 @@ class NormalWorld:
         n_customers: int = 100,
         n_merchants: int = 20,
         n_beneficiaries: int = 50,
+        bank_pool: List[str] | None = None,
+        cross_bank_rate: float = 0.15,
     ) -> None:
-        """Populate the world with synthetic entities."""
+        """Populate the world with synthetic entities.
+
+        bank_pool: simulated banks accounts can belong to. Defaults to a
+            single bank (single-institution simulation, backward compatible).
+            Pass e.g. ["BANK_A", "BANK_B", "BANK_C"] to simulate a multi-bank
+            population.
+        cross_bank_rate: see EntityGenerator.generate_population.
+        """
         logger.info(f"Generating population with {n_customers} customers.")
         
         custs, accts, devs, merchs, bens, rels = self.entity_gen.generate_population(
-            self.personas, n_customers, n_merchants, n_beneficiaries
+            self.personas, n_customers, n_merchants, n_beneficiaries,
+            bank_pool=bank_pool, cross_bank_rate=cross_bank_rate,
         )
         
         self.state.customers = {c.customer_id: c for c in custs}

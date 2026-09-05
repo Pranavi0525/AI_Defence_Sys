@@ -1,2 +1,9 @@
-{"trace_id": "atk-1179705d", "attack_family": "ACCOUNT_TAKEOVER", "attack_difficulty": "advanced", "model_confidence": 0.008381753228604794, "beneficiary_signal_fired": false, "new_device_signal_fired": true}
-{"trace_id": "atk-3f48c9b5", "attack_family": "AUTHORIZED_PUSH_PAYMENT", "attack_difficulty": "medium", "model_confidence": 0.3644599914550781, "beneficiary_signal_fired": false, "new_device_signal_fired": false}
+{"trace_id": "atk-87e38be9", "attack_family": "ACCOUNT_TAKEOVER", "attack_difficulty": "medium", "model_confidence": 0.48488491773605347, "beneficiary_signal_fired": false, "new_device_signal_fired": true}
+{"trace_id": "atk-30a559cd", "attack_family": "ACCOUNT_TAKEOVER", "attack_difficulty": "advanced", "model_confidence": 0.34263795614242554, "beneficiary_signal_fired": false, "new_device_signal_fired": true}
+{"trace_id": "atk-693a3017", "attack_family": "ACCOUNT_TAKEOVER", "attack_difficulty": "advanced", "model_confidence": 0.07446429878473282, "beneficiary_signal_fired": false, "new_device_signal_fired": true}
+{"trace_id": "atk-1179705d", "attack_family": "ACCOUNT_TAKEOVER", "attack_difficulty": "advanced", "model_confidence": 0.009646913968026638, "beneficiary_signal_fired": false, "new_device_signal_fired": true}
+{"trace_id": "atk-ee11d67a", "attack_family": "AUTHORIZED_PUSH_PAYMENT", "attack_difficulty": "medium", "model_confidence": 0.018709782510995865, "beneficiary_signal_fired": false, "new_device_signal_fired": false}
+{"trace_id": "atk-a127c99a", "attack_family": "AUTHORIZED_PUSH_PAYMENT", "attack_difficulty": "hard", "model_confidence": 0.0041441177017986774, "beneficiary_signal_fired": false, "new_device_signal_fired": false}
+{"trace_id": "atk-124853c8", "attack_family": "AUTHORIZED_PUSH_PAYMENT", "attack_difficulty": "advanced", "model_confidence": 0.19576725363731384, "beneficiary_signal_fired": false, "new_device_signal_fired": false}
+{"trace_id": "atk-195da29e", "attack_family": "MULE_NETWORK", "attack_difficulty": "medium", "model_confidence": 0.047412972897291183, "beneficiary_signal_fired": false, "new_device_signal_fired": false}
+{"trace_id": "atk-4bab58f2", "attack_family": "MULE_NETWORK", "attack_difficulty": "medium", "model_confidence": 0.004299275577068329, "beneficiary_signal_fired": false, "new_device_signal_fired": false}

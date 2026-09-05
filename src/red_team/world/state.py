@@ -60,10 +60,26 @@ class WorldState(BaseModel):
         # Event-driven graph updates
         payload = event.payload
         from red_team.schemas.events import (
-            DeviceEventPayload, TransactionEventPayload, RelationshipEventPayload, SessionEventPayload
+            DeviceEventPayload, TransactionEventPayload, RelationshipEventPayload,
+            SessionEventPayload, BeneficiaryEventPayload
         )
         
-        if isinstance(payload, DeviceEventPayload):
+        if isinstance(payload, BeneficiaryEventPayload):
+            if payload.action == "add":
+                self.graph.add_entity("beneficiary", payload.beneficiary.beneficiary_id)
+                rel = Relationship(
+                    source_entity_type="customer",
+                    source_entity_id=event.envelope.customer_id,
+                    target_entity_type="beneficiary",
+                    target_entity_id=payload.beneficiary.beneficiary_id,
+                    relationship_type="transacts_with",
+                    established_date=event.envelope.timestamp,
+                    last_activity_date=event.envelope.timestamp,
+                )
+                self.relationships[rel.relationship_id] = rel
+                self.graph.add_relationship(rel)
+
+        elif isinstance(payload, DeviceEventPayload):
             self.graph.add_entity("device", payload.device.device_id)
             # Add relationship between customer and device
             rel = Relationship(

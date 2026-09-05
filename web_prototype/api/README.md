@@ -15,16 +15,32 @@ pip install -r requirements.txt
 
 ## Run
 
-From the repo root:
-
-```powershell
-$env:PYTHONPATH="src"
-python -m uvicorn api.app:app --reload --port 8000
+```bash
+python3 web_prototype/run_api.py --reload
 ```
+
+This works from **any** directory — the repo root, `web_prototype/`,
+or elsewhere — because `run_api.py` resolves every path from its own
+file location instead of relying on the current working directory.
 
 Then open **http://localhost:8000/docs** — that's an interactive page
 where you can try every endpoint by hand, useful for the demo itself if
 you want to show the API directly.
+
+### Superseded: the old documented command
+
+`PYTHONPATH=src python -m uvicorn api.app:app --reload --port 8000`,
+run from the repo root, **does not work** — `api` is a package under
+`web_prototype/`, not a top-level package at the repo root, so
+`import api.app` raises `ModuleNotFoundError`. It only ever worked by
+accident, when the process's cwd already happened to be
+`web_prototype/` (`cd web_prototype && uvicorn api.app:app ...`). This
+was confirmed by reproduction, not assumed — see
+`reports/FINAL_VALIDATION_REPORT.md`, section 5, which flagged the same
+discrepancy in an earlier pass but deliberately left it unfixed pending
+this launcher. `run_api.py` removes the cwd dependency; if you still
+want to invoke uvicorn directly, `cd web_prototype && uvicorn
+api.app:app --reload --port 8000` remains a valid workaround.
 
 ## Endpoints
 
