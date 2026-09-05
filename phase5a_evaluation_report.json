@@ -1,0 +1,413 @@
+{
+  "schema_version": "phase5a.1",
+  "evaluation": {
+    "dataset": "cascade_with_graph.load_all_records() (ring-overlay validation population) + decision_policy.load_cached_validation_data('fused')",
+    "row_count": 1556,
+    "unique_trace_ids": 1556,
+    "fraud_count": 374,
+    "legitimate_count": 1182,
+    "attack_family_counts": {
+      "total": 1556,
+      "ACCOUNT_TAKEOVER": 97,
+      "AUTHORIZED_PUSH_PAYMENT": 156,
+      "MULE_NETWORK": 121,
+      "legitimate": 1182
+    },
+    "matches_documented_phase4_population": true
+  },
+  "policy": {
+    "source": "decision_policy_results.json",
+    "variant": "corrected",
+    "review_threshold": 0.0933,
+    "block_threshold": 0.9643,
+    "score_source": {
+      "score": "risk_fusion_stacked_lr",
+      "validation_population": "ring_overlay_corpus (cwg.load_all_records, same rows Stage 3/Stage 4 were validated on)",
+      "fusion_avg_coefficients": {
+        "stage_1_2_score": 6.886057041599038,
+        "gcn_score": 2.440168114826725,
+        "ae_score": 2.514358617327715,
+        "intercept": -3.855113815235474
+      },
+      "n_graph_connected_nodes": 229,
+      "note": "These coefficients come from THIS run (ring-overlay corpus), not from risk_fusion_results.json's real_corpus_risk_fusion block, which is a separate no-overlay run with a structurally different (near-zero) gcn_score weight. Consumers needing to explain why the fused score moved (e.g. explainability.py) should read fusion_avg_coefficients from here, not from risk_fusion_results.json's real-corpus block."
+    },
+    "methodology_note": {
+      "threshold_selection_optimism": "The 'corrected' block above selects (t_review, t_block) by grid search over expected cost computed on the FULL validation population, then reports allow/review/block rates, recall, cost, and liability_breakdown on that SAME population. proba is legitimately out-of-fold w.r.t. the base/fusion models, but the threshold pair itself is a free parameter fit to this exact sample and judged on it -- a separate, additional source of optimism (moderate severity; does not affect the API, which uses a fixed DECISION_THRESHOLD=0.5 on Stage 1+2 only and does not consume these thresholds -- see web_prototype/api/inference.py). 'nested_fold_honest_estimate' below is a fold-honest estimate of the OUT-OF-SAMPLE PERFORMANCE OF THE THRESHOLD-SELECTION PROCEDURE itself, not literally the future performance of the single full-population-selected 'corrected' pair above: thresholds are re-selected on 4 folds and applied only to the held-out 5th, rotated across all 5, and different outer folds may pick different pairs (see its 'fold_thresholds' list). See reports/stage_leakage_audit_risk_fusion_decision_policy.md, Finding 2, for the full writeup."
+    }
+  },
+  "scores": {
+    "available_count": 1556,
+    "unavailable_count": 0,
+    "min": 0.018875271212418686,
+    "max": 0.9997767803755082,
+    "mean": 0.26317818912901125,
+    "median": 0.03502713363511407,
+    "std": 0.4015251539658678
+  },
+  "classification": {
+    "positive_class_definition": "positive = fraud (y == 1), negative = legitimate (y == 0)",
+    "threshold_used": 0.5,
+    "confusion_matrix": {
+      "true_positive": 362,
+      "true_negative": 1176,
+      "false_positive": 6,
+      "false_negative": 12
+    },
+    "accuracy": 0.9884318766066839,
+    "precision": 0.9836956521739131,
+    "recall": 0.9679144385026738,
+    "f1": 0.9757412398921833,
+    "canonical_cross_check": "cascade_with_graph.block_metrics",
+    "canonical_cross_check_passed": true
+  },
+  "fraud_metrics": {
+    "fraud_count": 374,
+    "legitimate_count": 1182,
+    "fraud_recall": 0.9679,
+    "fraud_precision": 0.9837,
+    "fraud_false_negative_rate": 0.0321,
+    "fraud_false_positive_rate": 0.0051
+  },
+  "decision_policy_metrics": {
+    "t_review": 0.0933,
+    "t_block": 0.9643,
+    "allow_count": 1134,
+    "review_count": 78,
+    "block_count": 344,
+    "allow_rate": 0.7288,
+    "review_rate": 0.0501,
+    "block_rate": 0.2211,
+    "fraud_allowed_rate": 0.0187,
+    "fraud_review_rate": 0.0642,
+    "fraud_block_rate": 0.9171,
+    "legitimate_allowed_rate": 0.9535,
+    "legitimate_review_rate": 0.0457,
+    "legitimate_block_rate": 0.0008,
+    "composition": {
+      "fraud_allowed": 7,
+      "fraud_reviewed": 24,
+      "fraud_blocked": 343,
+      "legitimate_allowed": 1127,
+      "legitimate_reviewed": 54,
+      "legitimate_blocked": 1
+    },
+    "canonical_policy_stats": {
+      "t_review": 0.0933,
+      "t_block": 0.9643,
+      "allow_rate": 0.7288,
+      "review_rate": 0.0501,
+      "block_rate": 0.2211,
+      "legit_blocked": 1,
+      "legit_blocked_rate": 0.0008,
+      "legit_reviewed_rate": 0.0457,
+      "fraud_blocked": 343,
+      "fraud_reviewed": 24,
+      "fraud_allowed": 7,
+      "fraud_recall_blocked_only": 0.9171,
+      "fraud_recall_blocked_plus_review": 0.9813,
+      "dollars_fraud_allowed_through": 11779.67,
+      "dollars_fraud_total": 7304745.04,
+      "expected_cost_at_assumed_prevalence": 1177.72,
+      "liability_breakdown": {
+        "ACCOUNT_TAKEOVER": {
+          "liable_side": "SENDING",
+          "acting_side": "SENDING",
+          "sending_liability_share": 1.0,
+          "receiving_liability_share": 0.0,
+          "n_fraud_traces": 97,
+          "n_blocked": 90,
+          "n_reviewed": 5,
+          "n_allowed_through": 2,
+          "dollars_allowed_through_total": 0.0,
+          "dollars_allowed_through_this_institution_liable_for": 0.0
+        },
+        "AUTHORIZED_PUSH_PAYMENT": {
+          "liable_side": "SHARED_50_50",
+          "acting_side": "BOTH",
+          "sending_liability_share": 0.5,
+          "receiving_liability_share": 0.5,
+          "n_fraud_traces": 156,
+          "n_blocked": 149,
+          "n_reviewed": 3,
+          "n_allowed_through": 4,
+          "dollars_allowed_through_total": 10031.44,
+          "dollars_allowed_through_this_institution_liable_for": 5015.72
+        },
+        "MULE_NETWORK": {
+          "liable_side": "RECEIVING",
+          "acting_side": "RECEIVING",
+          "sending_liability_share": 1.0,
+          "receiving_liability_share": 1.0,
+          "n_fraud_traces": 121,
+          "n_blocked": 104,
+          "n_reviewed": 16,
+          "n_allowed_through": 1,
+          "dollars_allowed_through_total": 1748.23,
+          "dollars_allowed_through_this_institution_liable_for": 1748.23
+        }
+      }
+    }
+  },
+  "attack_families": {
+    "families": {
+      "ACCOUNT_TAKEOVER": {
+        "count": 97,
+        "fraud_count": 97,
+        "allow_count": 2,
+        "review_count": 5,
+        "block_count": 90,
+        "fraud_recall": 0.9794,
+        "fraud_recall_blocked_only": 0.9278,
+        "fraud_allowed": 2,
+        "fraud_reviewed": 5,
+        "fraud_blocked": 90
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "count": 156,
+        "fraud_count": 156,
+        "allow_count": 4,
+        "review_count": 3,
+        "block_count": 149,
+        "fraud_recall": 0.9744,
+        "fraud_recall_blocked_only": 0.9551,
+        "fraud_allowed": 4,
+        "fraud_reviewed": 3,
+        "fraud_blocked": 149
+      },
+      "MULE_NETWORK": {
+        "count": 121,
+        "fraud_count": 121,
+        "allow_count": 1,
+        "review_count": 16,
+        "block_count": 104,
+        "fraud_recall": 0.9917,
+        "fraud_recall_blocked_only": 0.8595,
+        "fraud_allowed": 1,
+        "fraud_reviewed": 16,
+        "fraud_blocked": 104
+      }
+    },
+    "reconciliation": {
+      "sum_family_counts": 374,
+      "sum_family_fraud_counts": 374,
+      "matches_global_fraud_count": true
+    }
+  },
+  "stage_availability": {
+    "stage1_2": {
+      "available": false,
+      "count_available": 0,
+      "count_unavailable": 1556,
+      "reason": "decision_policy_validation_cache.npz (validation_variant='fused') persists only the final fused Stage 5 score, not the individual Stage 1+2 / Stage 3 (GCN) / Stage 4 (autoencoder) component scores. Recomputing them would require re-running the 5-fold OOF cascade (a fresh GCN retrained per fold, per risk_fusion.compute_base_scores), which this read-only evaluation harness does not do. See risk_fusion_results.json's 'comparison' block for a historical, already-computed per-stage breakdown from the run that originally produced this policy (different corpus variant -- see that file's own docstring caveat)."
+    },
+    "stage3_graph": {
+      "available": false,
+      "count_available": 0,
+      "count_unavailable": 1556,
+      "reason": "decision_policy_validation_cache.npz (validation_variant='fused') persists only the final fused Stage 5 score, not the individual Stage 1+2 / Stage 3 (GCN) / Stage 4 (autoencoder) component scores. Recomputing them would require re-running the 5-fold OOF cascade (a fresh GCN retrained per fold, per risk_fusion.compute_base_scores), which this read-only evaluation harness does not do. See risk_fusion_results.json's 'comparison' block for a historical, already-computed per-stage breakdown from the run that originally produced this policy (different corpus variant -- see that file's own docstring caveat)."
+    },
+    "stage4_autoencoder": {
+      "available": false,
+      "count_available": 0,
+      "count_unavailable": 1556,
+      "reason": "decision_policy_validation_cache.npz (validation_variant='fused') persists only the final fused Stage 5 score, not the individual Stage 1+2 / Stage 3 (GCN) / Stage 4 (autoencoder) component scores. Recomputing them would require re-running the 5-fold OOF cascade (a fresh GCN retrained per fold, per risk_fusion.compute_base_scores), which this read-only evaluation harness does not do. See risk_fusion_results.json's 'comparison' block for a historical, already-computed per-stage breakdown from the run that originally produced this policy (different corpus variant -- see that file's own docstring caveat)."
+    },
+    "stage5_fusion": {
+      "available": true,
+      "count_available": 1556,
+      "count_unavailable": 0,
+      "source": "decision_policy_validation_cache.npz (validation_variant='fused')"
+    }
+  },
+  "cost_metrics": {
+    "expected_cost": 1177.72,
+    "expected_cost_definition": "decision_policy.expected_cost(), importance-reweighted to assumed_production_fraud_rate -- the canonical objective the 'corrected' threshold pair was selected to minimize.",
+    "fraud_loss_dollars_allowed_through_unweighted": 11779.67,
+    "fraud_loss_dollars_total_unweighted": 7304745.04,
+    "review_ops_cost_unweighted": 936.0,
+    "false_positive_cost_unweighted": 150.0,
+    "note": "The *_unweighted figures above are raw dollar/count totals observed on this validation population, reported for context. They are NOT expected to sum exactly to expected_cost, which is importance-reweighted (dp.sample_weights) to assumed_production_fraud_rate before summing -- see decision_policy.py's module docstring for why the unweighted validation-set prevalence cannot be used directly.",
+    "assumed_production_fraud_rate": 0.006,
+    "cost_model": {
+      "review_ops_cost": 12.0,
+      "review_catch_rate": 0.85,
+      "legit_block_friction_cost": 150.0,
+      "assumed_production_fraud_rate": 0.006,
+      "app_sending_liability_share": 0.5
+    }
+  },
+  "calibration": {
+    "available": true,
+    "method": "Read-only reliability diagnostic over the already-produced fused score and already-known labels -- no calibrator is fit, no parameters are estimated or applied.",
+    "brier_score": 0.011514,
+    "n_bins": 10,
+    "bins": [
+      {
+        "bin_range": [
+          0.0,
+          0.1
+        ],
+        "count": 1135,
+        "mean_predicted_score": 0.0343,
+        "observed_fraud_rate": 0.0062
+      },
+      {
+        "bin_range": [
+          0.1,
+          0.2
+        ],
+        "count": 37,
+        "mean_predicted_score": 0.1462,
+        "observed_fraud_rate": 0.1351
+      },
+      {
+        "bin_range": [
+          0.2,
+          0.3
+        ],
+        "count": 14,
+        "mean_predicted_score": 0.2272,
+        "observed_fraud_rate": 0.0
+      },
+      {
+        "bin_range": [
+          0.3,
+          0.4
+        ],
+        "count": 1,
+        "mean_predicted_score": 0.3126,
+        "observed_fraud_rate": 0.0
+      },
+      {
+        "bin_range": [
+          0.4,
+          0.5
+        ],
+        "count": 1,
+        "mean_predicted_score": 0.4006,
+        "observed_fraud_rate": 0.0
+      },
+      {
+        "bin_range": [
+          0.5,
+          0.6
+        ],
+        "count": 2,
+        "mean_predicted_score": 0.5771,
+        "observed_fraud_rate": 0.5
+      },
+      {
+        "bin_range": [
+          0.6,
+          0.7
+        ],
+        "count": 2,
+        "mean_predicted_score": 0.6609,
+        "observed_fraud_rate": 0.5
+      },
+      {
+        "bin_range": [
+          0.7,
+          0.8
+        ],
+        "count": 0,
+        "mean_predicted_score": null,
+        "observed_fraud_rate": null
+      },
+      {
+        "bin_range": [
+          0.8,
+          0.9
+        ],
+        "count": 0,
+        "mean_predicted_score": null,
+        "observed_fraud_rate": null
+      },
+      {
+        "bin_range": [
+          0.9,
+          1.0
+        ],
+        "count": 364,
+        "mean_predicted_score": 0.9858,
+        "observed_fraud_rate": 0.989
+      }
+    ]
+  },
+  "provenance": {
+    "git_commit": "2d6a0412795826b9f69f22efd9a807226c03e1a4",
+    "git_dirty": true,
+    "package_versions": {
+      "numpy": "2.4.4",
+      "pandas": "3.0.2",
+      "sklearn": "1.8.0",
+      "xgboost": "3.2.0",
+      "pydantic": "2.13.4"
+    },
+    "artifact_paths": {
+      "decision_policy_results.json": "C:\\Users\\New\\Downloads\\AI_Defence_Sys-integration\\decision_policy_results.json",
+      "decision_policy_validation_cache.npz": "C:\\Users\\New\\Downloads\\AI_Defence_Sys-integration\\decision_policy_validation_cache.npz"
+    },
+    "policy_source": "decision_policy_results.json['corrected']",
+    "score_source": {
+      "score": "risk_fusion_stacked_lr",
+      "validation_population": "ring_overlay_corpus (cwg.load_all_records, same rows Stage 3/Stage 4 were validated on)",
+      "fusion_avg_coefficients": {
+        "stage_1_2_score": 6.886057041599038,
+        "gcn_score": 2.440168114826725,
+        "ae_score": 2.514358617327715,
+        "intercept": -3.855113815235474
+      },
+      "n_graph_connected_nodes": 229,
+      "note": "These coefficients come from THIS run (ring-overlay corpus), not from risk_fusion_results.json's real_corpus_risk_fusion block, which is a separate no-overlay run with a structurally different (near-zero) gcn_score weight. Consumers needing to explain why the fused score moved (e.g. explainability.py) should read fusion_avg_coefficients from here, not from risk_fusion_results.json's real-corpus block."
+    },
+    "policy_artifact_provenance": {
+      "generated_at_utc": "2026-09-05T07:50:20.646519+00:00",
+      "git_commit": "62fdb9aa093dd03049a2dbf8d20bdb45a0474849",
+      "git_dirty": true,
+      "python_version": "3.14.4",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "package_versions": {
+        "numpy": "2.4.4",
+        "pandas": "3.0.2",
+        "sklearn": "1.8.0",
+        "xgboost": "3.2.0",
+        "pydantic": "2.13.4"
+      },
+      "seeds": {
+        "RANDOM_STATE": 42
+      }
+    },
+    "cache_provenance": {
+      "path": "C:\\Users\\New\\Downloads\\AI_Defence_Sys-integration\\decision_policy_validation_cache.npz",
+      "content_hash_sha256": "63c2408db5eb8831f6be8140ac7541a14047a201969cdeca4bd45080bf922de5"
+    }
+  },
+  "invariants": {
+    "row_count_equals_unique_trace_ids": true,
+    "score_count_equals_row_count": true,
+    "scores_finite_and_in_unit_interval": true,
+    "attack_families_all_supported": true,
+    "allow_review_block_sums_to_row_count": true,
+    "thresholds_valid": true,
+    "family_fraud_counts_reconcile_with_global": true,
+    "classification_cross_check_passed": true,
+    "cache_variant_is_fused": true,
+    "policy_and_cache_score_source_consistent": true,
+    "all_reported_metrics_finite": true,
+    "all_passed": true,
+    "policy_stats_reproduces_persisted_corrected_block": true
+  },
+  "leakage_protections": {
+    "threshold_optimization": "NOT USED (decision_policy.optimize_thresholds is never called)",
+    "calibration_fitting": "NOT USED (compute_calibration_diagnostics only bins/reads existing scores+labels)",
+    "retraining": "NOT USED (no .fit()/.train() call anywhere in this file)",
+    "preprocessing_fitting": "NOT USED (no scaler/encoder fit anywhere in this file)",
+    "labels_used_only_after_scoring": true
+  },
+  "determinism_check": {
+    "deterministic": true,
+    "diffs": {}
+  }
+}
