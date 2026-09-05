@@ -1,0 +1,1416 @@
+{
+  "schema_version": "phase5b.1",
+  "metadata": {
+    "phase": "5B",
+    "objective": "Robustness / stress evaluation of the FROZEN fraud-risk system",
+    "implemented_category": "class_imbalance_prevalence_shift",
+    "not_implemented_categories": {
+      "feature_noise": "Requires re-scoring perturbed feature vectors through the Stage 3/4/5 pipeline. No saved GCN/autoencoder/fusion-meta-model artifact exists in this repo; producing a fused score for any row whose features differ from the canonical population requires risk_fusion.run_risk_fusion(), which trains a fresh GCN + autoencoder + LogisticRegression meta-model and refits per-fold standardization -- forbidden retraining/preprocessing fitting under this phase's mandate.",
+      "timing_jitter": "Same blocker as feature_noise: timestamp perturbation changes derived behavioral features (e.g. hesitation/timing features), which requires re-scoring through the same un-frozen Stage 3/4/5 pipeline.",
+      "missing_information": "Same blocker as feature_noise: inducing missingness in device/beneficiary/metadata fields changes the feature vector fed to Stage 1+2/3/4, which requires re-scoring through the same un-frozen Stage 3/4/5 pipeline.",
+      "behavioral_drift": "Same blocker as feature_noise: a distribution shift in velocity/amount/reuse/temporal features requires re-scoring shifted feature vectors through the same un-frozen Stage 3/4/5 pipeline.",
+      "graph_sparsity": "Reducing cross-customer edges changes connected_mask and A (the adjacency matrix), which changes the message-passed features (A_hat @ X) that Stage 3's GCN is trained AND scored on every fold. There is no saved GCN that can be handed a different graph at inference time; the only implementation path is risk_fusion.compute_base_scores() with a modified A, which retrains a fresh GCN on it -- forbidden retraining."
+    },
+    "scope_note": "Only class-imbalance/prevalence-shift is implemented. The other five requested categories (feature noise, timing jitter, missing information, behavioral drift, graph sparsity) all require re-scoring perturbed feature vectors through Stage 3 (GCN) / Stage 4 (autoencoder) / Stage 5 (fusion meta-model), none of which has a saved, frozen, loadable artifact in this repository -- producing a score for them would require retraining, which this phase's mandate forbids. See module docstring / not_implemented_categories for the specific blocker per category. This scope decision was made explicit to, and approved by, the requester before implementation."
+  },
+  "baseline": {
+    "row_count": 1556,
+    "attack_family_counts": {
+      "total": 1556,
+      "ACCOUNT_TAKEOVER": 97,
+      "AUTHORIZED_PUSH_PAYMENT": 156,
+      "MULE_NETWORK": 121,
+      "legitimate": 1182
+    },
+    "canonical_prevalence": 0.24036
+  },
+  "frozen_policy": {
+    "source": "decision_policy_results.json['corrected']",
+    "t_review": 0.0933,
+    "t_block": 0.9643,
+    "frozen": true,
+    "note": "Never recomputed/optimized anywhere in this file -- see leakage_protections."
+  },
+  "scenarios": [
+    {
+      "scenario_name": "prevalence_baseline_canonical",
+      "severity": "baseline",
+      "scenario_description": "Identity (no resampling) canonical population -- zero-degradation reference.",
+      "perturbation_type": "prevalence_resampling",
+      "requested_prevalence": null,
+      "achieved_prevalence": 0.2403599,
+      "prevalence_error": null,
+      "fraud_count": 374,
+      "legitimate_count": 1182,
+      "total_count": 1556,
+      "perturbation_parameters": {
+        "target_prevalence": null,
+        "achieved_prevalence": 0.24036,
+        "family_fraud_targets": {
+          "ACCOUNT_TAKEOVER": 97,
+          "AUTHORIZED_PUSH_PAYMENT": 156,
+          "MULE_NETWORK": 121
+        },
+        "family_resampled_with_replacement": {
+          "ACCOUNT_TAKEOVER": false,
+          "AUTHORIZED_PUSH_PAYMENT": false,
+          "MULE_NETWORK": false
+        },
+        "legit_population": "unchanged (all canonical legitimate rows kept, no resampling)"
+      },
+      "random_seed": null,
+      "rng_note": "no resampling performed (identity scenario)",
+      "source_population": "cascade_with_graph.load_all_records() canonical evaluation population (Phase 5A)",
+      "source_population_size": 1556,
+      "stressed_population_size": 1556,
+      "n_duplicate_source_trace_ids": 0,
+      "n_duplicate_source_trace_ids_expected": false
+    },
+    {
+      "scenario_name": "prevalence_mild_5pct",
+      "severity": "mild",
+      "scenario_description": "Fraud rows resampled (family-stratified, seeded) to hit an overall fraud prevalence of 5.0000% against the full, UNCHANGED canonical legitimate population (1182 rows kept 1:1). No feature value, model input, or score is ever modified -- only which already-scored rows participate, and how many times a fraud row repeats, changes.",
+      "perturbation_type": "prevalence_resampling",
+      "requested_prevalence": 0.05,
+      "achieved_prevalence": 0.04983923,
+      "prevalence_error": 0.00016077,
+      "fraud_count": 62,
+      "legitimate_count": 1182,
+      "total_count": 1244,
+      "perturbation_parameters": {
+        "target_prevalence": 0.05,
+        "achieved_prevalence": 0.049839,
+        "family_fraud_targets": {
+          "ACCOUNT_TAKEOVER": 16,
+          "AUTHORIZED_PUSH_PAYMENT": 26,
+          "MULE_NETWORK": 20
+        },
+        "family_resampled_with_replacement": {
+          "ACCOUNT_TAKEOVER": false,
+          "AUTHORIZED_PUSH_PAYMENT": false,
+          "MULE_NETWORK": false
+        },
+        "legit_population": "unchanged (all canonical legitimate rows kept, no resampling)"
+      },
+      "random_seed": 5003,
+      "rng_note": "numpy Generator(PCG64), seed=5003",
+      "source_population": "cascade_with_graph.load_all_records() canonical evaluation population (Phase 5A)",
+      "source_population_size": 1556,
+      "stressed_population_size": 1244,
+      "n_duplicate_source_trace_ids": 0,
+      "n_duplicate_source_trace_ids_expected": false
+    },
+    {
+      "scenario_name": "prevalence_moderate_1pct",
+      "severity": "moderate",
+      "scenario_description": "Fraud rows resampled (family-stratified, seeded) to hit an overall fraud prevalence of 1.0000% against the full, UNCHANGED canonical legitimate population (1182 rows kept 1:1). No feature value, model input, or score is ever modified -- only which already-scored rows participate, and how many times a fraud row repeats, changes.",
+      "perturbation_type": "prevalence_resampling",
+      "requested_prevalence": 0.01,
+      "achieved_prevalence": 0.01005025,
+      "prevalence_error": 5.025e-05,
+      "fraud_count": 12,
+      "legitimate_count": 1182,
+      "total_count": 1194,
+      "perturbation_parameters": {
+        "target_prevalence": 0.01,
+        "achieved_prevalence": 0.01005,
+        "family_fraud_targets": {
+          "ACCOUNT_TAKEOVER": 3,
+          "AUTHORIZED_PUSH_PAYMENT": 5,
+          "MULE_NETWORK": 4
+        },
+        "family_resampled_with_replacement": {
+          "ACCOUNT_TAKEOVER": false,
+          "AUTHORIZED_PUSH_PAYMENT": false,
+          "MULE_NETWORK": false
+        },
+        "legit_population": "unchanged (all canonical legitimate rows kept, no resampling)"
+      },
+      "random_seed": 5004,
+      "rng_note": "numpy Generator(PCG64), seed=5004",
+      "source_population": "cascade_with_graph.load_all_records() canonical evaluation population (Phase 5A)",
+      "source_population_size": 1556,
+      "stressed_population_size": 1194,
+      "n_duplicate_source_trace_ids": 0,
+      "n_duplicate_source_trace_ids_expected": false
+    },
+    {
+      "scenario_name": "prevalence_severe_deployed_assumption_0.6pct",
+      "severity": "severe",
+      "scenario_description": "Fraud rows resampled (family-stratified, seeded) to hit an overall fraud prevalence of 0.6000% against the full, UNCHANGED canonical legitimate population (1182 rows kept 1:1). No feature value, model input, or score is ever modified -- only which already-scored rows participate, and how many times a fraud row repeats, changes.",
+      "perturbation_type": "prevalence_resampling",
+      "requested_prevalence": 0.006,
+      "achieved_prevalence": 0.0058873,
+      "prevalence_error": 0.0001127,
+      "fraud_count": 7,
+      "legitimate_count": 1182,
+      "total_count": 1189,
+      "perturbation_parameters": {
+        "target_prevalence": 0.006,
+        "achieved_prevalence": 0.005887,
+        "family_fraud_targets": {
+          "ACCOUNT_TAKEOVER": 2,
+          "AUTHORIZED_PUSH_PAYMENT": 3,
+          "MULE_NETWORK": 2
+        },
+        "family_resampled_with_replacement": {
+          "ACCOUNT_TAKEOVER": false,
+          "AUTHORIZED_PUSH_PAYMENT": false,
+          "MULE_NETWORK": false
+        },
+        "legit_population": "unchanged (all canonical legitimate rows kept, no resampling)"
+      },
+      "random_seed": 5005,
+      "rng_note": "numpy Generator(PCG64), seed=5005",
+      "source_population": "cascade_with_graph.load_all_records() canonical evaluation population (Phase 5A)",
+      "source_population_size": 1556,
+      "stressed_population_size": 1189,
+      "n_duplicate_source_trace_ids": 0,
+      "n_duplicate_source_trace_ids_expected": false
+    },
+    {
+      "scenario_name": "prevalence_extreme_0.1pct",
+      "severity": "extreme",
+      "scenario_description": "Fraud rows resampled (family-stratified, seeded) to hit an overall fraud prevalence of 0.1000% against the full, UNCHANGED canonical legitimate population (1182 rows kept 1:1). No feature value, model input, or score is ever modified -- only which already-scored rows participate, and how many times a fraud row repeats, changes.",
+      "perturbation_type": "prevalence_resampling",
+      "requested_prevalence": 0.001,
+      "achieved_prevalence": 0.00084531,
+      "prevalence_error": 0.00015469,
+      "fraud_count": 1,
+      "legitimate_count": 1182,
+      "total_count": 1183,
+      "perturbation_parameters": {
+        "target_prevalence": 0.001,
+        "achieved_prevalence": 0.000845,
+        "family_fraud_targets": {
+          "ACCOUNT_TAKEOVER": 0,
+          "AUTHORIZED_PUSH_PAYMENT": 1,
+          "MULE_NETWORK": 0
+        },
+        "family_resampled_with_replacement": {
+          "ACCOUNT_TAKEOVER": false,
+          "AUTHORIZED_PUSH_PAYMENT": false,
+          "MULE_NETWORK": false
+        },
+        "legit_population": "unchanged (all canonical legitimate rows kept, no resampling)"
+      },
+      "random_seed": 5006,
+      "rng_note": "numpy Generator(PCG64), seed=5006",
+      "source_population": "cascade_with_graph.load_all_records() canonical evaluation population (Phase 5A)",
+      "source_population_size": 1556,
+      "stressed_population_size": 1183,
+      "n_duplicate_source_trace_ids": 0,
+      "n_duplicate_source_trace_ids_expected": false
+    }
+  ],
+  "scenario_results": {
+    "prevalence_baseline_canonical": {
+      "classification": {
+        "positive_class_definition": "positive = fraud (y == 1), negative = legitimate (y == 0)",
+        "threshold_used": 0.5,
+        "confusion_matrix": {
+          "true_positive": 362,
+          "true_negative": 1176,
+          "false_positive": 6,
+          "false_negative": 12
+        },
+        "accuracy": 0.9884318766066839,
+        "precision": 0.9836956521739131,
+        "recall": 0.9679144385026738,
+        "f1": 0.9757412398921833,
+        "canonical_cross_check": "cascade_with_graph.block_metrics",
+        "canonical_cross_check_passed": true
+      },
+      "fraud_metrics": {
+        "fraud_count": 374,
+        "legitimate_count": 1182,
+        "fraud_recall": 0.9679,
+        "fraud_precision": 0.9837,
+        "fraud_false_negative_rate": 0.0321,
+        "fraud_false_positive_rate": 0.0051
+      },
+      "decision_policy_metrics": {
+        "t_review": 0.0933,
+        "t_block": 0.9643,
+        "allow_count": 1134,
+        "review_count": 78,
+        "block_count": 344,
+        "allow_rate": 0.7288,
+        "review_rate": 0.0501,
+        "block_rate": 0.2211,
+        "fraud_allowed_rate": 0.0187,
+        "fraud_review_rate": 0.0642,
+        "fraud_block_rate": 0.9171,
+        "legitimate_allowed_rate": 0.9535,
+        "legitimate_review_rate": 0.0457,
+        "legitimate_block_rate": 0.0008,
+        "composition": {
+          "fraud_allowed": 7,
+          "fraud_reviewed": 24,
+          "fraud_blocked": 343,
+          "legitimate_allowed": 1127,
+          "legitimate_reviewed": 54,
+          "legitimate_blocked": 1
+        },
+        "canonical_policy_stats": {
+          "t_review": 0.0933,
+          "t_block": 0.9643,
+          "allow_rate": 0.7288,
+          "review_rate": 0.0501,
+          "block_rate": 0.2211,
+          "legit_blocked": 1,
+          "legit_blocked_rate": 0.0008,
+          "legit_reviewed_rate": 0.0457,
+          "fraud_blocked": 343,
+          "fraud_reviewed": 24,
+          "fraud_allowed": 7,
+          "fraud_recall_blocked_only": 0.9171,
+          "fraud_recall_blocked_plus_review": 0.9813,
+          "dollars_fraud_allowed_through": 11779.67,
+          "dollars_fraud_total": 7304745.04,
+          "expected_cost_at_assumed_prevalence": 1177.72,
+          "liability_breakdown": {
+            "ACCOUNT_TAKEOVER": {
+              "liable_side": "SENDING",
+              "acting_side": "SENDING",
+              "sending_liability_share": 1.0,
+              "receiving_liability_share": 0.0,
+              "n_fraud_traces": 97,
+              "n_blocked": 90,
+              "n_reviewed": 5,
+              "n_allowed_through": 2,
+              "dollars_allowed_through_total": 0.0,
+              "dollars_allowed_through_this_institution_liable_for": 0.0
+            },
+            "AUTHORIZED_PUSH_PAYMENT": {
+              "liable_side": "SHARED_50_50",
+              "acting_side": "BOTH",
+              "sending_liability_share": 0.5,
+              "receiving_liability_share": 0.5,
+              "n_fraud_traces": 156,
+              "n_blocked": 149,
+              "n_reviewed": 3,
+              "n_allowed_through": 4,
+              "dollars_allowed_through_total": 10031.44,
+              "dollars_allowed_through_this_institution_liable_for": 5015.72
+            },
+            "MULE_NETWORK": {
+              "liable_side": "RECEIVING",
+              "acting_side": "RECEIVING",
+              "sending_liability_share": 1.0,
+              "receiving_liability_share": 1.0,
+              "n_fraud_traces": 121,
+              "n_blocked": 104,
+              "n_reviewed": 16,
+              "n_allowed_through": 1,
+              "dollars_allowed_through_total": 1748.23,
+              "dollars_allowed_through_this_institution_liable_for": 1748.23
+            }
+          }
+        }
+      },
+      "attack_families": {
+        "families": {
+          "ACCOUNT_TAKEOVER": {
+            "count": 97,
+            "fraud_count": 97,
+            "allow_count": 2,
+            "review_count": 5,
+            "block_count": 90,
+            "fraud_recall": 0.9794,
+            "fraud_recall_blocked_only": 0.9278,
+            "fraud_allowed": 2,
+            "fraud_reviewed": 5,
+            "fraud_blocked": 90
+          },
+          "AUTHORIZED_PUSH_PAYMENT": {
+            "count": 156,
+            "fraud_count": 156,
+            "allow_count": 4,
+            "review_count": 3,
+            "block_count": 149,
+            "fraud_recall": 0.9744,
+            "fraud_recall_blocked_only": 0.9551,
+            "fraud_allowed": 4,
+            "fraud_reviewed": 3,
+            "fraud_blocked": 149
+          },
+          "MULE_NETWORK": {
+            "count": 121,
+            "fraud_count": 121,
+            "allow_count": 1,
+            "review_count": 16,
+            "block_count": 104,
+            "fraud_recall": 0.9917,
+            "fraud_recall_blocked_only": 0.8595,
+            "fraud_allowed": 1,
+            "fraud_reviewed": 16,
+            "fraud_blocked": 104
+          }
+        },
+        "reconciliation": {
+          "sum_family_counts": 374,
+          "sum_family_fraud_counts": 374,
+          "matches_global_fraud_count": true
+        }
+      },
+      "score_change_metrics": {
+        "available": false,
+        "reason": "Prevalence resampling changes which already-scored rows participate (and how many times a fraud row repeats); it never changes any row's own score. Per-row baseline-vs-stressed score deltas / decision flips are not a meaningful concept for this scenario type.",
+        "score_mae": null,
+        "score_rmse": null,
+        "score_mean_delta": null,
+        "score_max_absolute_delta": null,
+        "decision_flip_rate": null
+      }
+    },
+    "prevalence_mild_5pct": {
+      "classification": {
+        "positive_class_definition": "positive = fraud (y == 1), negative = legitimate (y == 0)",
+        "threshold_used": 0.5,
+        "confusion_matrix": {
+          "true_positive": 62,
+          "true_negative": 1176,
+          "false_positive": 6,
+          "false_negative": 0
+        },
+        "accuracy": 0.9951768488745981,
+        "precision": 0.9117647058823529,
+        "recall": 1.0,
+        "f1": 0.9538461538461539,
+        "canonical_cross_check": "cascade_with_graph.block_metrics",
+        "canonical_cross_check_passed": true
+      },
+      "fraud_metrics": {
+        "fraud_count": 62,
+        "legitimate_count": 1182,
+        "fraud_recall": 1.0,
+        "fraud_precision": 0.9118,
+        "fraud_false_negative_rate": 0.0,
+        "fraud_false_positive_rate": 0.0051
+      },
+      "decision_policy_metrics": {
+        "t_review": 0.0933,
+        "t_block": 0.9643,
+        "allow_count": 1127,
+        "review_count": 58,
+        "block_count": 59,
+        "allow_rate": 0.9059,
+        "review_rate": 0.0466,
+        "block_rate": 0.0474,
+        "fraud_allowed_rate": 0.0,
+        "fraud_review_rate": 0.0645,
+        "fraud_block_rate": 0.9355,
+        "legitimate_allowed_rate": 0.9535,
+        "legitimate_review_rate": 0.0457,
+        "legitimate_block_rate": 0.0008,
+        "composition": {
+          "fraud_allowed": 0,
+          "fraud_reviewed": 4,
+          "fraud_blocked": 58,
+          "legitimate_allowed": 1127,
+          "legitimate_reviewed": 54,
+          "legitimate_blocked": 1
+        },
+        "canonical_policy_stats": {
+          "t_review": 0.0933,
+          "t_block": 0.9643,
+          "allow_rate": 0.9059,
+          "review_rate": 0.0466,
+          "block_rate": 0.0474,
+          "legit_blocked": 1,
+          "legit_blocked_rate": 0.0008,
+          "legit_reviewed_rate": 0.0457,
+          "fraud_blocked": 58,
+          "fraud_reviewed": 4,
+          "fraud_allowed": 0,
+          "fraud_recall_blocked_only": 0.9355,
+          "fraud_recall_blocked_plus_review": 1.0,
+          "dollars_fraud_allowed_through": 0.0,
+          "dollars_fraud_total": 1284186.17,
+          "expected_cost_at_assumed_prevalence": 1062.68,
+          "liability_breakdown": {
+            "ACCOUNT_TAKEOVER": {
+              "liable_side": "SENDING",
+              "acting_side": "SENDING",
+              "sending_liability_share": 1.0,
+              "receiving_liability_share": 0.0,
+              "n_fraud_traces": 16,
+              "n_blocked": 15,
+              "n_reviewed": 1,
+              "n_allowed_through": 0,
+              "dollars_allowed_through_total": 0.0,
+              "dollars_allowed_through_this_institution_liable_for": 0.0
+            },
+            "AUTHORIZED_PUSH_PAYMENT": {
+              "liable_side": "SHARED_50_50",
+              "acting_side": "BOTH",
+              "sending_liability_share": 0.5,
+              "receiving_liability_share": 0.5,
+              "n_fraud_traces": 26,
+              "n_blocked": 26,
+              "n_reviewed": 0,
+              "n_allowed_through": 0,
+              "dollars_allowed_through_total": 0.0,
+              "dollars_allowed_through_this_institution_liable_for": 0.0
+            },
+            "MULE_NETWORK": {
+              "liable_side": "RECEIVING",
+              "acting_side": "RECEIVING",
+              "sending_liability_share": 1.0,
+              "receiving_liability_share": 1.0,
+              "n_fraud_traces": 20,
+              "n_blocked": 17,
+              "n_reviewed": 3,
+              "n_allowed_through": 0,
+              "dollars_allowed_through_total": 0.0,
+              "dollars_allowed_through_this_institution_liable_for": 0.0
+            }
+          }
+        }
+      },
+      "attack_families": {
+        "families": {
+          "ACCOUNT_TAKEOVER": {
+            "count": 16,
+            "fraud_count": 16,
+            "allow_count": 0,
+            "review_count": 1,
+            "block_count": 15,
+            "fraud_recall": 1.0,
+            "fraud_recall_blocked_only": 0.9375,
+            "fraud_allowed": 0,
+            "fraud_reviewed": 1,
+            "fraud_blocked": 15
+          },
+          "AUTHORIZED_PUSH_PAYMENT": {
+            "count": 26,
+            "fraud_count": 26,
+            "allow_count": 0,
+            "review_count": 0,
+            "block_count": 26,
+            "fraud_recall": 1.0,
+            "fraud_recall_blocked_only": 1.0,
+            "fraud_allowed": 0,
+            "fraud_reviewed": 0,
+            "fraud_blocked": 26
+          },
+          "MULE_NETWORK": {
+            "count": 20,
+            "fraud_count": 20,
+            "allow_count": 0,
+            "review_count": 3,
+            "block_count": 17,
+            "fraud_recall": 1.0,
+            "fraud_recall_blocked_only": 0.85,
+            "fraud_allowed": 0,
+            "fraud_reviewed": 3,
+            "fraud_blocked": 17
+          }
+        },
+        "reconciliation": {
+          "sum_family_counts": 62,
+          "sum_family_fraud_counts": 62,
+          "matches_global_fraud_count": true
+        }
+      },
+      "score_change_metrics": {
+        "available": false,
+        "reason": "Prevalence resampling changes which already-scored rows participate (and how many times a fraud row repeats); it never changes any row's own score. Per-row baseline-vs-stressed score deltas / decision flips are not a meaningful concept for this scenario type.",
+        "score_mae": null,
+        "score_rmse": null,
+        "score_mean_delta": null,
+        "score_max_absolute_delta": null,
+        "decision_flip_rate": null
+      }
+    },
+    "prevalence_moderate_1pct": {
+      "classification": {
+        "positive_class_definition": "positive = fraud (y == 1), negative = legitimate (y == 0)",
+        "threshold_used": 0.5,
+        "confusion_matrix": {
+          "true_positive": 12,
+          "true_negative": 1176,
+          "false_positive": 6,
+          "false_negative": 0
+        },
+        "accuracy": 0.9949748743718593,
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1": 0.8,
+        "canonical_cross_check": "cascade_with_graph.block_metrics",
+        "canonical_cross_check_passed": true
+      },
+      "fraud_metrics": {
+        "fraud_count": 12,
+        "legitimate_count": 1182,
+        "fraud_recall": 1.0,
+        "fraud_precision": 0.6667,
+        "fraud_false_negative_rate": 0.0,
+        "fraud_false_positive_rate": 0.0051
+      },
+      "decision_policy_metrics": {
+        "t_review": 0.0933,
+        "t_block": 0.9643,
+        "allow_count": 1127,
+        "review_count": 54,
+        "block_count": 13,
+        "allow_rate": 0.9439,
+        "review_rate": 0.0452,
+        "block_rate": 0.0109,
+        "fraud_allowed_rate": 0.0,
+        "fraud_review_rate": 0.0,
+        "fraud_block_rate": 1.0,
+        "legitimate_allowed_rate": 0.9535,
+        "legitimate_review_rate": 0.0457,
+        "legitimate_block_rate": 0.0008,
+        "composition": {
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 12,
+          "legitimate_allowed": 1127,
+          "legitimate_reviewed": 54,
+          "legitimate_blocked": 1
+        },
+        "canonical_policy_stats": {
+          "t_review": 0.0933,
+          "t_block": 0.9643,
+          "allow_rate": 0.9439,
+          "review_rate": 0.0452,
+          "block_rate": 0.0109,
+          "legit_blocked": 1,
+          "legit_blocked_rate": 0.0008,
+          "legit_reviewed_rate": 0.0457,
+          "fraud_blocked": 12,
+          "fraud_reviewed": 0,
+          "fraud_allowed": 0,
+          "fraud_recall_blocked_only": 1.0,
+          "fraud_recall_blocked_plus_review": 1.0,
+          "dollars_fraud_allowed_through": 0.0,
+          "dollars_fraud_total": 187412.16,
+          "expected_cost_at_assumed_prevalence": 798.0,
+          "liability_breakdown": {
+            "ACCOUNT_TAKEOVER": {
+              "liable_side": "SENDING",
+              "acting_side": "SENDING",
+              "sending_liability_share": 1.0,
+              "receiving_liability_share": 0.0,
+              "n_fraud_traces": 3,
+              "n_blocked": 3,
+              "n_reviewed": 0,
+              "n_allowed_through": 0,
+              "dollars_allowed_through_total": 0.0,
+              "dollars_allowed_through_this_institution_liable_for": 0.0
+            },
+            "AUTHORIZED_PUSH_PAYMENT": {
+              "liable_side": "SHARED_50_50",
+              "acting_side": "BOTH",
+              "sending_liability_share": 0.5,
+              "receiving_liability_share": 0.5,
+              "n_fraud_traces": 5,
+              "n_blocked": 5,
+              "n_reviewed": 0,
+              "n_allowed_through": 0,
+              "dollars_allowed_through_total": 0.0,
+              "dollars_allowed_through_this_institution_liable_for": 0.0
+            },
+            "MULE_NETWORK": {
+              "liable_side": "RECEIVING",
+              "acting_side": "RECEIVING",
+              "sending_liability_share": 1.0,
+              "receiving_liability_share": 1.0,
+              "n_fraud_traces": 4,
+              "n_blocked": 4,
+              "n_reviewed": 0,
+              "n_allowed_through": 0,
+              "dollars_allowed_through_total": 0.0,
+              "dollars_allowed_through_this_institution_liable_for": 0.0
+            }
+          }
+        }
+      },
+      "attack_families": {
+        "families": {
+          "ACCOUNT_TAKEOVER": {
+            "count": 3,
+            "fraud_count": 3,
+            "allow_count": 0,
+            "review_count": 0,
+            "block_count": 3,
+            "fraud_recall": 1.0,
+            "fraud_recall_blocked_only": 1.0,
+            "fraud_allowed": 0,
+            "fraud_reviewed": 0,
+            "fraud_blocked": 3
+          },
+          "AUTHORIZED_PUSH_PAYMENT": {
+            "count": 5,
+            "fraud_count": 5,
+            "allow_count": 0,
+            "review_count": 0,
+            "block_count": 5,
+            "fraud_recall": 1.0,
+            "fraud_recall_blocked_only": 1.0,
+            "fraud_allowed": 0,
+            "fraud_reviewed": 0,
+            "fraud_blocked": 5
+          },
+          "MULE_NETWORK": {
+            "count": 4,
+            "fraud_count": 4,
+            "allow_count": 0,
+            "review_count": 0,
+            "block_count": 4,
+            "fraud_recall": 1.0,
+            "fraud_recall_blocked_only": 1.0,
+            "fraud_allowed": 0,
+            "fraud_reviewed": 0,
+            "fraud_blocked": 4
+          }
+        },
+        "reconciliation": {
+          "sum_family_counts": 12,
+          "sum_family_fraud_counts": 12,
+          "matches_global_fraud_count": true
+        }
+      },
+      "score_change_metrics": {
+        "available": false,
+        "reason": "Prevalence resampling changes which already-scored rows participate (and how many times a fraud row repeats); it never changes any row's own score. Per-row baseline-vs-stressed score deltas / decision flips are not a meaningful concept for this scenario type.",
+        "score_mae": null,
+        "score_rmse": null,
+        "score_mean_delta": null,
+        "score_max_absolute_delta": null,
+        "decision_flip_rate": null
+      }
+    },
+    "prevalence_severe_deployed_assumption_0.6pct": {
+      "classification": {
+        "positive_class_definition": "positive = fraud (y == 1), negative = legitimate (y == 0)",
+        "threshold_used": 0.5,
+        "confusion_matrix": {
+          "true_positive": 7,
+          "true_negative": 1176,
+          "false_positive": 6,
+          "false_negative": 0
+        },
+        "accuracy": 0.9949537426408747,
+        "precision": 0.5384615384615384,
+        "recall": 1.0,
+        "f1": 0.7,
+        "canonical_cross_check": "cascade_with_graph.block_metrics",
+        "canonical_cross_check_passed": true
+      },
+      "fraud_metrics": {
+        "fraud_count": 7,
+        "legitimate_count": 1182,
+        "fraud_recall": 1.0,
+        "fraud_precision": 0.5385,
+        "fraud_false_negative_rate": 0.0,
+        "fraud_false_positive_rate": 0.0051
+      },
+      "decision_policy_metrics": {
+        "t_review": 0.0933,
+        "t_block": 0.9643,
+        "allow_count": 1127,
+        "review_count": 54,
+        "block_count": 8,
+        "allow_rate": 0.9479,
+        "review_rate": 0.0454,
+        "block_rate": 0.0067,
+        "fraud_allowed_rate": 0.0,
+        "fraud_review_rate": 0.0,
+        "fraud_block_rate": 1.0,
+        "legitimate_allowed_rate": 0.9535,
+        "legitimate_review_rate": 0.0457,
+        "legitimate_block_rate": 0.0008,
+        "composition": {
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 7,
+          "legitimate_allowed": 1127,
+          "legitimate_reviewed": 54,
+          "legitimate_blocked": 1
+        },
+        "canonical_policy_stats": {
+          "t_review": 0.0933,
+          "t_block": 0.9643,
+          "allow_rate": 0.9479,
+          "review_rate": 0.0454,
+          "block_rate": 0.0067,
+          "legit_blocked": 1,
+          "legit_blocked_rate": 0.0008,
+          "legit_reviewed_rate": 0.0457,
+          "fraud_blocked": 7,
+          "fraud_reviewed": 0,
+          "fraud_allowed": 0,
+          "fraud_recall_blocked_only": 1.0,
+          "fraud_recall_blocked_plus_review": 1.0,
+          "dollars_fraud_allowed_through": 0.0,
+          "dollars_fraud_total": 94246.36,
+          "expected_cost_at_assumed_prevalence": 798.0,
+          "liability_breakdown": {
+            "ACCOUNT_TAKEOVER": {
+              "liable_side": "SENDING",
+              "acting_side": "SENDING",
+              "sending_liability_share": 1.0,
+              "receiving_liability_share": 0.0,
+              "n_fraud_traces": 2,
+              "n_blocked": 2,
+              "n_reviewed": 0,
+              "n_allowed_through": 0,
+              "dollars_allowed_through_total": 0.0,
+              "dollars_allowed_through_this_institution_liable_for": 0.0
+            },
+            "AUTHORIZED_PUSH_PAYMENT": {
+              "liable_side": "SHARED_50_50",
+              "acting_side": "BOTH",
+              "sending_liability_share": 0.5,
+              "receiving_liability_share": 0.5,
+              "n_fraud_traces": 3,
+              "n_blocked": 3,
+              "n_reviewed": 0,
+              "n_allowed_through": 0,
+              "dollars_allowed_through_total": 0.0,
+              "dollars_allowed_through_this_institution_liable_for": 0.0
+            },
+            "MULE_NETWORK": {
+              "liable_side": "RECEIVING",
+              "acting_side": "RECEIVING",
+              "sending_liability_share": 1.0,
+              "receiving_liability_share": 1.0,
+              "n_fraud_traces": 2,
+              "n_blocked": 2,
+              "n_reviewed": 0,
+              "n_allowed_through": 0,
+              "dollars_allowed_through_total": 0.0,
+              "dollars_allowed_through_this_institution_liable_for": 0.0
+            }
+          }
+        }
+      },
+      "attack_families": {
+        "families": {
+          "ACCOUNT_TAKEOVER": {
+            "count": 2,
+            "fraud_count": 2,
+            "allow_count": 0,
+            "review_count": 0,
+            "block_count": 2,
+            "fraud_recall": 1.0,
+            "fraud_recall_blocked_only": 1.0,
+            "fraud_allowed": 0,
+            "fraud_reviewed": 0,
+            "fraud_blocked": 2
+          },
+          "AUTHORIZED_PUSH_PAYMENT": {
+            "count": 3,
+            "fraud_count": 3,
+            "allow_count": 0,
+            "review_count": 0,
+            "block_count": 3,
+            "fraud_recall": 1.0,
+            "fraud_recall_blocked_only": 1.0,
+            "fraud_allowed": 0,
+            "fraud_reviewed": 0,
+            "fraud_blocked": 3
+          },
+          "MULE_NETWORK": {
+            "count": 2,
+            "fraud_count": 2,
+            "allow_count": 0,
+            "review_count": 0,
+            "block_count": 2,
+            "fraud_recall": 1.0,
+            "fraud_recall_blocked_only": 1.0,
+            "fraud_allowed": 0,
+            "fraud_reviewed": 0,
+            "fraud_blocked": 2
+          }
+        },
+        "reconciliation": {
+          "sum_family_counts": 7,
+          "sum_family_fraud_counts": 7,
+          "matches_global_fraud_count": true
+        }
+      },
+      "score_change_metrics": {
+        "available": false,
+        "reason": "Prevalence resampling changes which already-scored rows participate (and how many times a fraud row repeats); it never changes any row's own score. Per-row baseline-vs-stressed score deltas / decision flips are not a meaningful concept for this scenario type.",
+        "score_mae": null,
+        "score_rmse": null,
+        "score_mean_delta": null,
+        "score_max_absolute_delta": null,
+        "decision_flip_rate": null
+      }
+    },
+    "prevalence_extreme_0.1pct": {
+      "classification": {
+        "positive_class_definition": "positive = fraud (y == 1), negative = legitimate (y == 0)",
+        "threshold_used": 0.5,
+        "confusion_matrix": {
+          "true_positive": 1,
+          "true_negative": 1176,
+          "false_positive": 6,
+          "false_negative": 0
+        },
+        "accuracy": 0.9949281487743026,
+        "precision": 0.14285714285714285,
+        "recall": 1.0,
+        "f1": 0.25,
+        "canonical_cross_check": "cascade_with_graph.block_metrics",
+        "canonical_cross_check_passed": true
+      },
+      "fraud_metrics": {
+        "fraud_count": 1,
+        "legitimate_count": 1182,
+        "fraud_recall": 1.0,
+        "fraud_precision": 0.1429,
+        "fraud_false_negative_rate": 0.0,
+        "fraud_false_positive_rate": 0.0051
+      },
+      "decision_policy_metrics": {
+        "t_review": 0.0933,
+        "t_block": 0.9643,
+        "allow_count": 1127,
+        "review_count": 54,
+        "block_count": 2,
+        "allow_rate": 0.9527,
+        "review_rate": 0.0456,
+        "block_rate": 0.0017,
+        "fraud_allowed_rate": 0.0,
+        "fraud_review_rate": 0.0,
+        "fraud_block_rate": 1.0,
+        "legitimate_allowed_rate": 0.9535,
+        "legitimate_review_rate": 0.0457,
+        "legitimate_block_rate": 0.0008,
+        "composition": {
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 1,
+          "legitimate_allowed": 1127,
+          "legitimate_reviewed": 54,
+          "legitimate_blocked": 1
+        },
+        "canonical_policy_stats": {
+          "t_review": 0.0933,
+          "t_block": 0.9643,
+          "allow_rate": 0.9527,
+          "review_rate": 0.0456,
+          "block_rate": 0.0017,
+          "legit_blocked": 1,
+          "legit_blocked_rate": 0.0008,
+          "legit_reviewed_rate": 0.0457,
+          "fraud_blocked": 1,
+          "fraud_reviewed": 0,
+          "fraud_allowed": 0,
+          "fraud_recall_blocked_only": 1.0,
+          "fraud_recall_blocked_plus_review": 1.0,
+          "dollars_fraud_allowed_through": 0.0,
+          "dollars_fraud_total": 10159.51,
+          "expected_cost_at_assumed_prevalence": 798.0,
+          "liability_breakdown": {
+            "AUTHORIZED_PUSH_PAYMENT": {
+              "liable_side": "SHARED_50_50",
+              "acting_side": "BOTH",
+              "sending_liability_share": 0.5,
+              "receiving_liability_share": 0.5,
+              "n_fraud_traces": 1,
+              "n_blocked": 1,
+              "n_reviewed": 0,
+              "n_allowed_through": 0,
+              "dollars_allowed_through_total": 0.0,
+              "dollars_allowed_through_this_institution_liable_for": 0.0
+            }
+          }
+        }
+      },
+      "attack_families": {
+        "families": {
+          "ACCOUNT_TAKEOVER": {
+            "count": 0,
+            "fraud_count": 0,
+            "allow_count": 0,
+            "review_count": 0,
+            "block_count": 0,
+            "fraud_recall": null,
+            "fraud_recall_blocked_only": null,
+            "fraud_allowed": 0,
+            "fraud_reviewed": 0,
+            "fraud_blocked": 0
+          },
+          "AUTHORIZED_PUSH_PAYMENT": {
+            "count": 1,
+            "fraud_count": 1,
+            "allow_count": 0,
+            "review_count": 0,
+            "block_count": 1,
+            "fraud_recall": 1.0,
+            "fraud_recall_blocked_only": 1.0,
+            "fraud_allowed": 0,
+            "fraud_reviewed": 0,
+            "fraud_blocked": 1
+          },
+          "MULE_NETWORK": {
+            "count": 0,
+            "fraud_count": 0,
+            "allow_count": 0,
+            "review_count": 0,
+            "block_count": 0,
+            "fraud_recall": null,
+            "fraud_recall_blocked_only": null,
+            "fraud_allowed": 0,
+            "fraud_reviewed": 0,
+            "fraud_blocked": 0
+          }
+        },
+        "reconciliation": {
+          "sum_family_counts": 1,
+          "sum_family_fraud_counts": 1,
+          "matches_global_fraud_count": true
+        }
+      },
+      "score_change_metrics": {
+        "available": false,
+        "reason": "Prevalence resampling changes which already-scored rows participate (and how many times a fraud row repeats); it never changes any row's own score. Per-row baseline-vs-stressed score deltas / decision flips are not a meaningful concept for this scenario type.",
+        "score_mae": null,
+        "score_rmse": null,
+        "score_mean_delta": null,
+        "score_max_absolute_delta": null,
+        "decision_flip_rate": null
+      }
+    }
+  },
+  "attack_family_results": {
+    "prevalence_baseline_canonical": {
+      "families": {
+        "ACCOUNT_TAKEOVER": {
+          "count": 97,
+          "fraud_count": 97,
+          "allow_count": 2,
+          "review_count": 5,
+          "block_count": 90,
+          "fraud_recall": 0.9794,
+          "fraud_recall_blocked_only": 0.9278,
+          "fraud_allowed": 2,
+          "fraud_reviewed": 5,
+          "fraud_blocked": 90
+        },
+        "AUTHORIZED_PUSH_PAYMENT": {
+          "count": 156,
+          "fraud_count": 156,
+          "allow_count": 4,
+          "review_count": 3,
+          "block_count": 149,
+          "fraud_recall": 0.9744,
+          "fraud_recall_blocked_only": 0.9551,
+          "fraud_allowed": 4,
+          "fraud_reviewed": 3,
+          "fraud_blocked": 149
+        },
+        "MULE_NETWORK": {
+          "count": 121,
+          "fraud_count": 121,
+          "allow_count": 1,
+          "review_count": 16,
+          "block_count": 104,
+          "fraud_recall": 0.9917,
+          "fraud_recall_blocked_only": 0.8595,
+          "fraud_allowed": 1,
+          "fraud_reviewed": 16,
+          "fraud_blocked": 104
+        }
+      },
+      "reconciliation": {
+        "sum_family_counts": 374,
+        "sum_family_fraud_counts": 374,
+        "matches_global_fraud_count": true
+      }
+    },
+    "prevalence_mild_5pct": {
+      "families": {
+        "ACCOUNT_TAKEOVER": {
+          "count": 16,
+          "fraud_count": 16,
+          "allow_count": 0,
+          "review_count": 1,
+          "block_count": 15,
+          "fraud_recall": 1.0,
+          "fraud_recall_blocked_only": 0.9375,
+          "fraud_allowed": 0,
+          "fraud_reviewed": 1,
+          "fraud_blocked": 15
+        },
+        "AUTHORIZED_PUSH_PAYMENT": {
+          "count": 26,
+          "fraud_count": 26,
+          "allow_count": 0,
+          "review_count": 0,
+          "block_count": 26,
+          "fraud_recall": 1.0,
+          "fraud_recall_blocked_only": 1.0,
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 26
+        },
+        "MULE_NETWORK": {
+          "count": 20,
+          "fraud_count": 20,
+          "allow_count": 0,
+          "review_count": 3,
+          "block_count": 17,
+          "fraud_recall": 1.0,
+          "fraud_recall_blocked_only": 0.85,
+          "fraud_allowed": 0,
+          "fraud_reviewed": 3,
+          "fraud_blocked": 17
+        }
+      },
+      "reconciliation": {
+        "sum_family_counts": 62,
+        "sum_family_fraud_counts": 62,
+        "matches_global_fraud_count": true
+      }
+    },
+    "prevalence_moderate_1pct": {
+      "families": {
+        "ACCOUNT_TAKEOVER": {
+          "count": 3,
+          "fraud_count": 3,
+          "allow_count": 0,
+          "review_count": 0,
+          "block_count": 3,
+          "fraud_recall": 1.0,
+          "fraud_recall_blocked_only": 1.0,
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 3
+        },
+        "AUTHORIZED_PUSH_PAYMENT": {
+          "count": 5,
+          "fraud_count": 5,
+          "allow_count": 0,
+          "review_count": 0,
+          "block_count": 5,
+          "fraud_recall": 1.0,
+          "fraud_recall_blocked_only": 1.0,
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 5
+        },
+        "MULE_NETWORK": {
+          "count": 4,
+          "fraud_count": 4,
+          "allow_count": 0,
+          "review_count": 0,
+          "block_count": 4,
+          "fraud_recall": 1.0,
+          "fraud_recall_blocked_only": 1.0,
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 4
+        }
+      },
+      "reconciliation": {
+        "sum_family_counts": 12,
+        "sum_family_fraud_counts": 12,
+        "matches_global_fraud_count": true
+      }
+    },
+    "prevalence_severe_deployed_assumption_0.6pct": {
+      "families": {
+        "ACCOUNT_TAKEOVER": {
+          "count": 2,
+          "fraud_count": 2,
+          "allow_count": 0,
+          "review_count": 0,
+          "block_count": 2,
+          "fraud_recall": 1.0,
+          "fraud_recall_blocked_only": 1.0,
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 2
+        },
+        "AUTHORIZED_PUSH_PAYMENT": {
+          "count": 3,
+          "fraud_count": 3,
+          "allow_count": 0,
+          "review_count": 0,
+          "block_count": 3,
+          "fraud_recall": 1.0,
+          "fraud_recall_blocked_only": 1.0,
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 3
+        },
+        "MULE_NETWORK": {
+          "count": 2,
+          "fraud_count": 2,
+          "allow_count": 0,
+          "review_count": 0,
+          "block_count": 2,
+          "fraud_recall": 1.0,
+          "fraud_recall_blocked_only": 1.0,
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 2
+        }
+      },
+      "reconciliation": {
+        "sum_family_counts": 7,
+        "sum_family_fraud_counts": 7,
+        "matches_global_fraud_count": true
+      }
+    },
+    "prevalence_extreme_0.1pct": {
+      "families": {
+        "ACCOUNT_TAKEOVER": {
+          "count": 0,
+          "fraud_count": 0,
+          "allow_count": 0,
+          "review_count": 0,
+          "block_count": 0,
+          "fraud_recall": null,
+          "fraud_recall_blocked_only": null,
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 0
+        },
+        "AUTHORIZED_PUSH_PAYMENT": {
+          "count": 1,
+          "fraud_count": 1,
+          "allow_count": 0,
+          "review_count": 0,
+          "block_count": 1,
+          "fraud_recall": 1.0,
+          "fraud_recall_blocked_only": 1.0,
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 1
+        },
+        "MULE_NETWORK": {
+          "count": 0,
+          "fraud_count": 0,
+          "allow_count": 0,
+          "review_count": 0,
+          "block_count": 0,
+          "fraud_recall": null,
+          "fraud_recall_blocked_only": null,
+          "fraud_allowed": 0,
+          "fraud_reviewed": 0,
+          "fraud_blocked": 0
+        }
+      },
+      "reconciliation": {
+        "sum_family_counts": 1,
+        "sum_family_fraud_counts": 1,
+        "matches_global_fraud_count": true
+      }
+    }
+  },
+  "degradation_summary": {
+    "prevalence_baseline_canonical": {
+      "recall_delta": 0.0,
+      "precision_delta": 0.0,
+      "f1_delta": 0.0,
+      "fraud_recall_delta": 0.0,
+      "fraud_precision_delta": 0.0,
+      "fraud_false_positive_rate_delta": 0.0,
+      "fraud_false_negative_rate_delta": 0.0,
+      "fraud_recall_blocked_plus_review_delta": 0.0,
+      "fraud_recall_blocked_only_delta": 0.0,
+      "expected_cost_at_assumed_prevalence_delta": 0.0,
+      "decision_flip_rate": null,
+      "mean_absolute_score_delta": null,
+      "classification_note": "recall / fraud_false_positive_rate / fraud_false_negative_rate are PREVALENCE-INDEPENDENT here (same per-class score distribution, same fixed thresholds -- only sampling variance from the seeded bootstrap can move them). precision / fraud_precision / expected_cost ARE prevalence-dependent by construction and are expected to move with target_prevalence -- see decision_policy.py's own module docstring for why (the 'block-everyone' optimism at unrealistic prevalence).",
+      "degradation_category": "stable"
+    },
+    "prevalence_mild_5pct": {
+      "recall_delta": 0.032086,
+      "precision_delta": -0.071931,
+      "f1_delta": -0.021895,
+      "fraud_recall_delta": 0.0321,
+      "fraud_precision_delta": -0.0719,
+      "fraud_false_positive_rate_delta": 0.0,
+      "fraud_false_negative_rate_delta": -0.0321,
+      "fraud_recall_blocked_plus_review_delta": 0.0187,
+      "fraud_recall_blocked_only_delta": 0.0184,
+      "expected_cost_at_assumed_prevalence_delta": -115.04,
+      "decision_flip_rate": null,
+      "mean_absolute_score_delta": null,
+      "classification_note": "recall / fraud_false_positive_rate / fraud_false_negative_rate are PREVALENCE-INDEPENDENT here (same per-class score distribution, same fixed thresholds -- only sampling variance from the seeded bootstrap can move them). precision / fraud_precision / expected_cost ARE prevalence-dependent by construction and are expected to move with target_prevalence -- see decision_policy.py's own module docstring for why (the 'block-everyone' optimism at unrealistic prevalence).",
+      "degradation_category": "stable (recall improved)"
+    },
+    "prevalence_moderate_1pct": {
+      "recall_delta": 0.032086,
+      "precision_delta": -0.317029,
+      "f1_delta": -0.175741,
+      "fraud_recall_delta": 0.0321,
+      "fraud_precision_delta": -0.317,
+      "fraud_false_positive_rate_delta": 0.0,
+      "fraud_false_negative_rate_delta": -0.0321,
+      "fraud_recall_blocked_plus_review_delta": 0.0187,
+      "fraud_recall_blocked_only_delta": 0.0829,
+      "expected_cost_at_assumed_prevalence_delta": -379.72,
+      "decision_flip_rate": null,
+      "mean_absolute_score_delta": null,
+      "classification_note": "recall / fraud_false_positive_rate / fraud_false_negative_rate are PREVALENCE-INDEPENDENT here (same per-class score distribution, same fixed thresholds -- only sampling variance from the seeded bootstrap can move them). precision / fraud_precision / expected_cost ARE prevalence-dependent by construction and are expected to move with target_prevalence -- see decision_policy.py's own module docstring for why (the 'block-everyone' optimism at unrealistic prevalence).",
+      "degradation_category": "stable (recall improved)"
+    },
+    "prevalence_severe_deployed_assumption_0.6pct": {
+      "recall_delta": 0.032086,
+      "precision_delta": -0.445234,
+      "f1_delta": -0.275741,
+      "fraud_recall_delta": 0.0321,
+      "fraud_precision_delta": -0.4452,
+      "fraud_false_positive_rate_delta": 0.0,
+      "fraud_false_negative_rate_delta": -0.0321,
+      "fraud_recall_blocked_plus_review_delta": 0.0187,
+      "fraud_recall_blocked_only_delta": 0.0829,
+      "expected_cost_at_assumed_prevalence_delta": -379.72,
+      "decision_flip_rate": null,
+      "mean_absolute_score_delta": null,
+      "classification_note": "recall / fraud_false_positive_rate / fraud_false_negative_rate are PREVALENCE-INDEPENDENT here (same per-class score distribution, same fixed thresholds -- only sampling variance from the seeded bootstrap can move them). precision / fraud_precision / expected_cost ARE prevalence-dependent by construction and are expected to move with target_prevalence -- see decision_policy.py's own module docstring for why (the 'block-everyone' optimism at unrealistic prevalence).",
+      "degradation_category": "stable (recall improved)"
+    },
+    "prevalence_extreme_0.1pct": {
+      "recall_delta": 0.032086,
+      "precision_delta": -0.840839,
+      "f1_delta": -0.725741,
+      "fraud_recall_delta": 0.0321,
+      "fraud_precision_delta": -0.8408,
+      "fraud_false_positive_rate_delta": 0.0,
+      "fraud_false_negative_rate_delta": -0.0321,
+      "fraud_recall_blocked_plus_review_delta": 0.0187,
+      "fraud_recall_blocked_only_delta": 0.0829,
+      "expected_cost_at_assumed_prevalence_delta": -379.72,
+      "decision_flip_rate": null,
+      "mean_absolute_score_delta": null,
+      "classification_note": "recall / fraud_false_positive_rate / fraud_false_negative_rate are PREVALENCE-INDEPENDENT here (same per-class score distribution, same fixed thresholds -- only sampling variance from the seeded bootstrap can move them). precision / fraud_precision / expected_cost ARE prevalence-dependent by construction and are expected to move with target_prevalence -- see decision_policy.py's own module docstring for why (the 'block-everyone' optimism at unrealistic prevalence).",
+      "degradation_category": "stable (recall improved)"
+    }
+  },
+  "invariants": {
+    "baseline_population_unchanged": true,
+    "scenario_ids_valid": true,
+    "no_unexpected_duplicate_trace_ids": true,
+    "row_counts_reconcile": true,
+    "labels_unchanged_by_resampling": true,
+    "attack_families_remain_canonical": true,
+    "scores_finite_and_in_unit_interval": true,
+    "thresholds_identical_to_canonical_policy": true,
+    "random_seeds_recorded": true,
+    "canonical_data_never_overwritten": true,
+    "no_training_optimization_fitting_occurred": true,
+    "all_passed": true
+  },
+  "threshold_verification": {
+    "passed": true,
+    "method": "independent second load of decision_policy_results.json via evaluation_harness.load_canonical_policy()",
+    "tolerance": 1e-09,
+    "canonical_t_review": 0.0933,
+    "canonical_t_block": 0.9643,
+    "evaluator_t_review": 0.0933,
+    "evaluator_t_block": 0.9643,
+    "t_review_match": true,
+    "t_block_match": true
+  },
+  "canonical_immutability": {
+    "passed": true,
+    "pre_evaluation_fingerprint": {
+      "row_count": 1556,
+      "array_fingerprint_sha256": "6d14012f645ab147c178531ac3cbce811c370c16af2b8a04eded8f17daae9699",
+      "cache_file_sha256": "63c2408db5eb8831f6be8140ac7541a14047a201969cdeca4bd45080bf922de5",
+      "cache_file_path": "C:\\Users\\New\\Downloads\\AI_Defence_Sys-integration\\decision_policy_validation_cache.npz"
+    },
+    "post_evaluation_fingerprint": {
+      "row_count": 1556,
+      "array_fingerprint_sha256": "6d14012f645ab147c178531ac3cbce811c370c16af2b8a04eded8f17daae9699",
+      "cache_file_sha256": "63c2408db5eb8831f6be8140ac7541a14047a201969cdeca4bd45080bf922de5",
+      "cache_file_path": "C:\\Users\\New\\Downloads\\AI_Defence_Sys-integration\\decision_policy_validation_cache.npz"
+    }
+  },
+  "training_fitting_guard": {
+    "guarded_targets": [
+      "gcn.train",
+      "autoencoder.train",
+      "risk_fusion.run_risk_fusion",
+      "risk_fusion.fit_fusion_oof",
+      "decision_policy.optimize_thresholds",
+      "decision_policy.nested_threshold_estimate",
+      "sklearn.linear_model.LogisticRegression.fit"
+    ],
+    "violation": null,
+    "passed": true
+  },
+  "leakage_protections": {
+    "threshold_optimization": "GUARDED (decision_policy.optimize_thresholds raises if called; see training_fitting_guard)",
+    "nested_threshold_estimation": "GUARDED (decision_policy.nested_threshold_estimate raises if called; see training_fitting_guard)",
+    "calibration_fitting": "NOT USED (no calibrator .fit() anywhere in this file)",
+    "retraining": "GUARDED (gcn.train / autoencoder.train / risk_fusion.run_risk_fusion / risk_fusion.fit_fusion_oof all raise if called; see training_fitting_guard). GCN/autoencoder/meta-model retraining is precisely why 5 of 6 categories are out of scope -- see metadata.scope_note.",
+    "preprocessing_fitting": "GUARDED (sklearn.linear_model.LogisticRegression.fit raises if called; see training_fitting_guard)",
+    "labels_used_only_after_scoring": true,
+    "canonical_corpus_modified": false
+  },
+  "provenance": {
+    "git_commit": "42d829eccb57bd49664b97e60d402c9263b3d70f",
+    "git_dirty": true,
+    "python_version": "3.14.4",
+    "package_versions": {
+      "numpy": "2.4.4",
+      "pandas": "3.0.2",
+      "sklearn": "1.8.0",
+      "xgboost": "3.2.0",
+      "pydantic": "2.13.4"
+    },
+    "policy_artifact_provenance": {
+      "path": "decision_policy_results.json",
+      "block": "corrected",
+      "provenance": {
+        "generated_at_utc": "2026-09-05T07:50:20.646519+00:00",
+        "git_commit": "62fdb9aa093dd03049a2dbf8d20bdb45a0474849",
+        "git_dirty": true,
+        "python_version": "3.14.4",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "package_versions": {
+          "numpy": "2.4.4",
+          "pandas": "3.0.2",
+          "sklearn": "1.8.0",
+          "xgboost": "3.2.0",
+          "pydantic": "2.13.4"
+        },
+        "seeds": {
+          "RANDOM_STATE": 42
+        }
+      }
+    },
+    "cache_provenance": {
+      "path": "C:\\Users\\New\\Downloads\\AI_Defence_Sys-integration\\decision_policy_validation_cache.npz",
+      "validation_variant": "fused",
+      "sha256": "63c2408db5eb8831f6be8140ac7541a14047a201969cdeca4bd45080bf922de5",
+      "note": "unmodified, reused verbatim -- see canonical_immutability for before/after fingerprint"
+    },
+    "phase5b_seed_root": 5002
+  },
+  "conclusions": {
+    "summary": "Under prevalence resampling alone (fixed frozen fused-score model, fixed frozen t_review/t_block thresholds), fraud recall is the prevalence-independent signal to watch; it is reported per scenario in degradation_summary rather than collapsed into a single score. Precision and expected cost move with prevalence by construction (see decision_policy.py's own documented block-everyone-at-high-prevalence finding) and should not be read as model degradation.",
+    "degradation_by_scenario": {
+      "prevalence_mild_5pct": "stable (recall improved)",
+      "prevalence_moderate_1pct": "stable (recall improved)",
+      "prevalence_severe_deployed_assumption_0.6pct": "stable (recall improved)",
+      "prevalence_extreme_0.1pct": "stable (recall improved)"
+    },
+    "categories_not_evaluated": [
+      "feature_noise",
+      "timing_jitter",
+      "missing_information",
+      "behavioral_drift",
+      "graph_sparsity"
+    ],
+    "recommendation": "To evaluate the five out-of-scope categories, either (a) accept Stage-1+2-only robustness testing against the genuinely frozen xgb_model.joblib/calibrator.joblib artifact (a different, weaker system than the deployed fused-score policy), or (b) explicitly authorize re-running the identical, seed-controlled 5-fold CV recipe on perturbed data as an accepted exception to the no-retrain mandate."
+  },
+  "determinism_check": {
+    "deterministic": true,
+    "diffs": {}
+  }
+}
