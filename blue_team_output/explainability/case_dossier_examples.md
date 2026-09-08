@@ -4,7 +4,7 @@ These summaries help a human reviewer act faster on a decision already made by d
 
 ## easy ato correctly blocked
 
-DECISION: BLOCK -- trace atk-73100246 (customer ace3b175-db94-4ca5-9d87-34d64fd6b993), $33,647.49 moved. Attack family: ACCOUNT_TAKEOVER (easy). Liable side under current policy: SENDING (acting side: SENDING). Signals that drove this decision: largest transaction amount, shortest gap between two transactions, length of the observation window. No graph-connected similar past cases found for this trace. NOTE: this dossier is an investigation aid only. It summarizes why the automated policy made its decision; it does not itself make or override that decision.
+DECISION: BLOCK -- trace atk-73100246 (customer ace3b175-db94-4ca5-9d87-34d64fd6b993), $33,647.49 moved. Attack family: ACCOUNT_TAKEOVER (easy). Liable side under current policy: SENDING (acting side: SENDING). Signals that drove this decision: largest transaction amount, number of failed transaction attempts, length of the observation window. No graph-connected similar past cases found for this trace. NOTE: this dossier is an investigation aid only. It summarizes why the automated policy made its decision; it does not itself make or override that decision.
 
 ## hard app correctly blocked
 
@@ -21,3 +21,4 @@ DECISION: REVIEW -- trace atk-87e38be9 (customer 259fc45e-741c-4a4a-8d33-fe3f103
 ## legitimate case routed to review
 
 DECISION: REVIEW -- trace legit_sess_1139069f-d729-4e28-b894-28ae9d50e895 (customer f4237624-2ca8-41a9-a350-3592873b1cd3), $6,276.25 moved. True label: legitimate -- this is a false positive under the current thresholds. Liability fields don't apply. Signals that drove this decision: shortest gap between two transactions, number of failed transaction attempts, average gap between transactions. No graph-connected similar past cases found for this trace. NOTE: this dossier is an investigation aid only. It summarizes why the automated policy made its decision; it does not itself make or override that decision.
+

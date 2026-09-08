@@ -5,9 +5,8 @@ Real, load-once, inference-only Stage 1+2 scoring path for POST /api/score.
 
 WHAT THIS DOES
 --------------
-- Loads blue_team_output/calibrator.joblib (the calibrated XGBoost saved by
-  blue_team_pipeline.py's main()) and blue_team_output/xgb_model.joblib
-  (the raw booster, needed for SHAP) exactly ONCE, at process startup --
+- Loads portable blue_team_output/calibration.json and
+  blue_team_output/xgb_model.json exactly ONCE, at process startup --
   see ModelRegistry.load(). Nothing here ever calls .fit() on anything, and
   nothing here shells out to blue_team_pipeline.py, cascade_with_graph.py,
   or any other batch script. If that's what you want, use
@@ -23,8 +22,8 @@ WHAT THIS DELIBERATELY DOES NOT DO
 Stage 3 (GCN graph escalation), Stage 4 (autoencoder novelty), and Stage 5
 (risk fusion) are NOT computed here, because:
   - None of the three has a saved, loadable artifact anywhere in this repo
-    (verified: only xgb_model.joblib and calibrator.joblib exist under
-    blue_team_output/). Each is retrained fresh inside a 5-fold CV loop
+    (the online service persists only the Stage 1+2 model artifacts; later
+    stages are not loaded here). Each is retrained fresh inside a 5-fold CV loop
     every time its batch script runs.
   - Stage 3 specifically needs a CROSS-CUSTOMER graph
     (build_cross_customer_graph() in cascade_with_graph.py, keyed on
@@ -61,11 +60,13 @@ import logging
 import sys
 import time
 import types
+import json
+
+import xgboost as xgb
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import joblib
 import numpy as np
 import pandas as pd
 
@@ -76,6 +77,34 @@ logger = logging.getLogger("ai_defense.inference")
 _SRC_DIR = REPO_ROOT / "src"
 if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
+
+
+class PortableIsotonicCalibrator:
+    """Portable replacement for sklearn CalibratedClassifierCV(isotonic).
+
+    The original calibrator.joblib contains an XGBClassifier pickle, which
+    cannot be safely unpickled on Windows when it was serialized on Linux.
+    Only the fitted isotonic mapping is needed at inference time, so it is
+    stored as plain JSON threshold arrays and applied with numpy.interp.
+    """
+
+    def __init__(self, x_thresholds: list[float], y_thresholds: list[float]) -> None:
+        self.x_thresholds = np.asarray(x_thresholds, dtype=float)
+        self.y_thresholds = np.asarray(y_thresholds, dtype=float)
+        if self.x_thresholds.ndim != 1 or self.y_thresholds.ndim != 1:
+            raise ValueError("Calibration thresholds must be one-dimensional")
+        if len(self.x_thresholds) != len(self.y_thresholds) or len(self.x_thresholds) < 2:
+            raise ValueError("Invalid isotonic calibration thresholds")
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        raw_positive = np.asarray(self.model.predict_proba(X))[:, 1]
+        calibrated_positive = np.interp(
+            raw_positive, self.x_thresholds, self.y_thresholds
+        )
+        return np.column_stack((1.0 - calibrated_positive, calibrated_positive))
+
+    def bind(self, model: Any) -> None:
+        self.model = model
 
 
 class ModelNotReady(RuntimeError):
@@ -153,16 +182,22 @@ class ModelRegistry:
         model load should not take down the whole API, including the
         pipeline-dashboard endpoints that don't need this registry)."""
         try:
-            calibrator_path = OUT_DIR / "calibrator.joblib"
-            base_model_path = OUT_DIR / "xgb_model.joblib"
+            # IMPORTANT: do not joblib-load the XGBoost estimator on Windows.
+            # The committed artifacts were serialized on Linux, and XGBoost's
+            # internal pickle buffer can fail to deserialize on Windows with
+            # `XGBoostError: input stream corrupted` even at the same version.
+            # Use XGBoost's native JSON model format plus a tiny JSON copy of
+            # the fitted isotonic calibration mapping instead.
+            calibration_path = OUT_DIR / "calibration.json"
+            base_model_path = OUT_DIR / "xgb_model.json"
             feature_table_path = OUT_DIR / "feature_table.csv"
 
-            missing = [p for p in (calibrator_path, base_model_path, feature_table_path) if not p.exists()]
+            missing = [p for p in (calibration_path, base_model_path, feature_table_path) if not p.exists()]
             if missing:
                 raise ModelNotReady(
                     "Missing required artifact(s): "
                     + ", ".join(str(p.relative_to(REPO_ROOT)) for p in missing)
-                    + ". Run `PYTHONPATH=src python3 blue_team_pipeline.py` from the repo root first."
+                    + ". Copy the portable xgb_model.json and calibration.json artifacts into blue_team_output/."
                 )
 
             pipeline = _load_pipeline_module()
@@ -170,8 +205,16 @@ class ModelRegistry:
             self.feature_cols = list(pipeline.FEATURE_COLS)
             self.decision_threshold = float(pipeline.CONFIG["DECISION_THRESHOLD"])
 
-            self.calibrator = joblib.load(calibrator_path)
-            self.base_model = joblib.load(base_model_path)
+            with open(calibration_path, encoding="utf-8") as f:
+                calibration = json.load(f)
+
+            self.base_model = xgb.XGBClassifier()
+            self.base_model.load_model(base_model_path)
+
+            self.calibrator = PortableIsotonicCalibrator(
+                calibration["x_thresholds_"], calibration["y_thresholds_"]
+            )
+            self.calibrator.bind(self.base_model)
 
             import shap  # deferred import: heavy, only needed once artifacts exist
 
@@ -185,7 +228,7 @@ class ModelRegistry:
             self.hesitation_baseline = HesitationBaseline(global_mean=global_mean, global_std=global_std)
 
             self.reference_thresholds = self._load_reference_thresholds()
-            self.model_version = self._compute_model_version(calibrator_path, base_model_path)
+            self.model_version = self._compute_model_version(calibration_path, base_model_path)
 
             self.ready = True
             self.load_error = None
@@ -208,7 +251,7 @@ class ModelRegistry:
             return None
         return {"t_review": float(corrected["t_review"]), "t_block": float(corrected["t_block"])}
 
-    def _compute_model_version(self, calibrator_path: Path, base_model_path: Path) -> str:
+    def _compute_model_version(self, calibration_path: Path, base_model_path: Path) -> str:
         import json
 
         results_path = OUT_DIR / "results.json"
@@ -220,7 +263,7 @@ class ModelRegistry:
                 trained_at = meta.get("generated_at_utc", "unknown")
             except Exception:  # noqa: BLE001 -- version string is best-effort
                 pass
-        artifact_hash = _sha256_file(calibrator_path) + _sha256_file(base_model_path)
+        artifact_hash = _sha256_file(calibration_path) + _sha256_file(base_model_path)
         short_hash = hashlib.sha256(artifact_hash.encode()).hexdigest()[:12]
         return f"stage1_2-calibrated-xgb@{trained_at}+{short_hash}"
 

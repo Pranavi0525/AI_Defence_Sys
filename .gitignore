@@ -44,6 +44,10 @@ data/raw/
 !.env.example
 !web_prototype/api/.env.example
 
+# Pipeline job state (SQLite) -- runtime data, not source. See
+# web_prototype/api/job_store.py.
+web_prototype/api/pipeline_jobs.sqlite3
+
 # OS
 Thumbs.db
 .DS_Store

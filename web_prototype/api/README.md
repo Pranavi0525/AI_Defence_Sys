@@ -7,11 +7,22 @@ kicks off the real stage scripts as subprocesses.
 
 ## Setup
 
-```powershell
-pip install -r requirements.txt
+```bash
+bash scripts/install.sh
 ```
 
-(`fastapi` and `uvicorn` are already in `requirements.txt`.)
+(`fastapi` and `uvicorn` are already in `requirements.txt`.) Use
+`scripts/install.sh` rather than a plain `pip install -r requirements.txt`
+-- it installs xgboost with `--no-deps` afterward to skip a ~290MB
+nvidia-nccl-cu13 dependency that xgboost's Linux wheel pulls in for GPU
+training this repo never does. See the script's own comments for the
+full reasoning. For local development (running the test suite), install
+`requirements-dev.txt` first, then run the same script:
+
+```bash
+pip install -r requirements-dev.txt
+bash scripts/install.sh
+```
 
 ## Run
 
@@ -86,6 +97,10 @@ stale root-level copy) at the top of `config.py` — worth reading once.
 
 ## Known limitation (say this if asked, don't hide it)
 
-Job state lives in an in-memory dict — restart the server and history is
-gone. Fine for a single-demo hackathon prototype; would need Redis/a DB
-for anything persistent.
+Job state is persisted to a local SQLite file (`job_store.py`), so a
+process restart on the same instance keeps job history intact. It does
+NOT survive a full redeploy on a platform with an ephemeral filesystem
+(e.g. Render's free tier wipes local disk on redeploy) — that would need
+an external store (hosted Postgres, S3, a paid persistent disk). Good
+enough for surviving a crash or idle-timeout restart; not a claim of
+durability across redeploys.

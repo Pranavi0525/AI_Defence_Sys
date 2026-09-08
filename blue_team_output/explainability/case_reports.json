@@ -42,42 +42,42 @@
     "stage2": {
       "ran": true,
       "score": 0.9683,
-      "score_if_it_had_run_anyway": 0.9924,
+      "score_if_it_had_run_anyway": 0.9912,
       "top_features": [
         {
           "feature": "amount_max",
           "label": "largest transaction amount",
           "value": 33647.49,
-          "shap_value": 2.8203,
-          "pushed_score": "up"
-        },
-        {
-          "feature": "min_time_between_transactions",
-          "label": "shortest gap between two transactions",
-          "value": 960.0,
-          "shap_value": -1.4568,
-          "pushed_score": "down"
-        },
-        {
-          "feature": "window_seconds",
-          "label": "length of the observation window",
-          "value": 960.0,
-          "shap_value": 1.2459,
+          "shap_value": 2.8808,
           "pushed_score": "up"
         },
         {
           "feature": "failed_transaction_count",
           "label": "number of failed transaction attempts",
           "value": 1.0,
-          "shap_value": -1.1929,
+          "shap_value": -1.3367,
           "pushed_score": "down"
         },
         {
-          "feature": "count_beneficiary_addition",
-          "label": "number of new payees added",
-          "value": 1.0,
-          "shap_value": 1.1362,
+          "feature": "window_seconds",
+          "label": "length of the observation window",
+          "value": 960.0,
+          "shap_value": 1.3007,
           "pushed_score": "up"
+        },
+        {
+          "feature": "amount_mean",
+          "label": "average transaction amount",
+          "value": 33647.49,
+          "shap_value": 1.2879,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "min_time_between_transactions",
+          "label": "shortest gap between two transactions",
+          "value": 960.0,
+          "shap_value": -1.2198,
+          "pushed_score": "down"
         }
       ]
     },
@@ -100,7 +100,7 @@
       "t_block": 0.9643,
       "decision": "BLOCK"
     },
-    "narrative": "Trace atk-73100246 (customer ace3b175-db94-4ca5-9d87-34d64fd6b993), true label: FRAUD [ACCOUNT_TAKEOVER, easy], $33,647.49 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: a payee was added and then paid within the same session; a new device was registered on this trace; two transactions happened under an hour apart; transaction velocity exceeded 2.5/hour. Stage 2 (XGBoost) scored it 0.968. Top contributing signals: largest transaction amount (33647.49) pushed the score up; shortest gap between two transactions (960.0) pushed the score down; length of the observation window (960.0) pushed the score up. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.994, vs. 0.968 from Stage 1+2 alone. This is a lift over Stage 1+2 alone, but the illustrative graph score doesn't explain it, so the more likely driver is the autoencoder and/or the fusion model's reweighting, not the graph specifically. Stage 6 (decision policy): final score 0.994 vs. thresholds REVIEW>=0.093 / BLOCK>=0.964 -> decision: BLOCK."
+    "narrative": "Trace atk-73100246 (customer ace3b175-db94-4ca5-9d87-34d64fd6b993), true label: FRAUD [ACCOUNT_TAKEOVER, easy], $33,647.49 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: a payee was added and then paid within the same session; a new device was registered on this trace; two transactions happened under an hour apart; transaction velocity exceeded 2.5/hour. Stage 2 (XGBoost) scored it 0.968. Top contributing signals: largest transaction amount (33647.49) pushed the score up; number of failed transaction attempts (1.0) pushed the score down; length of the observation window (960.0) pushed the score up. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.994, vs. 0.968 from Stage 1+2 alone. This is a lift over Stage 1+2 alone, but the illustrative graph score doesn't explain it, so the more likely driver is the autoencoder and/or the fusion model's reweighting, not the graph specifically. Stage 6 (decision policy): final score 0.994 vs. thresholds REVIEW>=0.093 / BLOCK>=0.964 -> decision: BLOCK."
   },
   "hard_app_correctly_blocked": {
     "trace_id": "atk-57b9b051",
@@ -145,42 +145,42 @@
     "stage2": {
       "ran": true,
       "score": 0.9964,
-      "score_if_it_had_run_anyway": 0.9983,
+      "score_if_it_had_run_anyway": 0.9984,
       "top_features": [
         {
           "feature": "min_time_between_transactions",
           "label": "shortest gap between two transactions",
           "value": 39.0,
-          "shap_value": 6.6676,
+          "shap_value": 6.7665,
           "pushed_score": "up"
         },
         {
           "feature": "mean_time_between_transactions",
           "label": "average gap between transactions",
           "value": 141.0,
-          "shap_value": 1.2656,
+          "shap_value": 1.4591,
           "pushed_score": "up"
         },
         {
           "feature": "failed_transaction_count",
           "label": "number of failed transaction attempts",
           "value": 2.0,
-          "shap_value": -0.8282,
+          "shap_value": -0.9218,
           "pushed_score": "down"
         },
         {
           "feature": "failed_then_completed",
           "label": "a failed transaction was immediately retried and succeeded",
           "value": 1.0,
-          "shap_value": 0.8046,
+          "shap_value": 0.815,
           "pushed_score": "up"
         },
         {
-          "feature": "count_beneficiary_addition",
-          "label": "number of new payees added",
-          "value": 0.0,
-          "shap_value": -0.3081,
-          "pushed_score": "down"
+          "feature": "time_login_to_first_transaction",
+          "label": "time from login to first transaction",
+          "value": 120949.0,
+          "shap_value": 0.2874,
+          "pushed_score": "up"
         }
       ]
     },
@@ -248,41 +248,41 @@
     "stage2": {
       "ran": true,
       "score": 0.88,
-      "score_if_it_had_run_anyway": 0.9846,
+      "score_if_it_had_run_anyway": 0.9717,
       "top_features": [
         {
           "feature": "amount_max",
           "label": "largest transaction amount",
           "value": 6846.9,
-          "shap_value": 3.3862,
+          "shap_value": 3.0426,
           "pushed_score": "up"
         },
         {
           "feature": "min_time_between_transactions",
           "label": "shortest gap between two transactions",
           "value": 1920.0,
-          "shap_value": -2.178,
+          "shap_value": -2.1111,
           "pushed_score": "down"
         },
         {
           "feature": "failed_transaction_count",
           "label": "number of failed transaction attempts",
           "value": 0.0,
-          "shap_value": 1.3467,
+          "shap_value": 1.269,
           "pushed_score": "up"
         },
         {
           "feature": "count_transaction",
           "label": "number of transactions in the trace",
           "value": 2.0,
-          "shap_value": 0.9389,
+          "shap_value": 0.9991,
           "pushed_score": "up"
         },
         {
           "feature": "transactions_per_hour",
           "label": "transaction velocity (txns/hour)",
           "value": 1.429,
-          "shap_value": 0.9159,
+          "shap_value": 0.8526,
           "pushed_score": "up"
         }
       ]
@@ -364,41 +364,41 @@
     "stage2": {
       "ran": true,
       "score": 0.5127,
-      "score_if_it_had_run_anyway": 0.9058,
+      "score_if_it_had_run_anyway": 0.8727,
       "top_features": [
         {
           "feature": "count_beneficiary_addition",
           "label": "number of new payees added",
           "value": 1.0,
-          "shap_value": 2.6137,
+          "shap_value": 2.5441,
           "pushed_score": "up"
         },
         {
           "feature": "count_device_registration",
           "label": "number of new-device registrations",
           "value": 1.0,
-          "shap_value": 2.5029,
+          "shap_value": 2.4931,
           "pushed_score": "up"
         },
         {
           "feature": "min_time_between_transactions",
           "label": "shortest gap between two transactions",
           "value": 16500.0,
-          "shap_value": -2.1682,
+          "shap_value": -2.1898,
           "pushed_score": "down"
         },
         {
           "feature": "failed_transaction_count",
           "label": "number of failed transaction attempts",
           "value": 0.0,
-          "shap_value": 1.572,
+          "shap_value": 1.6553,
           "pushed_score": "up"
         },
         {
           "feature": "total_events",
           "label": "total number of events observed",
           "value": 3.0,
-          "shap_value": -0.4051,
+          "shap_value": -0.4919,
           "pushed_score": "down"
         }
       ]
@@ -467,41 +467,41 @@
     "stage2": {
       "ran": true,
       "score": 0.0808,
-      "score_if_it_had_run_anyway": 0.7495,
+      "score_if_it_had_run_anyway": 0.777,
       "top_features": [
         {
           "feature": "count_device_registration",
           "label": "number of new-device registrations",
           "value": 1.0,
-          "shap_value": 1.6422,
+          "shap_value": 1.6335,
           "pushed_score": "up"
         },
         {
           "feature": "mean_time_between_transactions",
           "label": "average gap between transactions",
           "value": 420.0,
-          "shap_value": 1.4996,
+          "shap_value": 1.4185,
           "pushed_score": "up"
         },
         {
           "feature": "transactions_per_hour",
           "label": "transaction velocity (txns/hour)",
           "value": 0.0,
-          "shap_value": -1.2654,
+          "shap_value": -1.1413,
           "pushed_score": "down"
         },
         {
           "feature": "count_beneficiary_addition",
           "label": "number of new payees added",
           "value": 0.0,
-          "shap_value": -1.0128,
+          "shap_value": -0.9918,
           "pushed_score": "down"
         },
         {
-          "feature": "failed_transaction_count",
-          "label": "number of failed transaction attempts",
-          "value": 0.0,
-          "shap_value": 0.7196,
+          "feature": "window_seconds",
+          "label": "length of the observation window",
+          "value": 420.0,
+          "shap_value": 0.8799,
           "pushed_score": "up"
         }
       ]
@@ -576,35 +576,35 @@
           "feature": "min_time_between_transactions",
           "label": "shortest gap between two transactions",
           "value": 3912.0,
-          "shap_value": -2.9183,
+          "shap_value": -2.8238,
           "pushed_score": "down"
         },
         {
           "feature": "failed_transaction_count",
           "label": "number of failed transaction attempts",
           "value": 4.0,
-          "shap_value": -1.902,
+          "shap_value": -2.0379,
           "pushed_score": "down"
         },
         {
           "feature": "mean_time_between_transactions",
           "label": "average gap between transactions",
           "value": 58892.667,
-          "shap_value": -1.211,
+          "shap_value": -1.2616,
           "pushed_score": "down"
         },
         {
           "feature": "count_beneficiary_addition",
           "label": "number of new payees added",
           "value": 1.0,
-          "shap_value": 0.9872,
+          "shap_value": 0.8482,
           "pushed_score": "up"
         },
         {
           "feature": "window_seconds",
           "label": "length of the observation window",
           "value": 193771.0,
-          "shap_value": -0.8042,
+          "shap_value": -0.777,
           "pushed_score": "down"
         }
       ]
@@ -686,35 +686,35 @@
           "feature": "min_time_between_transactions",
           "label": "shortest gap between two transactions",
           "value": 49017.0,
-          "shap_value": -2.9351,
+          "shap_value": -2.9998,
           "pushed_score": "down"
         },
         {
           "feature": "count_beneficiary_addition",
           "label": "number of new payees added",
           "value": 0.0,
-          "shap_value": -1.2411,
+          "shap_value": -1.2248,
           "pushed_score": "down"
         },
         {
           "feature": "mean_time_between_transactions",
           "label": "average gap between transactions",
           "value": 49017.0,
-          "shap_value": -1.1932,
+          "shap_value": -1.1114,
           "pushed_score": "down"
         },
         {
           "feature": "failed_transaction_count",
           "label": "number of failed transaction attempts",
           "value": 0.0,
-          "shap_value": 0.9136,
+          "shap_value": 0.9652,
           "pushed_score": "up"
         },
         {
           "feature": "count_device_registration",
           "label": "number of new-device registrations",
           "value": 0.0,
-          "shap_value": -0.6733,
+          "shap_value": -0.7014,
           "pushed_score": "down"
         }
       ]
@@ -741,16 +741,16 @@
     "narrative": "Trace legit_sess_edd9f6a1-5a23-4f2c-8f28-370b2cd0aeb2 (customer 8600d020-b359-4eeb-b271-d359089a02d6), true label: legitimate, $0.00 moved in this trace. Stage 1 (rules) did NOT escalate this trace -- none of the four trigger conditions fired, so it was auto-cleared without the ML model ever running. (For reference only, the model's score had it been escalated would have been 0.000.) Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.035, vs. 0.000 from Stage 1+2 alone. This is a lift over Stage 1+2 alone, but the illustrative graph score doesn't explain it, so the more likely driver is the autoencoder and/or the fusion model's reweighting, not the graph specifically. Stage 6 (decision policy): final score 0.035 vs. thresholds REVIEW>=0.093 / BLOCK>=0.964 -> decision: ALLOW."
   },
   "_artifact_metadata": {
-    "generated_at_utc": "2026-09-05T07:50:45.666953+00:00",
-    "git_commit": "62fdb9aa093dd03049a2dbf8d20bdb45a0474849",
+    "generated_at_utc": "2026-09-08T14:12:37.039737+00:00",
+    "git_commit": "122bdc444b4985a3ac2f54a422f6f18d101795e7",
     "git_dirty": true,
-    "python_version": "3.14.4",
+    "python_version": "3.14.3",
     "platform": "Windows-11-10.0.26200-SP0",
     "package_versions": {
-      "numpy": "2.4.4",
-      "pandas": "3.0.2",
-      "sklearn": "1.8.0",
-      "xgboost": "3.2.0",
+      "numpy": "2.4.5",
+      "pandas": "2.3.3",
+      "sklearn": "1.7.2",
+      "xgboost": "3.4.1",
       "pydantic": "2.13.4"
     }
   }

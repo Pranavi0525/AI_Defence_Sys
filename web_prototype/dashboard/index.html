@@ -637,14 +637,31 @@ apiBaseInput.addEventListener('change', () => {
 
 const getBase = () => apiBaseInput.value.trim().replace(/\/$/, '');
 
-const STAGE_CATALOG = [
-  { id: 'stage1_2', label: 'Stage 1+2', sub: 'Rules + XGBoost' },
-  { id: 'stage3_graph', label: 'Stage 3', sub: 'GCN graph' },
-  { id: 'stage4_autoencoder', label: 'Stage 4', sub: 'Autoencoder' },
-  { id: 'risk_fusion', label: 'Fusion', sub: 'Stacked LR' },
-  { id: 'decision_policy', label: 'Policy', sub: 'Allow/Review/Block' },
-  { id: 'explainability', label: 'Explain', sub: 'SHAP' },
-];
+// Previously a hardcoded array here duplicated the backend's stage list
+// (api/config.py's STAGES) and had drifted out of sync with it -- it only
+// listed 6 of the real 10 stages, and one id ('risk_fusion') didn't even
+// match the backend's actual id ('stage5_fusion'). That never broke a
+// real pipeline run (startRun() always sends real ids, e.g.
+// 'decision_policy_sensitivity'), but it did understate what "Run
+// pipeline" actually does in the pending-state placeholder shown before
+// a job starts.
+//
+// Fixed by fetching the real catalog from GET /api/pipeline/stages
+// (already existed as an endpoint, just wasn't used for this) so there is
+// exactly one source of truth -- config.py -- and this can't drift again.
+let STAGE_CATALOG = [];
+
+async function loadStageCatalog(){
+  try{
+    const res = await fetchJSON('/api/pipeline/stages');
+    STAGE_CATALOG = (res.stages || []).map(s => ({ id: s.id, label: s.label, sub: '' }));
+  }catch(e){
+    // Backend not reachable yet -- leave STAGE_CATALOG empty; the pending
+    // placeholder just won't render stage rows until a run starts or the
+    // backend comes up and this is retried alongside checkHealth().
+    STAGE_CATALOG = [];
+  }
+}
 
 function pct(x, digits=1){ return (x==null) ? 'â€”' : (x*100).toFixed(digits)+'%'; }
 function num(x){ return (x==null) ? 'â€”' : x.toLocaleString(); }
@@ -1441,11 +1458,16 @@ async function startRun(stageIds){
 // ---------------------------------------------------------------------
 $('#runBtn').addEventListener('click', () => startRun(null));
 $('#quickRunBtn').addEventListener('click', () => startRun(['decision_policy_sensitivity']));
-$('#refreshBtn').addEventListener('click', () => { checkHealth(); loadDashboard(); });
-apiBaseInput.addEventListener('change', () => { checkHealth(); loadDashboard(); });
+function refreshStageCatalogAndRender(){
+  loadStageCatalog().then(() => renderStageList(null));
+}
+
+$('#refreshBtn').addEventListener('click', () => { checkHealth(); loadDashboard(); refreshStageCatalogAndRender(); });
+apiBaseInput.addEventListener('change', () => { checkHealth(); loadDashboard(); refreshStageCatalogAndRender(); });
 
 renderStageList(null);
 checkHealth().then(loadDashboard);
+refreshStageCatalogAndRender();
 </script>
 </body>
 </html>

@@ -1,28 +1,37 @@
- # Core
- pydantic==2.13.4
- pydantic-settings==2.14.1
- numpy==2.2.4
- scipy==1.15.2
- pandas==2.2.3
- scikit-learn==1.6.1
- networkx>=3.4
- fastapi==0.136.1
- uvicorn==0.46.0
- matplotlib==3.10.1
- seaborn==0.13.2
- python-dotenv==1.2.2
- google-genai==2.7.0
+# requirements.txt
+# =================
+# PRODUCTION runtime dependencies only. This is what actually needs to be
+# installed for the API and the pipeline scripts to run.
+#
+# xgboost is deliberately NOT listed here even though it's required at
+# runtime -- its Linux wheel unconditionally depends on nvidia-nccl-cu13
+# (a ~290MB GPU/distributed-training package), which this CPU-only
+# deployment never uses. It's installed separately with --no-deps by
+# scripts/install.sh (see that file for the full explanation). Always run
+# `bash scripts/install.sh` instead of `pip install -r requirements.txt`
+# directly, or xgboost will be missing.
+#
+# google-genai and pytest/pytest-cov are intentionally excluded: they are
+# not imported anywhere in the API or pipeline code (only in the test
+# suite) and don't belong in a production install. See requirements-dev.txt.
 
+# Core
+pydantic==2.13.4
+pydantic-settings==2.14.1
+numpy==2.2.4
+scipy==1.15.2
+pandas==2.2.3
+scikit-learn==1.6.1
+networkx>=3.4
+fastapi==0.136.1
+uvicorn==0.46.0
+matplotlib==3.10.1
+seaborn==0.13.2
+python-dotenv==1.2.2
 
-# Model inference (pinned to actual artifact-creation versions — see
-# blue_team_output/results.json._artifact_metadata and raw pickle inspection)
-xgboost==3.4.1
+# Model inference support (xgboost itself is installed by scripts/install.sh)
 joblib==1.5.3
 
 # Explainability
 # Verified locally with the production XGBoost artifact.
 shap==0.52.0
-
- # Dev / Test
- pytest>=8.0
- pytest-cov>=5.0

@@ -28,7 +28,7 @@ services:
     runtime: python
     plan: free
     branch: master
-    buildCommand: pip install -r requirements.txt
+    buildCommand: bash scripts/install.sh
     startCommand: "python3 web_prototype/run_api.py --host 0.0.0.0 --port $PORT"
     healthCheckPath: /healthz
     envVars:

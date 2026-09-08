@@ -22,12 +22,16 @@ import time
 import uuid
 from typing import Optional
 
+import job_store
 from config import REPO_ROOT, SRC_DIR, STAGES
 
-# In-memory job store. A hackathon demo prototype does not need Redis --
-# one process, one dashboard, restart clears it. Good enough, and honest
-# about that limitation (see README).
-_JOBS: dict[str, dict] = {}
+# Job state is persisted via job_store (SQLite) rather than kept only in
+# this process's memory -- see job_store.py's module docstring for why
+# (in short: the previous in-memory-only dict lost all job history on
+# every process restart, which happens routinely on a real deployment).
+# _LOCK still guards the read-modify-write sequence in _update_stage
+# against concurrent stage-completion callbacks; job_store has its own
+# internal lock around the actual DB writes.
 _LOCK = threading.Lock()
 
 LOG_TAIL_LINES = 40
@@ -47,22 +51,11 @@ def _new_stage_state(stage: dict) -> dict:
 
 
 def get_job(job_id: str) -> Optional[dict]:
-    with _LOCK:
-        job = _JOBS.get(job_id)
-        return None if job is None else dict(job, stages=[dict(s) for s in job["stages"]])
+    return job_store.load_job(job_id)
 
 
 def list_jobs() -> list[dict]:
-    with _LOCK:
-        return [
-            {
-                "job_id": jid,
-                "status": j["status"],
-                "started_at": j["started_at"],
-                "finished_at": j["finished_at"],
-            }
-            for jid, j in sorted(_JOBS.items(), key=lambda kv: kv[1]["started_at"] or 0, reverse=True)
-        ]
+    return job_store.list_jobs()
 
 
 def start_run(stage_ids: Optional[list[str]] = None) -> str:
@@ -80,8 +73,7 @@ def start_run(stage_ids: Optional[list[str]] = None) -> str:
         "finished_at": None,
         "stages": [_new_stage_state(s) for s in selected],
     }
-    with _LOCK:
-        _JOBS[job_id] = job
+    job_store.save_job(job)
 
     thread = threading.Thread(target=_run_job, args=(job_id, selected), daemon=True)
     thread.start()
@@ -90,7 +82,9 @@ def start_run(stage_ids: Optional[list[str]] = None) -> str:
 
 def _update_stage(job_id: str, idx: int, **kwargs) -> None:
     with _LOCK:
-        _JOBS[job_id]["stages"][idx].update(kwargs)
+        job = job_store.load_job(job_id)
+        job["stages"][idx].update(kwargs)
+        job_store.save_job(job)
 
 
 def _run_job(job_id: str, selected: list[dict]) -> None:
@@ -144,5 +138,7 @@ def _run_job(job_id: str, selected: list[dict]) -> None:
             overall_ok = False
 
     with _LOCK:
-        _JOBS[job_id]["status"] = "success" if overall_ok else "failed"
-        _JOBS[job_id]["finished_at"] = time.time()
+        job = job_store.load_job(job_id)
+        job["status"] = "success" if overall_ok else "failed"
+        job["finished_at"] = time.time()
+        job_store.save_job(job)

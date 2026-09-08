@@ -697,10 +697,12 @@ The project does not claim that a component is production-served merely because 
 
 Python 3.12 is the supported runtime used by the deployment configuration.
 
-Install dependencies:
+Install dependencies (use the install script, not a plain `pip install`,
+to avoid pulling in an unnecessary ~290MB nvidia-nccl-cu13 GPU dependency
+via xgboost's Linux wheel -- see scripts/install.sh for why):
 
 ```bash
-pip install -r requirements.txt
+bash scripts/install.sh
 ```
 
 Set the project source path:
