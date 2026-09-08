@@ -1,4 +1,4 @@
-// web_prototype/dashboard/config.js
+﻿// web_prototype/dashboard/config.js
 //
 // Static, no-build-step configuration for the AI Defense System dashboard.
 //
@@ -12,3 +12,4 @@
 // as the default here would silently point a deployed frontend at the
 // visitor's own machine, which is never correct after deployment.
 window.AI_DEFENSE_API_BASE = "https://ai-defense-api.onrender.com";
+
