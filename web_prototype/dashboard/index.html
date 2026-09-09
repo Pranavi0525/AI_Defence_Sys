@@ -606,6 +606,15 @@ const apiBaseInput = $('#apiBase');
 //      rather than silently falling back to localhost.
 const API_BASE_STORAGE_KEY = 'ai_defense_api_base';
 
+function getApiBase() {
+  const saved = (localStorage.getItem(API_BASE_STORAGE_KEY) || '').trim();
+  const configured = (window.AI_DEFENSE_API_BASE || '').trim();
+
+  const val = saved || configured || 'https://ai-defense-api.onrender.com';
+
+  return val.replace(/\/+$/, '');
+}
+
 (function initApiBase() {
   const saved = (localStorage.getItem(API_BASE_STORAGE_KEY) || '').trim();
   const configured = (window.AI_DEFENSE_API_BASE || '').trim();
