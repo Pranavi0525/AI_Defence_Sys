@@ -219,7 +219,11 @@ class StatefulSimulator:
         if not self.generated_events:
             raise ValueError("Attack generated zero events")
 
-        trace = extract_observable(self.generated_events, trace_id=attack_id)
+        trace = extract_observable(
+            self.generated_events,
+            trace_id=attack_id,
+            merchant_lookup=self.state.merchants,
+        )
         ground_truth = self._create_ground_truth(attack_id, plan)
         
         return trace, ground_truth

@@ -131,8 +131,34 @@ def optimize_thresholds(y, proba, dollars, cost: CostModel, n_candidates: int = 
 
 
 def load_cached_validation_data():
+    """Reads decision_policy_validation_cache.npz, which this script has
+    always assumed holds the Stage 5 FUSED score (see module docstring).
+
+    Phase 4C, B-2: the cache is shared with get_validation_data()'s
+    "cascade" variant and previously carried no tag saying which one was
+    actually in it, so this could silently run its sweeps against the
+    wrong score. Now refuses to proceed on anything but a cache
+    explicitly tagged "fused" -- this script has no light way to
+    regenerate it itself (that requires the heavy blue_team_pipeline /
+    cascade_with_graph / risk_fusion stack this file deliberately avoids
+    importing), so it fails loudly with instructions instead.
+    """
     cache_path = Path(__file__).parent / "decision_policy_validation_cache.npz"
-    data = np.load(cache_path)
+    if not cache_path.exists():
+        raise RuntimeError(
+            f"{cache_path.name} not found. Run `python3 decision_policy.py` "
+            f"first to generate the Stage 5 fused-score validation cache."
+        )
+    data = np.load(cache_path, allow_pickle=False)
+    variant = str(data["validation_variant"]) if "validation_variant" in data.files else None
+    if variant != "fused":
+        raise RuntimeError(
+            f"{cache_path.name} holds validation_variant={variant!r}, not "
+            f"'fused'. This script requires the Stage 5 fused-score cache -- "
+            f"run `python3 decision_policy.py` (which ends by calling "
+            f"get_validation_data_fused()) to regenerate it, then re-run this "
+            f"script."
+        )
     return data["y"], data["proba"], data["dollars"]
 
 

@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Annotated, Literal, Union
+from typing import TYPE_CHECKING, Annotated, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -30,6 +30,9 @@ from red_team.schemas.events import (
     SessionEventPayload,
     TransactionEventPayload,
 )
+
+if TYPE_CHECKING:
+    from red_team.schemas.entities import Merchant
 
 
 # ---------------------------------------------------------------------------
@@ -51,6 +54,20 @@ class ObservableTransactionEvent(BaseModel):
     transaction_type: str = Field(..., min_length=1)
     merchant_category: str | None = None
     merchant_country: str | None = None
+    beneficiary_id: str | None = Field(
+        default=None,
+        description=(
+            "FK -> Beneficiary.beneficiary_id, observable for transfer "
+            "transactions (any real bank logs the destination of a "
+            "transfer it processes). None for non-transfer transaction "
+            "types (purchase/withdrawal/payment/refund), which have no "
+            "beneficiary. This is the field a cross-bank/graph detector "
+            "needs to see a mule network's shared collector account -- "
+            "previously stripped here, which is why cascade_with_graph.py "
+            "had to fall back on a hand-injected synthetic overlay instead "
+            "of the real Red Team MULE_NETWORK signal."
+        ),
+    )
     channel: str = Field(..., min_length=1)
     transaction_status: str = Field(..., min_length=1)
 
@@ -192,7 +209,11 @@ class ObservableAttackTrace(BaseModel):
 # One-way extraction: internal Events → ObservableAttackTrace
 # ---------------------------------------------------------------------------
 
-def extract_observable(events: list[Event], trace_id: str) -> ObservableAttackTrace:
+def extract_observable(
+    events: list[Event],
+    trace_id: str,
+    merchant_lookup: dict[str, "Merchant"] | None = None,
+) -> ObservableAttackTrace:
     """One-way transformation from internal Event list to ObservableAttackTrace.
 
     Extracts only Blue-Team-visible fields. Strips all internal metadata.
@@ -204,6 +225,13 @@ def extract_observable(events: list[Event], trace_id: str) -> ObservableAttackTr
     Args:
         events: Internal event objects from the simulation engine.
         trace_id: Unique identifier for this observable trace.
+        merchant_lookup: Optional mapping of merchant_id -> Merchant, taken
+            from the simulated world state. When provided, purchase
+            transactions get their merchant_category/merchant_country
+            populated from a real merchant record — this is information any
+            bank has in its own systems (it operates the card network /
+            merchant acquiring relationship), not a Blue-Team leak. When
+            omitted, both fields stay None (unchanged legacy behavior).
 
     Returns:
         ObservableAttackTrace containing only observable information.
@@ -228,7 +256,7 @@ def extract_observable(events: list[Event], trace_id: str) -> ObservableAttackTr
         | ObservableBeneficiaryEvent
         | ObservableAccountContextEvent
         | ObservableRelationshipEvent
-    ] = [_extract_single_event(e) for e in events]
+    ] = [_extract_single_event(e, merchant_lookup) for e in events]
 
     timestamps = [e.envelope.timestamp for e in events]
     observation_window = (min(timestamps), max(timestamps))
@@ -243,6 +271,7 @@ def extract_observable(events: list[Event], trace_id: str) -> ObservableAttackTr
 
 def _extract_single_event(
     event: Event,
+    merchant_lookup: dict[str, "Merchant"] | None = None,
 ) -> (
     ObservableTransactionEvent
     | ObservableSessionEvent
@@ -257,6 +286,13 @@ def _extract_single_event(
 
     if isinstance(payload, TransactionEventPayload):
         tx = payload.transaction
+        merchant_category = None
+        merchant_country = None
+        if merchant_lookup is not None and tx.merchant_id:
+            merchant = merchant_lookup.get(tx.merchant_id)
+            if merchant is not None:
+                merchant_category = merchant.category
+                merchant_country = merchant.country
         return ObservableTransactionEvent(
             event_type=env.event_type.value,
             event_id=env.event_id,
@@ -266,8 +302,9 @@ def _extract_single_event(
             amount=tx.amount,
             currency=tx.currency,
             transaction_type=tx.transaction_type,
-            merchant_category=None,   # Requires world-state lookup (future)
-            merchant_country=None,    # Requires world-state lookup (future)
+            merchant_category=merchant_category,
+            merchant_country=merchant_country,
+            beneficiary_id=tx.beneficiary_id,
             channel=tx.channel,
             transaction_status=tx.status,
         )

@@ -1,8 +1,7 @@
 """
 Stage 4 -- Autoencoder Anomaly Escalation on top of the Verified
 Stage 1+2 Cascade
-=======================================================================
-Mastercard Innovation Challenge 2026
+======================================================================
 
 WHAT THIS FILE DOES
 --------------------

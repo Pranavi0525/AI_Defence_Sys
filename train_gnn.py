@@ -1,5 +1,5 @@
 """
-GNN Ring Detector -- Mastercard Innovation Challenge 2026
+GNN Ring Detector
 =============================================================
 
 Builds on top of the existing blue_team_pipeline.py (reuses its exact

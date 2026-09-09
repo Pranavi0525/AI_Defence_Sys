@@ -14,6 +14,12 @@ from red_team.schemas.events import (
     Event, EventEnvelope, EventType,
     TransactionEventPayload, SessionEventPayload, DeviceEventPayload, RelationshipEventPayload
 )
+from red_team.schemas.entities import Session, Transaction, Device, Relationship, Beneficiary
+from red_team.schemas.events import (
+    Event, EventEnvelope, EventType,
+    TransactionEventPayload, SessionEventPayload, DeviceEventPayload,
+    RelationshipEventPayload, BeneficiaryEventPayload
+)
 
 
 class BehavioralSimulator:
@@ -131,15 +137,43 @@ class BehavioralSimulator:
             if customer_id not in state.active_sessions:
                 event = self._generate_session_login(state, customer_id)
             else:
-                action_choice = self.rng.choices(["transact", "logout"], weights=[0.8, 0.2])[0]
+                action_choice = self.rng.choices(
+                    ["transact", "logout", "add_beneficiary"],
+                    weights=[0.8, 0.2, self.config.beneficiary_addition_prob],
+                )[0]
                 if action_choice == "logout":
                     event = self._generate_session_logout(state, customer_id)
+                elif action_choice == "add_beneficiary":
+                    event = self._generate_beneficiary_addition_event(state, customer_id)
                 else:
                     event = self._generate_transaction(state, customer_id, persona)
-                    
         # If generation failed (e.g. no accounts), event might be None. Still schedule next.
         self._schedule_next_event(state, customer_id)
         return event
+
+    def _generate_beneficiary_addition_event(self, state: WorldState, customer_id: str) -> Event:
+        """Legit customers occasionally add a brand-new beneficiary during a session,
+        distinct from the pre-seeded beneficiary pool established at population time.
+        This gives NormalWorld a real BENEFICIARY_ADDITION signal so that "customer
+        touches multiple beneficiaries" is not, by itself, a fraud-only shortcut."""
+        beneficiary = Beneficiary(
+            name=f"Beneficiary_{self.rng.randint(10000, 99999)}",
+            account_reference=f"ACCT_REF_{self.rng.randint(100000, 999999)}",
+            created_date=state.current_time,
+            relationship_type=self.rng.choice(
+                ["personal", "business", "utility", "government", "other"]
+            ),
+            is_verified=self.rng.random() < 0.7,
+        )
+        state.beneficiaries[beneficiary.beneficiary_id] = beneficiary
+
+        envelope = EventEnvelope(
+            timestamp=state.current_time,
+            event_type=EventType.BENEFICIARY_ADDITION,
+            customer_id=customer_id,
+        )
+        payload = BeneficiaryEventPayload(beneficiary=beneficiary, action="add")
+        return Event(envelope=envelope, payload=payload)
 
     def _generate_session_login(self, state: WorldState, customer_id: str) -> Event:
         cb = state.customer_behavior[customer_id]

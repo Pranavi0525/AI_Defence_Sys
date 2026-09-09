@@ -41,6 +41,11 @@ class AttackPlan(BaseModel):
     max_phases: int = 50
     max_events: int = 100
     max_simulation_duration_minutes: int = 1440
+    # MULE_NETWORK only: identifies which ring this single mule's trace
+    # belongs to, so a ring stays recoverable even after its traces are
+    # stored as independent flat AttackRecords. None for ATO/APP.
+    network_id: Optional[str] = None
+    mule_hop_index: Optional[int] = None
 
 
 class VariationProfile(BaseModel):
@@ -106,9 +111,19 @@ class StatefulSimulator:
         return str(uuid.UUID(int=self.rng.getrandbits(128)))
 
     def generate_attack(
-        self, plan: AttackPlan, customer_id: str
+        self, plan: AttackPlan, customer_id: str, forced_beneficiary: Optional[Beneficiary] = None
     ) -> Tuple[ObservableAttackTrace, AttackGroundTruth]:
-        """Execute the stateful simulation."""
+        """Execute the stateful simulation.
+
+        forced_beneficiary: if provided, seeds the attack's beneficiary
+        slot with this entity instead of letting the simulator create or
+        pick one on its own. Used by MuleNetworkOrchestrator so several
+        different mule customers genuinely transact to the SAME shared
+        collector beneficiary -- the correlating signal a graph model
+        needs -- generated through this real event pipeline, not patched
+        into already-generated traces afterward. Default (None) leaves
+        ATO/APP behavior completely unchanged.
+        """
         
         if customer_id not in self.state.customers:
             raise ValueError(f"Customer {customer_id} not found in WorldState")
@@ -128,10 +143,22 @@ class StatefulSimulator:
         
         attacker_session: Optional[Session] = None
         attacker_device: Optional[Device] = None
-        attacker_beneficiary: Optional[Beneficiary] = None
-        
+        attacker_beneficiary: Optional[Beneficiary] = forced_beneficiary
+
         # Enforce APP constraint: must use known primary device
         if plan.attack_family == "AUTHORIZED_PUSH_PAYMENT":
+            known_devices = []
+            for r in self.state.relationships.values():
+                if r.source_entity_id == customer_id and r.target_entity_type == "device":
+                    d_id = r.target_entity_id
+                    if d_id in self.state.devices:
+                        known_devices.append(self.state.devices[d_id])
+            if known_devices:
+                attacker_device = known_devices[0]
+
+        # Enforce MULE_NETWORK constraint: mules transact from their own
+        # known device too -- there's no credential compromise here.
+        if plan.attack_family == "MULE_NETWORK":
             known_devices = []
             for r in self.state.relationships.values():
                 if r.source_entity_id == customer_id and r.target_entity_type == "device":
@@ -252,7 +279,11 @@ class StatefulSimulator:
         if not self.generated_events:
             raise ValueError("Attack generated zero events")
 
-        trace = extract_observable(self.generated_events, trace_id=attack_id)
+        trace = extract_observable(
+            self.generated_events,
+            trace_id=attack_id,
+            merchant_lookup=self.state.merchants,
+        )
         ground_truth = self._create_ground_truth(attack_id, plan)
         
         return trace, ground_truth

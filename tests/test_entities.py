@@ -57,6 +57,7 @@ def _make_customer(**overrides) -> Customer:
 def _make_account(**overrides) -> Account:
     defaults = dict(
         customer_id="cust-001",
+        bank_id="BANK_A",
         account_type="checking",
         currency="USD",
         status="active",

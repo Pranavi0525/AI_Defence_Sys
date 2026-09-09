@@ -36,8 +36,24 @@ class EntityGenerator:
         num_customers: int,
         num_merchants: int,
         num_beneficiaries: int,
+        bank_pool: List[str] | None = None,
+        cross_bank_rate: float = 0.15,
     ) -> Tuple[List[Customer], List[Account], List[Device], List[Merchant], List[Beneficiary], List[Relationship]]:
-        
+        """Generate the initial synthetic population.
+
+        bank_pool: the set of simulated bank identifiers accounts can belong
+            to. Defaults to a single bank (backward compatible: every account
+            gets the same bank_id, so single-institution callers are
+            unaffected). Pass multiple banks to simulate a multi-bank
+            population (e.g. for mule/hub detection that only a network-level
+            view, not any single bank's own data, can see).
+        cross_bank_rate: probability that a customer's *additional* accounts
+            (beyond their first/primary bank) land at a different bank than
+            their primary one. Ignored if bank_pool has fewer than 2 entries.
+        """
+        if not bank_pool:
+            bank_pool = ["BANK_A"]
+
         customers = []
         accounts = []
         devices = []
@@ -46,12 +62,39 @@ class EntityGenerator:
         relationships = []
 
         # Generate Merchants
+        # Realistic category/country pool so merchant_category/merchant_country
+        # carry actual behavioral signal instead of a constant placeholder.
+        # Weighted so everyday categories dominate, with a thin tail of
+        # higher-risk categories (gambling, crypto, wire-transfer services)
+        # that fraud-detection features can key off of.
+        merchant_categories = [
+            "Grocery", "Grocery", "Grocery",
+            "Restaurant", "Restaurant", "Restaurant",
+            "Retail", "Retail", "Retail",
+            "Utilities", "Utilities",
+            "Travel", "Travel",
+            "Electronics",
+            "Pharmacy", "Pharmacy",
+            "Entertainment",
+            "Subscription",
+            "Gambling",
+            "Crypto Exchange",
+        ]
+        merchant_countries = [
+            "US", "US", "US", "US",
+            "GB", "GB",
+            "CA",
+            "SG",
+            "AU",
+            "NG",
+            "RU",
+        ]
         for i in range(num_merchants):
             m = Merchant(
                 name=f"Merchant_{i}",
                 mcc_code=f"{self.rng.randint(1000, 9999)}",
-                category="Retail",
-                country="US",
+                category=self.rng.choice(merchant_categories),
+                country=self.rng.choice(merchant_countries),
                 risk_level="low",
             )
             merchants.append(m)
@@ -81,10 +124,16 @@ class EntityGenerator:
             customers.append(c)
 
             # Generate Accounts (1-2 per customer)
+            primary_bank = self.rng.choice(bank_pool)
             num_accts = self.rng.randint(1, 2)
-            for _ in range(num_accts):
+            for acct_idx in range(num_accts):
+                if acct_idx > 0 and len(bank_pool) > 1 and self.rng.random() < cross_bank_rate:
+                    account_bank = self.rng.choice([b for b in bank_pool if b != primary_bank])
+                else:
+                    account_bank = primary_bank
                 a = Account(
                     customer_id=c.customer_id,
+                    bank_id=account_bank,
                     account_type=self.rng.choice(["checking", "savings", "credit"]),
                     currency="USD",
                     opened_date=self._random_date_before(self.start_time, 30),

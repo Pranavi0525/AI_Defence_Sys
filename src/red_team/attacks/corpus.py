@@ -86,13 +86,34 @@ def generate_attack_corpus(
 ) -> CorpusGenerationResult:
     """Generate a valid corpus of attacks."""
     
+    from red_team.schemas.id_generator import seed_ids
+    seed_ids(master_seed)  # any new entity/event created below becomes
+                             # reproducible given master_seed too, not
+                             # just the attack behavior choices
     rng = random.Random(master_seed)
     
     if attack_family == "AUTHORIZED_PUSH_PAYMENT":
         from red_team.attacks.app_signature import get_app_signature
         signature = get_app_signature()
-    else:
+    elif attack_family == "ACCOUNT_TAKEOVER":
         signature = get_ato_signature()
+    else:
+        # Previously this was a bare `else: signature = get_ato_signature()`,
+        # which silently generated ATO-signature traces (and wrote
+        # ground_truth.attack_family="ACCOUNT_TAKEOVER") for ANY
+        # unrecognized family, including "MULE_NETWORK" -- a real
+        # ground-truth mislabeling bug caught when hard_example_generator.py
+        # tried to mine harder MULE_NETWORK examples and got 12 traces
+        # silently relabeled as ACCOUNT_TAKEOVER. MULE_NETWORK has its own
+        # dedicated generator (generate_mule_network_corpus, ring-based,
+        # no single-signature/difficulty-quota concept) and must never
+        # reach this function. Fail loudly instead of silently mislabeling.
+        raise ValueError(
+            f"generate_attack_corpus() does not support attack_family="
+            f"{attack_family!r}. Recognized: 'ACCOUNT_TAKEOVER', "
+            f"'AUTHORIZED_PUSH_PAYMENT'. For MULE_NETWORK, call "
+            f"generate_mule_network_corpus() instead."
+        )
         
     from red_team.validation.novelty import NoveltyIndex, extract_fingerprint
     novelty_index = NoveltyIndex(similarity_threshold=novelty_threshold)
@@ -292,6 +313,99 @@ def generate_attack_corpus(
                 
         stats = _calculate_statistics(accepted, rejected, attempt)
         return CorpusGenerationResult(accepted_traces=accepted, rejected_attempts=rejected, generation_statistics=stats)
+
+
+def generate_mule_network_corpus(
+    world_state: WorldState,
+    target_traces: int = 100,
+    mules_per_ring_range: tuple = (2, 4),
+    master_seed: int = 42,
+    max_attempts: int = 500,
+    correlation_types: tuple = ("shared_beneficiary", "shared_bank_corridor"),
+) -> CorpusGenerationResult:
+    """Generate a valid MULE_NETWORK corpus.
+
+    Each attempt builds one ring (several mule customers correlated
+    through a shared collector beneficiary or bank_id corridor -- see
+    MuleNetworkOrchestrator), against its OWN deepcopy of world_state so
+    rings don't bleed state into each other, then validates each mule's
+    trace individually against the ORIGINAL, untouched world_state --
+    the same pattern generate_attack_corpus already uses for ATO/APP, so
+    a mule's balance is checked against its true pre-attack starting
+    point rather than a value some other ring already mutated.
+
+    Individual mule traces are stored as ordinary AttackRecords, exactly
+    like ATO/APP output, so nothing downstream needs special-case code
+    for MULE_NETWORK. A ring stays recoverable after the fact via
+    ground_truth.planner_metadata.plan_json['network_id'] -- every trace
+    that shares a network_id came from the same ring.
+    """
+    import copy
+    from red_team.attacks.mule_network_orchestrator import MuleNetworkOrchestrator
+    from red_team.attacks.mule_network_signature import get_mule_network_signature
+    from red_team.schemas.id_generator import seed_ids
+
+    seed_ids(master_seed)  # collector-beneficiary IDs (network_id) become
+                             # reproducible given master_seed too
+    rng = random.Random(master_seed)
+    signature = get_mule_network_signature()
+
+    customer_ids = list(world_state.customers.keys())
+    if len(customer_ids) < 2:
+        raise ValueError("World state needs at least 2 customers to build a mule network.")
+
+    accepted: List[AttackRecord] = []
+    rejected: List[Dict[str, Any]] = []
+    attempt = 0
+
+    while len(accepted) < target_traces and attempt < max_attempts:
+        attempt += 1
+        child_seed = rng.getrandbits(32)
+        ring_rng = random.Random(child_seed)
+
+        ring_size = min(ring_rng.randint(*mules_per_ring_range), len(customer_ids))
+        mule_customer_ids = ring_rng.sample(customer_ids, ring_size)
+        difficulty = ring_rng.choice(["easy", "medium", "hard", "advanced"])
+        correlation_type = ring_rng.choice(correlation_types)
+
+        state_copy = copy.deepcopy(world_state)
+        try:
+            orch = MuleNetworkOrchestrator(state_copy, seed=child_seed)
+            ring = orch.generate_ring(
+                mule_customer_ids, difficulty=difficulty, correlation_type=correlation_type
+            )
+        except Exception as e:
+            rejected.append({
+                "attempt_id": attempt,
+                "seed": child_seed,
+                "failure_category": "simulation_error",
+                "failure_reason": str(e),
+                "difficulty": difficulty,
+            })
+            continue
+
+        for trace, gt in zip(ring.traces, ring.ground_truths):
+            report = validate_attack_realism(trace, gt, signature, world_state)
+            if report.status == "ACCEPTED" and report.constraint.passed:
+                accepted.append(AttackRecord(
+                    observable_trace=trace,
+                    ground_truth=gt,
+                    validation_metadata=report,
+                    novelty=None,
+                ))
+            else:
+                rejected.append({
+                    "attempt_id": attempt,
+                    "seed": child_seed,
+                    "failure_category": "validation_rejection",
+                    "failure_reason": "; ".join(report.failures),
+                    "validation_metadata": report,
+                    "trace": trace,
+                    "difficulty": difficulty,
+                })
+
+    stats = _calculate_statistics(accepted, rejected, attempt)
+    return CorpusGenerationResult(accepted_traces=accepted, rejected_attempts=rejected, generation_statistics=stats)
 
 def _calculate_statistics(accepted: List[AttackRecord], rejected: List[Dict[str, Any]], attempts: int, difficulty_quotas: Optional[Dict[str, int]] = None, max_multiplier: int = 20) -> GenerationStatistics:
     if not accepted:

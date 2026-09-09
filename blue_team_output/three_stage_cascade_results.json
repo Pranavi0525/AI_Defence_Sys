@@ -1,71 +1,90 @@
 {
   "stage_1_2_overall": {
-    "n": 1458,
-    "precision": 0.9800796812749004,
-    "recall": 0.8880866425992779,
-    "f1": 0.9318181818181818,
-    "roc_auc": 0.9363615243766372,
-    "pr_auc": 0.9204877885419468,
+    "n": 1556,
+    "precision": 0.989041095890411,
+    "recall": 0.9652406417112299,
+    "f1": 0.9769959404600812,
+    "roc_auc": 0.983832804003004,
+    "pr_auc": 0.9821288879965667,
     "confusion_matrix": [
       [
-        1176,
-        5
+        1178,
+        4
       ],
       [
-        31,
-        246
+        13,
+        361
       ]
     ]
   },
   "stage_1_2_3_overall": {
-    "n": 1458,
-    "precision": 0.9816849816849816,
-    "recall": 0.9675090252707581,
-    "f1": 0.9745454545454545,
-    "roc_auc": 0.9862305394987422,
-    "pr_auc": 0.9828913479936293,
+    "n": 1556,
+    "precision": 0.989100817438692,
+    "recall": 0.9705882352941176,
+    "f1": 0.979757085020243,
+    "roc_auc": 0.9854569885176037,
+    "pr_auc": 0.9846802653117576,
     "confusion_matrix": [
       [
-        1176,
-        5
+        1178,
+        4
       ],
       [
-        9,
-        268
+        11,
+        363
       ]
     ]
   },
-  "stage_1_2_ring_only": {
-    "n": 24,
-    "note": "single class in this slice -- metrics undefined",
+  "stage_1_2_graph_connected_only": {
+    "n": 229,
+    "precision": 0.9736842105263158,
+    "recall": 0.9487179487179487,
+    "f1": 0.961038961038961,
+    "roc_auc": 0.9765856950067477,
+    "pr_auc": 0.9686707563408958,
     "confusion_matrix": [
       [
-        0,
-        0
-      ],
-      [
-        24,
-        0
-      ]
-    ]
-  },
-  "stage_1_2_3_ring_only": {
-    "n": 24,
-    "note": "single class in this slice -- metrics undefined",
-    "confusion_matrix": [
-      [
-        0,
-        0
+        189,
+        1
       ],
       [
         2,
-        22
+        37
       ]
     ]
   },
-  "fraud_cases_rescued_by_stage3": 22,
+  "stage_1_2_3_graph_connected_only": {
+    "n": 229,
+    "precision": 0.975,
+    "recall": 1.0,
+    "f1": 0.9873417721518988,
+    "roc_auc": 0.9998650472334683,
+    "pr_auc": 0.9993589743589744,
+    "confusion_matrix": [
+      [
+        189,
+        1
+      ],
+      [
+        0,
+        39
+      ]
+    ]
+  },
+  "mule_network_reachable_traces": 39,
+  "mule_network_unreachable_traces": 82,
+  "mule_network_recall_within_reachable_subset": {
+    "stage_1_2": 0.9487179487179487,
+    "stage_1_2_3": 1.0
+  },
+  "mule_network_recall_within_unreachable_subset": {
+    "stage_1_2": 0.975609756097561,
+    "stage_1_2_3": 0.975609756097561,
+    "note": "Stage 3 is structurally a no-op here by design -- these traces have no observable connecting field in this corpus (no shared beneficiary_id, no shared device_id), so stage_1_2 and stage_1_2_3 recall are expected to match exactly for this subset."
+  },
+  "fraud_cases_rescued_by_stage3": 2,
   "fraud_cases_downgraded_by_stage3_should_be_zero": 0,
-  "n_graph_connected_nodes": 24,
-  "n_ring_traces": 24,
+  "n_graph_connected_nodes": 229,
+  "honest_limitation": "21 of 42 real MULE_NETWORK rings in this corpus share a beneficiary_id across hops and are graph-reachable; the other 21 use a naming convention with no observable connecting field at all, and cannot be reached by graph escalation without fabricating a connection -- see build_cross_customer_graph()'s docstring.",
   "note": "downgraded is guaranteed 0 by construction (final score = max(stage_1_2, graph_score)) -- reported anyway as an explicit, checkable guardrail rather than an assumption."
 }

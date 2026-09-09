@@ -108,16 +108,25 @@ def get_df_and_scores(cfg: dict):
     own main() does).
     """
     print("Loading Red Team corpora + building the (unmodified) feature table...")
-    all_records, ring_ids = cwg.load_all_records(cfg)
-    df, A, connected_mask = cwg.build_feature_table_and_graph(all_records, ring_ids)
+    all_records = cwg.load_all_records(cfg)
+    ring_membership = cwg.get_graph_connected_trace_ids(all_records)
+    df, A, connected_mask = cwg.build_feature_table_and_graph(all_records, ring_membership)
     y = df["fraud"].values.astype(int)
 
+    # Phase 4C, B-2: this file needs the Stage 5 FUSED score (per the
+    # module docstring above), so the cache is only usable when it is
+    # explicitly tagged validation_variant="fused" AND its labels match
+    # this df -- checking y-alignment alone (the old behavior) could not
+    # tell a "cascade"-variant cache apart from a "fused" one, since both
+    # carry the identical y array. That was the confirmed root cause of
+    # misses.jsonl silently disagreeing with decision_policy_results.json.
     if CACHE_PATH.exists():
-        cached = np.load(CACHE_PATH)
-        if len(cached["y"]) == len(df) and np.array_equal(cached["y"], y):
-            print(f"Using cached out-of-fold cascade scores ({CACHE_PATH.name}).")
-            proba, dollars = cached["proba"], cached["dollars"]
+        try:
+            y_cached, proba, dollars = dp.load_cached_validation_data("fused", y_check=y)
+            print(f"Using cached out-of-fold Stage 5 fused scores ({CACHE_PATH.name}).")
             return df, all_records, A, connected_mask, y, proba, dollars
+        except dp.ValidationCacheMismatch as e:
+            print(f"Cache unusable ({e}) -- regenerating.")
 
     print("No usable cache -- running the real Risk Fusion pipeline via "
           "decision_policy.get_validation_data_fused() "
@@ -129,7 +138,7 @@ def get_df_and_scores(cfg: dict):
     # fused score here (not the raw Stage 1+2+3 score) keeps this file
     # consistent with decision_policy.py's own frozen thresholds, which are
     # now tuned against the fused score too.
-    _, A2, connected_mask2 = cwg.build_feature_table_and_graph(all_records, ring_ids)
+    _, A2, connected_mask2 = cwg.build_feature_table_and_graph(all_records, ring_membership)
     return df2, all_records, A2, connected_mask2, y2, proba, dollars
 
 
@@ -233,11 +242,30 @@ def collect_misses(
     return misses
 
 
+def _stamp_misses_metadata() -> dict:
+    """Builds the provenance header line for misses.jsonl (Phase 4C, B-3).
+
+    misses.jsonl is a JSONL file of per-trace records, not a single dict,
+    so artifact_metadata.stamp_artifact() (which adds a key to a dict)
+    can't be applied to the file as a whole the way decision_policy.py /
+    risk_fusion.py / blue_team_pipeline.py do. Instead this reuses the
+    exact same stamp_artifact() mechanism on a small standalone dict and
+    writes it as the FIRST line of the file -- a header record, not a
+    miss. Every reader of misses.jsonl (consistency_check.py's
+    _load_jsonl) explicitly recognizes and skips this line by its
+    "_artifact_metadata" key so it's never mistaken for a trace record.
+    """
+    from artifact_metadata import stamp_artifact
+    return stamp_artifact({}, Path(__file__).parent)
+
+
 def write_misses_jsonl(misses: list[dict], out_path: Path) -> None:
     with open(out_path, "w") as f:
+        f.write(json.dumps(_stamp_misses_metadata()) + "\n")
         for m in misses:
             f.write(json.dumps(m) + "\n")
-    print(f"Wrote {len(misses)} missed fraud trace(s) to {out_path}")
+    print(f"Wrote {len(misses)} missed fraud trace(s) to {out_path} "
+          f"(plus a provenance header line).")
 
 
 # ---------------------------------------------------------------------------

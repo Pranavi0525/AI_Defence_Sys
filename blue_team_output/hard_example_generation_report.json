@@ -1,23 +1,24 @@
 {
   "miss_analysis": {
-    "total_misses_analyzed": 5,
+    "total_misses_analyzed": 6,
     "breakdown_by_family_difficulty": {
       "ACCOUNT_TAKEOVER_advanced": 2,
       "AUTHORIZED_PUSH_PAYMENT_medium": 2,
-      "AUTHORIZED_PUSH_PAYMENT_hard": 1
+      "AUTHORIZED_PUSH_PAYMENT_hard": 1,
+      "MULE_NETWORK_medium": 1
     },
-    "misses_never_escalated_by_stage1": 3,
-    "misses_never_escalated_by_stage1_pct": 60.0,
+    "misses_never_escalated_by_stage1": 4,
+    "misses_never_escalated_by_stage1_pct": 66.7,
     "common_characteristics_of_stage1_evaders": {
       "note": "Traits shared by the misses Stage 1 never even escalated -- these are the signatures worth reproducing at scale.",
       "pct_without_new_device": 100.0,
       "pct_without_beneficiary_flag": 100.0,
-      "median_min_time_between_transactions_sec": 8420.0
+      "median_min_time_between_transactions_sec": 7510.0
     }
   },
   "generation_log": [
     {
-      "source_miss": "atk-693a3017",
+      "source_miss": "atk-1179705d",
       "family": "ACCOUNT_TAKEOVER",
       "difficulty": "advanced",
       "stage": "stage2_miss",
@@ -26,13 +27,13 @@
       "candidates_kept_as_hard_examples": 2
     },
     {
-      "source_miss": "atk-1179705d",
+      "source_miss": "atk-693a3017",
       "family": "ACCOUNT_TAKEOVER",
       "difficulty": "advanced",
       "stage": "stage2_miss",
       "candidates_generated": 100,
       "candidates_rejected_by_simulator": 0,
-      "candidates_kept_as_hard_examples": 3
+      "candidates_kept_as_hard_examples": 4
     },
     {
       "source_miss": "atk-7cad7aab",
@@ -44,35 +45,44 @@
       "candidates_kept_as_hard_examples": 18
     },
     {
-      "source_miss": "atk-a127c99a",
-      "family": "AUTHORIZED_PUSH_PAYMENT",
-      "difficulty": "hard",
-      "stage": "stage1_miss",
-      "candidates_generated": 100,
-      "candidates_rejected_by_simulator": 4,
-      "candidates_kept_as_hard_examples": 2
-    },
-    {
       "source_miss": "atk-ee11d67a",
       "family": "AUTHORIZED_PUSH_PAYMENT",
       "difficulty": "medium",
       "stage": "stage1_miss",
       "candidates_generated": 100,
-      "candidates_rejected_by_simulator": 18,
-      "candidates_kept_as_hard_examples": 17
+      "candidates_rejected_by_simulator": 8,
+      "candidates_kept_as_hard_examples": 21
+    },
+    {
+      "source_miss": "atk-a127c99a",
+      "family": "AUTHORIZED_PUSH_PAYMENT",
+      "difficulty": "hard",
+      "stage": "stage1_miss",
+      "candidates_generated": 100,
+      "candidates_rejected_by_simulator": 12,
+      "candidates_kept_as_hard_examples": 3
+    },
+    {
+      "source_miss": "atk-195da29e",
+      "family": "MULE_NETWORK",
+      "difficulty": "medium",
+      "stage": "stage1_miss",
+      "candidates_generated": 102,
+      "candidates_rejected_by_simulator": 0,
+      "candidates_kept_as_hard_examples": 5
     }
   ],
   "validation_vs_baseline": {
     "ACCOUNT_TAKEOVER_stage2_miss": {
       "validation_metric": "xgboost_predicted_probability",
       "practical_bar_used_to_keep_examples": "proba < 0.5 (the real decision threshold)",
-      "baseline_mean_xgb_proba_full_family": 0.9861,
+      "baseline_mean_xgb_proba_full_family": 0.9767,
       "baseline_n": 97,
-      "hard_examples_mean_xgb_proba": 0.2281,
-      "hard_examples_n": 5,
-      "original_source_miss_confidence": 0.1197,
+      "hard_examples_mean_xgb_proba": 0.2607,
+      "hard_examples_n": 6,
+      "original_source_miss_confidence": 0.0808,
       "genuinely_harder_than_family_baseline": true,
-      "how_many_beat_the_original_miss_exactly_stricter_bar": "1/5",
+      "how_many_beat_the_original_miss_exactly_stricter_bar": "0/6",
       "note": "Kept examples all fall below the real 0.5 decision threshold, so they are genuine false negatives in practice. Very few (if any) beat the ORIGINAL miss's exact confidence -- that miss was an extreme outlier (see generation notes: 100 random resamples got as low as 0.18, not below the original's 0.011). Reproducing that specific extreme would need real difficulty-axis steering, which the simulator does not currently expose (see module docstring)."
     },
     "AUTHORIZED_PUSH_PAYMENT_stage1_miss": {
@@ -80,7 +90,15 @@
       "baseline_escalation_rate": 0.968,
       "baseline_n": 156,
       "hard_examples_escalation_rate": 0.0,
-      "hard_examples_n": 37,
+      "hard_examples_n": 42,
+      "genuinely_harder": true
+    },
+    "MULE_NETWORK_stage1_miss": {
+      "validation_metric": "stage1_escalation_rate",
+      "baseline_escalation_rate": 0.975,
+      "baseline_n": 121,
+      "hard_examples_escalation_rate": 0.0,
+      "hard_examples_n": 5,
       "genuinely_harder": true
     }
   }

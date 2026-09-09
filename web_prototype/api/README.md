@@ -7,24 +7,51 @@ kicks off the real stage scripts as subprocesses.
 
 ## Setup
 
-```powershell
-pip install -r requirements.txt
+```bash
+bash scripts/install.sh
 ```
 
-(`fastapi` and `uvicorn` are already in `requirements.txt`.)
+(`fastapi` and `uvicorn` are already in `requirements.txt`.) Use
+`scripts/install.sh` rather than a plain `pip install -r requirements.txt`
+-- it installs xgboost with `--no-deps` afterward to skip a ~290MB
+nvidia-nccl-cu13 dependency that xgboost's Linux wheel pulls in for GPU
+training this repo never does. See the script's own comments for the
+full reasoning. For local development (running the test suite), install
+`requirements-dev.txt` first, then run the same script:
+
+```bash
+pip install -r requirements-dev.txt
+bash scripts/install.sh
+```
 
 ## Run
 
-From the repo root:
-
-```powershell
-$env:PYTHONPATH="src"
-python -m uvicorn api.app:app --reload --port 8000
+```bash
+python3 web_prototype/run_api.py --reload
 ```
+
+This works from **any** directory — the repo root, `web_prototype/`,
+or elsewhere — because `run_api.py` resolves every path from its own
+file location instead of relying on the current working directory.
 
 Then open **http://localhost:8000/docs** — that's an interactive page
 where you can try every endpoint by hand, useful for the demo itself if
 you want to show the API directly.
+
+### Superseded: the old documented command
+
+`PYTHONPATH=src python -m uvicorn api.app:app --reload --port 8000`,
+run from the repo root, **does not work** — `api` is a package under
+`web_prototype/`, not a top-level package at the repo root, so
+`import api.app` raises `ModuleNotFoundError`. It only ever worked by
+accident, when the process's cwd already happened to be
+`web_prototype/` (`cd web_prototype && uvicorn api.app:app ...`). This
+was confirmed by reproduction, not assumed — see
+`reports/FINAL_VALIDATION_REPORT.md`, section 5, which flagged the same
+discrepancy in an earlier pass but deliberately left it unfixed pending
+this launcher. `run_api.py` removes the cwd dependency; if you still
+want to invoke uvicorn directly, `cd web_prototype && uvicorn
+api.app:app --reload --port 8000` remains a valid workaround.
 
 ## Endpoints
 
@@ -70,6 +97,10 @@ stale root-level copy) at the top of `config.py` — worth reading once.
 
 ## Known limitation (say this if asked, don't hide it)
 
-Job state lives in an in-memory dict — restart the server and history is
-gone. Fine for a single-demo hackathon prototype; would need Redis/a DB
-for anything persistent.
+Job state is persisted to a local SQLite file (`job_store.py`), so a
+process restart on the same instance keeps job history intact. It does
+NOT survive a full redeploy on a platform with an ephemeral filesystem
+(e.g. Render's free tier wipes local disk on redeploy) — that would need
+an external store (hosted Postgres, S3, a paid persistent disk). Good
+enough for surviving a crash or idle-timeout restart; not a claim of
+durability across redeploys.

@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 
 def test_classify_entity():
-    from scratch.device_drilldown_101_1000 import classify_entity
+    from src.red_team.ml.sequence_dataset_v2 import classify_entity
     
     # CONFIRMED_DIFFUSE: >= 50% match rate, < 60% top3
     assert classify_entity(0.60, 0.55) == "CONFIRMED_DIFFUSE"

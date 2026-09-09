@@ -1,7 +1,7 @@
 """
 Hard-Example Generator / Red-Team Feedback Adapter
 ====================================================
-Mastercard Innovation Challenge 2026 -- Blue Team closed-loop component
+Blue Team closed-loop component
 
 Position in the loop:
 

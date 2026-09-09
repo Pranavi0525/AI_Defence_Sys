@@ -17,6 +17,9 @@ dependencies = [
     "seaborn>=0.13,<1",
     "python-dotenv>=1.2,<2",
     "google-genai>=2.7,<3",
+    "xgboost>=3.4,<3.5",
+    "joblib>=1.5,<2",
+    "shap>=0.52,<0.53",
 ]
 
 [project.optional-dependencies]

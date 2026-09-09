@@ -116,7 +116,7 @@ if __name__ == "__main__":
         from blue_team_pipeline import stage1_rule_filter as v1
 
     cost = calibrate_against_legit_population(
-        str(Path(__file__).parent / "feature_table.csv"), v1
+        str(Path(__file__).parent / "blue_team_output" / "feature_table.csv"), v1
     )
     import json
     print(json.dumps(cost, indent=2))

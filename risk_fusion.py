@@ -1,8 +1,6 @@
 """
 Stage 5 -- Risk Fusion
 =======================================================================
-Mastercard Innovation Challenge 2026
-
 WHAT THIS FILE DOES
 --------------------
 Combines the four Blue Team signals -- Stage 1 rules, Stage 2 XGBoost,
@@ -126,9 +124,6 @@ def compute_base_scores(df: pd.DataFrame, A: np.ndarray, connected_mask: np.ndar
     X_raw = df[feature_cols].fillna(0).values.astype(float)
     y = df["fraud"].values.astype(int)
 
-    mu, sigma = X_raw.mean(axis=0), X_raw.std(axis=0) + 1e-8
-    X_std = (X_raw - mu) / sigma
-
     stage_1_2_proba, escalate, folds = btp.compute_stage_1_2_cascade(
         df, feature_cols, btp.CONFIG, n_splits=n_splits
     )
@@ -137,16 +132,26 @@ def compute_base_scores(df: pd.DataFrame, A: np.ndarray, connected_mask: np.ndar
     ae_score = np.zeros(len(df))
 
     A_hat = normalize_adjacency(A)
-    M = A_hat @ X_std  # message-passed features, fixed for the whole run
 
     for fold, (train_idx, test_idx) in enumerate(folds, start=1):
+        # Standardization stats are fit on THIS fold's train_idx only
+        # (preprocessing leakage fix: previously mu/sigma were computed
+        # once over the entire dataset before the fold loop, so every
+        # fold's held-out rows influenced the scale used to standardize
+        # themselves -- see reports/stage_leakage_audit_risk_fusion_decision_policy.md).
+        # Same +1e-8 zero-std guard as before, now applied per fold.
+        mu = X_raw[train_idx].mean(axis=0)
+        sigma = X_raw[train_idx].std(axis=0) + 1e-8
+        X_std_fold = (X_raw - mu) / sigma
+        M_fold = A_hat @ X_std_fold  # message-passed features, recomputed per fold
+
         # --- Stage 3: GCN, transductive, trained only on this fold's
         # train labels, scored over connected test rows only ---
         train_mask = np.zeros(len(df), dtype=bool)
         train_mask[train_idx] = True
-        gcn = OneLayerGCN(in_dim=X_std.shape[1], hidden_dim=GCN_HIDDEN_DIM,
+        gcn = OneLayerGCN(in_dim=X_std_fold.shape[1], hidden_dim=GCN_HIDDEN_DIM,
                            seed=RANDOM_STATE + fold)
-        train_gcn(gcn, M, y.astype(float), train_mask, epochs=GCN_EPOCHS, lr=GCN_LR)
+        train_gcn(gcn, M_fold, y.astype(float), train_mask, epochs=GCN_EPOCHS, lr=GCN_LR)
         for i in test_idx:
             if connected_mask[i]:
                 gcn_score[i] = gcn.p[i]
@@ -154,11 +159,11 @@ def compute_base_scores(df: pd.DataFrame, A: np.ndarray, connected_mask: np.ndar
         # --- Stage 4: Autoencoder, trained only on this fold's
         # train-split LEGITIMATE rows ---
         legit_train_idx = train_idx[y[train_idx] == 0]
-        ae = Autoencoder(in_dim=X_std.shape[1], hidden_dim=AE_HIDDEN_DIM,
+        ae = Autoencoder(in_dim=X_std_fold.shape[1], hidden_dim=AE_HIDDEN_DIM,
                           seed=RANDOM_STATE + fold)
-        train_ae(ae, X_std[legit_train_idx], epochs=AE_EPOCHS, lr=AE_LR)
-        normal_train_err = ae.reconstruction_error(X_std[legit_train_idx])
-        test_err = ae.reconstruction_error(X_std[test_idx])
+        train_ae(ae, X_std_fold[legit_train_idx], epochs=AE_EPOCHS, lr=AE_LR)
+        normal_train_err = ae.reconstruction_error(X_std_fold[legit_train_idx])
+        test_err = ae.reconstruction_error(X_std_fold[test_idx])
         ae_scores = error_to_score(test_err, normal_train_err, high_percentile=HIGH_PERCENTILE)
         for local_i, global_i in enumerate(test_idx):
             ae_score[global_i] = float(ae_scores[local_i])
@@ -297,29 +302,72 @@ def run_fusion_with_ring_diagnostic(cfg: dict, n_splits: int = N_SPLITS):
     from cascade_with_graph import load_all_records, build_feature_table_and_graph
 
     print("Building ring-overlay diagnostic dataset (synthetic, clearly flagged)...")
-    all_records, ring_ids = load_all_records(cfg)
-    df, A, connected_mask = build_feature_table_and_graph(all_records, ring_ids)
 
-    result, fused_proba, y = run_risk_fusion(df, A, connected_mask, n_splits)
+    # load_all_records() returns ONE list of records.
+    all_records = load_all_records(cfg)
 
+    # Split the real corpus into attack and legitimate records.
+    # The synthetic overlay is applied ONLY to legitimate records.
+    legit_records = [
+        r for r in all_records
+        if r["attack_family"] == "legitimate"
+    ]
+
+    attack_records = [
+        r for r in all_records
+        if r["attack_family"] != "legitimate"
+    ]
+
+    # Inject the deliberately synthetic quiet-ring diagnostic.
+    # This does NOT modify the genuine Red Team MULE_NETWORK corpus.
+    legit_records, ring_ids = apply_quiet_ring_overlay(
+        legit_records,
+        n_ring=N_RING_TRACES,
+        seed=RANDOM_STATE,
+    )
+
+    # Recombine untouched real attacks + synthetic diagnostic traces.
+    diagnostic_records = attack_records + legit_records
+
+    # Evaluation-only ring membership.
+    ring_membership = {
+        trace_id: "synthetic_quiet_ring"
+        for trace_id in ring_ids
+    }
+
+    df, A, connected_mask = build_feature_table_and_graph(
+        diagnostic_records,
+        ring_membership,
+    )
+
+    result, fused_proba, y = run_risk_fusion(
+        df,
+        A,
+        connected_mask,
+        n_splits,
+    )
+
+    # Evaluate Risk Fusion specifically on the synthetic ring traces.
     ring_mask = df["is_ring"].values.astype(bool)
-    ring_overall, ring_preds = block_metrics(y[ring_mask], fused_proba[ring_mask])
+
+    ring_overall, ring_preds = block_metrics(
+        y[ring_mask],
+        fused_proba[ring_mask],
+    )
+
     result["ring_only_risk_fusion_metrics"] = ring_overall
     result["n_ring_traces"] = int(ring_mask.sum())
     result["is_synthetic_diagnostic"] = True
     result["diagnostic_purpose"] = (
         "This run uses the deliberately-injected quiet ring overlay "
         "(NOT real Red Team output -- see quiet_ring_overlay.py) purely "
-        "to verify the fusion meta-model can still recover a graph "
-        "signal when one exists, since the real corpus has none above "
-        "the noise-filtering threshold."
+        "to verify the fusion meta-model can recover a graph signal "
+        "when one exists. The genuine MULE_NETWORK corpus remains "
+        "untouched."
     )
+
     return result
 
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 def main():
     cfg = btp.CONFIG
     out_dir = cfg["REPO_ROOT"] / cfg["OUTPUT_DIR"]
@@ -330,8 +378,18 @@ def main():
     print("=" * 72)
     df = btp.build_dataset(cfg).reset_index(drop=True)
     all_records_for_graph = (
-        btp.load_attack_corpus(cfg["REPO_ROOT"] / cfg["ATO_CORPUS_PATH"], "ATO")
-        + btp.load_attack_corpus(cfg["REPO_ROOT"] / cfg["APP_CORPUS_PATH"], "APP")
+        btp.load_attack_corpus(
+            cfg["REPO_ROOT"] / cfg["ATO_CORPUS_PATH"],
+            "ATO",
+        )
+        + btp.load_attack_corpus(
+            cfg["REPO_ROOT"] / cfg["APP_CORPUS_PATH"],
+            "APP",
+        )
+        + btp.load_attack_corpus(
+            cfg["REPO_ROOT"] / cfg["MULE_CORPUS_PATH"],
+            "MULE_NETWORK",
+        )
     )
     # Rebuild legit records the same way build_dataset did internally, so we
     # have the raw `events` field (needed for graph-building) alongside the
@@ -362,6 +420,17 @@ def main():
         "real_corpus_risk_fusion": real_result,
         "ring_overlay_diagnostic": diagnostic_result,
     }
+    from artifact_metadata import stamp_artifact
+    output = stamp_artifact(
+        output,
+        cfg["REPO_ROOT"],
+        seeds={"RANDOM_STATE": cfg.get("RANDOM_STATE")},
+        dataset_files=[
+            cfg["REPO_ROOT"] / cfg["ATO_CORPUS_PATH"],
+            cfg["REPO_ROOT"] / cfg["APP_CORPUS_PATH"],
+        ],
+        feature_cols=btp.FEATURE_COLS,
+    )
     out_path = out_dir / "risk_fusion_results.json"
     with open(out_path, "w") as f:
         json.dump(output, f, indent=2, default=str)

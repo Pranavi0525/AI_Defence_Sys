@@ -1,0 +1,20 @@
+# requirements-dev.txt
+# =====================
+# Everything in requirements.txt, plus tooling only needed to develop and
+# test this repo locally. Never installed on Render -- see render.yaml,
+# which only runs scripts/install.sh (production deps).
+#
+# google-genai lives here, not in requirements.txt, because it is only
+# imported by tests/test_observable_isolation.py,
+# tests/test_observable_isolation_integration.py, and tests/test_events.py
+# -- nothing in the API or pipeline code touches it.
+
+-r requirements.txt
+
+pytest>=8.0
+pytest-cov>=5.0
+google-genai==2.7.0
+
+# Local dev also needs xgboost, same as production, same reasoning as
+# scripts/install.sh: run that script (or `pip install --no-deps
+# xgboost==3.4.1` by hand) after installing this file.
