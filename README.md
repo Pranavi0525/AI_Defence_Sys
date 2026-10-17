@@ -2,9 +2,7 @@
 
 ## AI Risk Manager for Payment Fraud
 
-An explainable, layered payment-risk system that combines behavioral rules, calibrated machine learning, graph signals, anomaly detection, risk fusion, and operational decision policy to evaluate synthetic payment-security events.
-
-> **Buildathon project:** Razorpay AI Buildathon — Track 02: AI Risk Manager
+An explainable, layered payment-risk system that combines behavioral rules, calibrated machine learning, graph signals, anomaly detection, risk fusion, and operational decision policy to evaluate synthetic payment-security event.
 
 ---
 
