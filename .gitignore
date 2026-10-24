@@ -68,3 +68,6 @@ blue_team_output_FROZEN/
 
 # Backup files
 *.backup
+reports/v2/_cache/*.pkl
+.venv-*/
+data/public/

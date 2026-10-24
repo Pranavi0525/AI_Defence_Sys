@@ -1,0 +1,41 @@
+{
+ "trace": {
+  "trace_id": "v2legit_3ada2092-11e",
+  "customer_id": "080f7c7d-e437-49f1-a251-5326e5bccdf3",
+  "events": [
+   {
+    "event_type": "SESSION_LOGIN",
+    "event_id": "3ada2092-11ed-4811-8b33-04ebde5394bf",
+    "timestamp": "2025-03-06T01:48:48",
+    "customer_id": "080f7c7d-e437-49f1-a251-5326e5bccdf3",
+    "account_id": "1f40abd8-ed37-4587-a056-06b7b121849b",
+    "session_id": "2d9997f8-a606-4fd0-8442-0debed768ce6",
+    "device_id": "1f7bfa65-58bc-4095-834d-7cd426b30a1f",
+    "auth_method": "password",
+    "auth_success": true,
+    "login_attempt_count": 1,
+    "account_age_days": 4172
+   },
+   {
+    "event_type": "TRANSACTION",
+    "event_id": "3359572c-659a-4a89-8b21-a05bc694f03b",
+    "timestamp": "2025-03-06T02:19:38",
+    "customer_id": "080f7c7d-e437-49f1-a251-5326e5bccdf3",
+    "account_id": "1f40abd8-ed37-4587-a056-06b7b121849b",
+    "amount": "698.48",
+    "currency": "USD",
+    "transaction_type": "purchase",
+    "channel": "online",
+    "transaction_status": "completed",
+    "merchant_id": "3dca2d78-40da-44e3-a917-e661282c7602",
+    "merchant_age_days": 99,
+    "beneficiary_id": null
+   }
+  ],
+  "observation_window": [
+   "2025-03-06T01:48:48",
+   "2025-03-06T02:19:38"
+  ]
+ },
+ "commit": false
+}

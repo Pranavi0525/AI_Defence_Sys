@@ -13,7 +13,8 @@ API_DIR = Path(__file__).resolve().parent.parent   # web_prototype/api
 REPO_ROOT = API_DIR.parent.parent                   # repo root
 SRC_DIR = REPO_ROOT / "src"
 
-for p in (str(API_DIR), str(SRC_DIR)):
+# REPO_ROOT is needed so `import v2` (the v2 package) works when tests are started with a bare `pytest` command.
+for p in (str(API_DIR), str(SRC_DIR), str(REPO_ROOT)):
     if p not in sys.path:
         sys.path.insert(0, p)
 

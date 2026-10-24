@@ -1,0 +1,18 @@
+# Exact versions used to verify the Phase 0-1.1 scripts (Python 3.12.3, Linux).
+# These are for the v2 EVALUATION environment. Do not change the deployed API's
+# requirements.txt for this; the API loads portable artifacts (xgb_model.json,
+# calibration.json) and is separate.
+#   python -m venv .venv-eval
+#   .venv-eval\Scripts\Activate.ps1        (Windows PowerShell)   |   source .venv-eval/bin/activate (bash)
+#   pip install -r requirements-eval.lock.txt
+numpy==2.4.4
+pandas==3.0.2
+scipy==1.17.1
+scikit-learn==1.8.0
+xgboost==3.4.1
+pydantic==2.14.1
+pydantic-settings==2.16.0
+networkx==3.6.1
+joblib==1.5.3
+shap==0.54.1
+pytest==9.1.1

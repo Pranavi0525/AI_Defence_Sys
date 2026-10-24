@@ -1,0 +1,66 @@
+{
+ "trace": {
+  "trace_id": "v2aia_051ca0c5-1f4",
+  "customer_id": "2a22bcec-70f7-4c69-84b3-91cbb015115d",
+  "events": [
+   {
+    "event_type": "SESSION_LOGIN",
+    "event_id": "051ca0c5-1f45-4554-991d-7052edddadff",
+    "timestamp": "2025-03-25T09:36:35",
+    "customer_id": "2a22bcec-70f7-4c69-84b3-91cbb015115d",
+    "account_id": "136b66df-248e-4ff3-8a61-abe2d379e074",
+    "session_id": "2ac8826a-dd0e-4310-87c0-042b6bf90c09",
+    "device_id": "1fe73e45-5215-4776-902b-c7dac33a61c9",
+    "auth_method": "password",
+    "auth_success": true,
+    "login_attempt_count": 1,
+    "account_age_days": 288
+   },
+   {
+    "event_type": "BENEFICIARY_ADDITION",
+    "event_id": "2798c1ac-a5d9-4ce5-bcbb-7220743f346c",
+    "timestamp": "2025-03-25T09:37:52",
+    "customer_id": "2a22bcec-70f7-4c69-84b3-91cbb015115d",
+    "beneficiary_id": "373a1209-4a8e-49dd-83a0-8e67fec21ad1",
+    "relationship_type": "other",
+    "is_verified": false,
+    "action": "add"
+   },
+   {
+    "event_type": "TRANSACTION",
+    "event_id": "369ef09f-9b65-415e-8947-b3b496514381",
+    "timestamp": "2025-03-25T09:43:16",
+    "customer_id": "2a22bcec-70f7-4c69-84b3-91cbb015115d",
+    "account_id": "136b66df-248e-4ff3-8a61-abe2d379e074",
+    "amount": "7385.76",
+    "currency": "USD",
+    "transaction_type": "transfer",
+    "channel": "online",
+    "transaction_status": "completed",
+    "merchant_id": null,
+    "merchant_age_days": null,
+    "beneficiary_id": "373a1209-4a8e-49dd-83a0-8e67fec21ad1"
+   },
+   {
+    "event_type": "TRANSACTION",
+    "event_id": "1d47079e-da14-46e5-99c9-debf8496aa64",
+    "timestamp": "2025-03-25T09:45:16",
+    "customer_id": "2a22bcec-70f7-4c69-84b3-91cbb015115d",
+    "account_id": "136b66df-248e-4ff3-8a61-abe2d379e074",
+    "amount": "7385.76",
+    "currency": "USD",
+    "transaction_type": "transfer",
+    "channel": "mobile",
+    "transaction_status": "completed",
+    "merchant_id": null,
+    "merchant_age_days": null,
+    "beneficiary_id": "373a1209-4a8e-49dd-83a0-8e67fec21ad1"
+   }
+  ],
+  "observation_window": [
+   "2025-03-25T09:36:35",
+   "2025-03-25T09:45:16"
+  ]
+ },
+ "commit": false
+}

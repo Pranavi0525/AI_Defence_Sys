@@ -1,0 +1,322 @@
+{
+  "nested_world_B": {
+    "xgb_only": {
+      "traffic_share_at_assumed_prevalence": {
+        "allow": 0.9804044444444445,
+        "review": 0.01510777777777778,
+        "block": 0.004487777777777778
+      },
+      "fraud_recall_review_plus_block": 0.6888888888888889,
+      "fraud_recall_block_only": 0.5638888888888889,
+      "legit_flagged_rate": 0.015555555555555555,
+      "legit_blocked_rate": 0.0011111111111111111,
+      "block_precision_at_assumed_prevalence": 0.7538994800693241,
+      "expected_cost_per_10k_txn": 11797.377777777778,
+      "thresholds_per_fold": [
+        [
+          0.814334523677826,
+          0.9166060596704484
+        ],
+        [
+          0.7183655411005023,
+          0.9100854501128197
+        ],
+        [
+          0.8043739318847658,
+          0.9338512927293777
+        ],
+        [
+          0.754898698627949,
+          0.8996250927448274
+        ],
+        [
+          0.650859297811986,
+          0.9244049496948723
+        ]
+      ]
+    },
+    "stacked": {
+      "traffic_share_at_assumed_prevalence": {
+        "allow": 0.9837511111111112,
+        "review": 0.011911111111111114,
+        "block": 0.004337777777777778
+      },
+      "fraud_recall_review_plus_block": 0.6833333333333333,
+      "fraud_recall_block_only": 0.5388888888888889,
+      "legit_flagged_rate": 0.012222222222222223,
+      "legit_blocked_rate": 0.0011111111111111111,
+      "block_precision_at_assumed_prevalence": 0.7453893442622952,
+      "expected_cost_per_10k_txn": 11638.777777777781,
+      "thresholds_per_fold": [
+        [
+          0.797382521286396,
+          0.9126746123168125
+        ],
+        [
+          0.7781837130538231,
+          0.8975263847717365
+        ],
+        [
+          0.7659169753838342,
+          0.910579913789031
+        ],
+        [
+          0.7207033736083701,
+          0.8749996633822146
+        ],
+        [
+          0.6615980504750952,
+          0.8899571586821464
+        ]
+      ]
+    },
+    "naive_max": {
+      "traffic_share_at_assumed_prevalence": {
+        "allow": 0.9600822222222223,
+        "review": 0.037292222222222234,
+        "block": 0.002625555555555556
+      },
+      "fraud_recall_review_plus_block": 0.39444444444444443,
+      "fraud_recall_block_only": 0.06944444444444445,
+      "legit_flagged_rate": 0.03777777777777778,
+      "legit_blocked_rate": 0.0022222222222222222,
+      "block_precision_at_assumed_prevalence": 0.15869657215404148,
+      "expected_cost_per_10k_txn": 24168.95555555556,
+      "thresholds_per_fold": [
+        [
+          0.9805555555555555,
+          1.0
+        ],
+        [
+          0.9887452185153961,
+          0.997943227738142
+        ],
+        [
+          0.9806167706847191,
+          0.9986791595816612
+        ],
+        [
+          0.971020021289587,
+          1.0
+        ],
+        [
+          0.9702633358538151,
+          1.0
+        ]
+      ]
+    },
+    "allow_everything_cost_per_10k": 30000.000000000004,
+    "policy_sensitivity_stacked": [
+      {
+        "assumption": "prevalence=0.002",
+        "t_review_mean": 0.8453672992170489,
+        "t_review_std": 0.04712261284356765,
+        "t_block_mean": 0.9515188225058282,
+        "t_block_std": 0.006070300894218739
+      },
+      {
+        "assumption": "prevalence=0.006",
+        "t_review_mean": 0.7447569267615037,
+        "t_review_std": 0.05437950676297774,
+        "t_block_mean": 0.8971475465883882,
+        "t_block_std": 0.015523306557185344
+      },
+      {
+        "assumption": "prevalence=0.02",
+        "t_review_mean": 0.4662898155781912,
+        "t_review_std": 0.07892438043066373,
+        "t_block_mean": 0.759718578132859,
+        "t_block_std": 0.07564595488947423
+      },
+      {
+        "assumption": "review_cost=12",
+        "t_review_mean": 0.7447569267615037,
+        "t_review_std": 0.05437950676297774,
+        "t_block_mean": 0.8971475465883882,
+        "t_block_std": 0.015523306557185344
+      },
+      {
+        "assumption": "review_cost=5",
+        "t_review_mean": 0.564067474826193,
+        "t_review_std": 0.0666017818152645,
+        "t_block_mean": 0.9188845635293591,
+        "t_block_std": 0.0307571762885566
+      },
+      {
+        "assumption": "review_cost=50",
+        "t_review_mean": 0.8124630591593155,
+        "t_review_std": 0.03950951758370141,
+        "t_block_mean": 0.8124630591593155,
+        "t_block_std": 0.03950951758370141
+      }
+    ],
+    "assumptions": {
+      "L": 500.0,
+      "q": 0.9,
+      "c_r": 12.0,
+      "c_fp": 25.0,
+      "prevalence": 0.006,
+      "review_cap": 0.05
+    }
+  },
+  "nested_world_A": {
+    "xgb_only": {
+      "traffic_share_at_assumed_prevalence": {
+        "allow": 0.9866079426694536,
+        "review": 0.005334455332663753,
+        "block": 0.00805760199788268
+      },
+      "fraud_recall_review_plus_block": 0.9705882352941176,
+      "fraud_recall_block_only": 0.9224598930481284,
+      "legit_flagged_rate": 0.007614213197969543,
+      "legit_blocked_rate": 0.0025380710659898475,
+      "block_precision_at_assumed_prevalence": 0.6868990749038183,
+      "expected_cost_per_10k_txn": 2297.5832677325666,
+      "thresholds_per_fold": [
+        [
+          0.4171982053667413,
+          0.9742788143455983
+        ],
+        [
+          0.5337052829563684,
+          0.9363563135266304
+        ],
+        [
+          0.4995539680123346,
+          0.9740038871765138
+        ],
+        [
+          0.7283318936824831,
+          0.9629516065120698
+        ],
+        [
+          0.6954125300049854,
+          0.900036542117596
+        ]
+      ]
+    },
+    "stacked": {
+      "traffic_share_at_assumed_prevalence": {
+        "allow": 0.9882898377625161,
+        "review": 0.003748816924093127,
+        "block": 0.007961345313390702
+      },
+      "fraud_recall_review_plus_block": 0.9705882352941176,
+      "fraud_recall_block_only": 0.9064171122994652,
+      "legit_flagged_rate": 0.005922165820642978,
+      "legit_blocked_rate": 0.0025380710659898475,
+      "block_precision_at_assumed_prevalence": 0.6831135266359346,
+      "expected_cost_per_10k_txn": 2155.4350009500804,
+      "thresholds_per_fold": [
+        [
+          0.42283931445826495,
+          0.9809907188195416
+        ],
+        [
+          0.647976336298194,
+          0.9330734776205749
+        ],
+        [
+          0.4879120234811386,
+          0.9656481656694069
+        ],
+        [
+          0.6376076183702375,
+          0.9653139273400891
+        ],
+        [
+          0.6321192228996587,
+          0.8797099971763228
+        ]
+      ]
+    },
+    "naive_max": {
+      "traffic_share_at_assumed_prevalence": {
+        "allow": 0.9745070984554413,
+        "review": 0.01605149434023725,
+        "block": 0.009441407204321508
+      },
+      "fraud_recall_review_plus_block": 0.8850267379679144,
+      "fraud_recall_block_only": 0.732620320855615,
+      "legit_flagged_rate": 0.02030456852791878,
+      "legit_blocked_rate": 0.005076142131979695,
+      "block_precision_at_assumed_prevalence": 0.4655791059537912,
+      "expected_cost_per_10k_txn": 7094.0177529248895,
+      "thresholds_per_fold": [
+        [
+          0.9894863409232387,
+          0.9979649186134338
+        ],
+        [
+          0.989273128323454,
+          0.9973723739385605
+        ],
+        [
+          0.9894594189102504,
+          0.9985150337219239
+        ],
+        [
+          0.987196713269703,
+          0.9969453662633896
+        ],
+        [
+          0.9840472548459727,
+          0.9989441948039083
+        ]
+      ]
+    },
+    "allow_everything_cost_per_10k": 30000.000000000004,
+    "policy_sensitivity_stacked": [
+      {
+        "assumption": "prevalence=0.002",
+        "t_review_mean": 0.7722382319107011,
+        "t_review_std": 0.2013972216556742,
+        "t_block_mean": 0.9689912695571261,
+        "t_block_std": 0.02138287188317789
+      },
+      {
+        "assumption": "prevalence=0.006",
+        "t_review_mean": 0.5656909031014987,
+        "t_review_std": 0.10345501270541868,
+        "t_block_mean": 0.9449472573251871,
+        "t_block_std": 0.04043311367700664
+      },
+      {
+        "assumption": "prevalence=0.02",
+        "t_review_mean": 0.5656909031014987,
+        "t_review_std": 0.10345501270541868,
+        "t_block_mean": 0.7141437235163451,
+        "t_block_std": 0.18655240515715665
+      },
+      {
+        "assumption": "review_cost=12",
+        "t_review_mean": 0.5656909031014987,
+        "t_review_std": 0.10345501270541868,
+        "t_block_mean": 0.9449472573251871,
+        "t_block_std": 0.04043311367700664
+      },
+      {
+        "assumption": "review_cost=5",
+        "t_review_mean": 0.5656909031014987,
+        "t_review_std": 0.10345501270541868,
+        "t_block_mean": 0.9484803771978024,
+        "t_block_std": 0.04336010076579007
+      },
+      {
+        "assumption": "review_cost=50",
+        "t_review_mean": 0.5656909031014987,
+        "t_review_std": 0.10345501270541868,
+        "t_block_mean": 0.5656909031014987,
+        "t_block_std": 0.10345501270541868
+      }
+    ],
+    "assumptions": {
+      "L": 500.0,
+      "q": 0.9,
+      "c_r": 12.0,
+      "c_fp": 25.0,
+      "prevalence": 0.006,
+      "review_cap": 0.05
+    }
+  }
+}

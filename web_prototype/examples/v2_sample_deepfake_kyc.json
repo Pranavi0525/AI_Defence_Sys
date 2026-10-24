@@ -1,0 +1,100 @@
+{
+ "trace": {
+  "trace_id": "v2dk_09b4f9be-cd3",
+  "customer_id": "2e8b7735-9d05-402b-8316-0e63cbcdc873",
+  "events": [
+   {
+    "event_type": "ACCOUNT_OPENING",
+    "event_id": "09b4f9be-cd3e-44f4-955f-029b69d705f8",
+    "timestamp": "2025-03-06T06:49:15",
+    "customer_id": "2e8b7735-9d05-402b-8316-0e63cbcdc873",
+    "phone_hash": "12dc2e8f-cc42-40b1-8469-5b1c37a91c61",
+    "address_hash": "043e616a-5539-4658-bc90-df02d99db026"
+   },
+   {
+    "event_type": "DEVICE_REGISTRATION",
+    "event_id": "3dd01c8b-a171-4c5b-a228-18cb4627e040",
+    "timestamp": "2025-03-06T06:49:15",
+    "customer_id": "2e8b7735-9d05-402b-8316-0e63cbcdc873",
+    "device_id": "318bbc65-ec9d-4228-b87b-7124939c1b88",
+    "device_type": "mobile",
+    "action": "register"
+   },
+   {
+    "event_type": "KYC_VERIFICATION",
+    "event_id": "00072946-6748-449e-8721-1357a39c0739",
+    "timestamp": "2025-03-06T06:49:35",
+    "customer_id": "2e8b7735-9d05-402b-8316-0e63cbcdc873",
+    "liveness_score": 0.8293400414402742,
+    "doc_score": 0.8766588161204011,
+    "face_match_score": 0.8395644687327788,
+    "virtual_camera": false,
+    "retries": 3,
+    "duration_s": 26.632736146212817
+   },
+   {
+    "event_type": "SESSION_LOGIN",
+    "event_id": "2c54ee8e-b812-43ec-9267-fbedbe66cd35",
+    "timestamp": "2025-03-06T06:58:57",
+    "customer_id": "2e8b7735-9d05-402b-8316-0e63cbcdc873",
+    "account_id": "1eac01ac-55bc-4db6-8431-a93616585060",
+    "session_id": "2e3cc7d7-9dd3-4e1e-973f-adb8d12addce",
+    "device_id": "318bbc65-ec9d-4228-b87b-7124939c1b88",
+    "auth_method": "password",
+    "auth_success": true,
+    "login_attempt_count": 1,
+    "account_age_days": 1
+   },
+   {
+    "event_type": "TRANSACTION",
+    "event_id": "1d9510da-9783-4e67-9d4e-1079828b68f5",
+    "timestamp": "2025-03-06T07:03:16",
+    "customer_id": "2e8b7735-9d05-402b-8316-0e63cbcdc873",
+    "account_id": "1eac01ac-55bc-4db6-8431-a93616585060",
+    "amount": "1662.70",
+    "currency": "USD",
+    "transaction_type": "transfer",
+    "channel": "online",
+    "transaction_status": "completed",
+    "merchant_id": null,
+    "merchant_age_days": null,
+    "beneficiary_id": "3a05eccb-c8fb-48f2-aeb0-fb575f0657d9"
+   },
+   {
+    "event_type": "TRANSACTION",
+    "event_id": "1d77d04d-62ff-4e07-a6b0-0f24e80b3e04",
+    "timestamp": "2025-03-06T07:35:23",
+    "customer_id": "2e8b7735-9d05-402b-8316-0e63cbcdc873",
+    "account_id": "1eac01ac-55bc-4db6-8431-a93616585060",
+    "amount": "3001.46",
+    "currency": "USD",
+    "transaction_type": "transfer",
+    "channel": "mobile",
+    "transaction_status": "completed",
+    "merchant_id": null,
+    "merchant_age_days": null,
+    "beneficiary_id": "24555e3e-af40-4a22-a3d2-ed74cdd87a47"
+   },
+   {
+    "event_type": "TRANSACTION",
+    "event_id": "24a73227-0363-4790-bbe4-7969c5c2e43f",
+    "timestamp": "2025-03-06T07:43:32",
+    "customer_id": "2e8b7735-9d05-402b-8316-0e63cbcdc873",
+    "account_id": "1eac01ac-55bc-4db6-8431-a93616585060",
+    "amount": "10355.62",
+    "currency": "USD",
+    "transaction_type": "transfer",
+    "channel": "mobile",
+    "transaction_status": "completed",
+    "merchant_id": null,
+    "merchant_age_days": null,
+    "beneficiary_id": "0a674a21-5941-480b-b3c0-013de08f1442"
+   }
+  ],
+  "observation_window": [
+   "2025-03-06T06:49:15",
+   "2025-03-06T07:43:32"
+  ]
+ },
+ "commit": false
+}

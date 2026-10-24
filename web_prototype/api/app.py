@@ -49,7 +49,7 @@ from pathlib import Path
 # forgotten -- see run_api.py's own docstring about this exact class of bug.
 _THIS_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _THIS_DIR.parent.parent
-for _p in (str(_THIS_DIR), str(_REPO_ROOT / "src")):
+for _p in (str(_THIS_DIR), str(_REPO_ROOT / "src"), str(_REPO_ROOT)):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
@@ -63,6 +63,7 @@ from pydantic import BaseModel  # noqa: E402
 import inference  # noqa: E402
 import pipeline_runner  # noqa: E402
 import reports  # noqa: E402
+import v2_routes  # noqa: E402
 from config import REPORTS, STAGES  # noqa: E402
 from logging_config import configure_logging  # noqa: E402
 from schemas import ObservableAttackTrace, ScoreResponse  # noqa: E402
@@ -88,6 +89,7 @@ async def lifespan(app: FastAPI):
     # /readyz honestly reports not-ready, and /api/score returns 503
     # instead of a raw traceback.
     model_registry.load()
+    v2_routes.registry.load()          # full v2 cascade (independent of the v1 model; a failure here never blocks v1)
     yield
 
 
@@ -97,6 +99,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+app.include_router(v2_routes.router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -197,6 +201,7 @@ def readyz():
     body = {
         "ready": model_registry.ready,
         "model_version": model_registry.model_version if model_registry.ready else None,
+        "v2_ready": v2_routes.registry.ready,
     }
     if not model_registry.ready:
         body["error"] = model_registry.load_error

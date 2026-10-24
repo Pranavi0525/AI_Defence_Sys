@@ -1,0 +1,36 @@
+{
+ "rolling_origin": [
+  {
+   "fold": 2,
+   "train_rows": 94936,
+   "test_rows": 47468,
+   "test_fraud": 52,
+   "average_precision": 0.7403608633877378,
+   "recall_at_0p5pct_alerts": 0.7884615384615384
+  },
+  {
+   "fold": 3,
+   "train_rows": 142404,
+   "test_rows": 47468,
+   "test_fraud": 101,
+   "average_precision": 0.8217761804484115,
+   "recall_at_0p5pct_alerts": 0.8811881188118812
+  },
+  {
+   "fold": 4,
+   "train_rows": 189872,
+   "test_rows": 47468,
+   "test_fraud": 61,
+   "average_precision": 0.7898983903634967,
+   "recall_at_0p5pct_alerts": 0.819672131147541
+  },
+  {
+   "fold": 5,
+   "train_rows": 237340,
+   "test_rows": 47467,
+   "test_fraud": 61,
+   "average_precision": 0.7630960435059391,
+   "recall_at_0p5pct_alerts": 0.819672131147541
+  }
+ ]
+}

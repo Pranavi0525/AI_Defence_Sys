@@ -1,0 +1,209 @@
+{
+  "environment": {
+    "python": "3.14.4",
+    "sklearn": "1.8.0",
+    "xgboost": "3.2.0",
+    "pandas": "3.0.2",
+    "numpy": "2.4.4"
+  },
+  "world_B_generator_settings": {
+    "stealth": 0.5,
+    "onboarding_share": 0.2,
+    "young_share": 0.12
+  },
+  "data": {
+    "world_A_rows": 1556,
+    "world_A_fraud": 374,
+    "world_B_rows": 1260,
+    "world_B_fraud": 360,
+    "families_A": [
+      "ACCOUNT_TAKEOVER",
+      "AUTHORIZED_PUSH_PAYMENT",
+      "MULE_NETWORK"
+    ],
+    "families_B": [
+      "SYNTHETIC_IDENTITY",
+      "FAKE_MERCHANT",
+      "DEEPFAKE_KYC",
+      "AI_SCRIPTED_APP"
+    ]
+  },
+  "audit": {
+    "v1_raw_fields": [
+      {
+        "field": "device_id",
+        "legit_values": {
+          "<uuid>": 1241
+        },
+        "fraud_values": {
+          "#v_#": 313,
+          "<uuid>": 138
+        },
+        "disjoint_value_sets": false
+      },
+      {
+        "field": "fingerprint",
+        "legit_values": {
+          "NEW_FINGERPRINT_#": 59
+        },
+        "fraud_values": {
+          "#tk_#p_#": 77
+        },
+        "disjoint_value_sets": true
+      },
+      {
+        "field": "channel",
+        "legit_values": {
+          "mobile": 3632
+        },
+        "fraud_values": {
+          "online": 1706
+        },
+        "disjoint_value_sets": true
+      },
+      {
+        "field": "transaction_status",
+        "legit_values": {
+          "pending": 3632
+        },
+        "fraud_values": {
+          "completed": 1226,
+          "failed": 480
+        },
+        "disjoint_value_sets": true
+      },
+      {
+        "field": "merchant_category",
+        "legit_values": {
+          "None": 910,
+          "Grocery": 603,
+          "Restaurant": 478,
+          "Gambling": 355
+        },
+        "fraud_values": {
+          "None": 1706
+        },
+        "disjoint_value_sets": false
+      },
+      {
+        "field": "relationship_type",
+        "legit_values": {
+          "other": 37,
+          "government": 30,
+          "business": 29,
+          "personal": 28
+        },
+        "fraud_values": {
+          "other": 100
+        },
+        "disjoint_value_sets": false
+      },
+      {
+        "field": "is_verified",
+        "legit_values": {
+          "True": 99,
+          "False": 48
+        },
+        "fraud_values": {
+          "False": 100
+        },
+        "disjoint_value_sets": false
+      },
+      {
+        "field": "auth_method",
+        "legit_values": {
+          "password": 1182
+        },
+        "fraud_values": {
+          "password": 374
+        },
+        "disjoint_value_sets": false
+      }
+    ],
+    "world_A_top_feature_auc": [
+      {
+        "feature": "min_time_between_transactions",
+        "auc": 0.03746708651157738,
+        "strength": 0.4625329134884226
+      },
+      {
+        "feature": "mean_time_between_transactions",
+        "auc": 0.08241831573423093,
+        "strength": 0.4175816842657691
+      },
+      {
+        "feature": "amount_max",
+        "auc": 0.7783870354787046,
+        "strength": 0.2783870354787046
+      },
+      {
+        "feature": "amount_mean",
+        "auc": 0.7482581865233403,
+        "strength": 0.2482581865233403
+      },
+      {
+        "feature": "amount_std",
+        "auc": 0.7248545472642218,
+        "strength": 0.22485454726422183
+      },
+      {
+        "feature": "failed_transaction_count",
+        "auc": 0.7245989304812834,
+        "strength": 0.22459893048128343
+      },
+      {
+        "feature": "g_component_size",
+        "auc": 0.2895798836378114,
+        "strength": 0.2104201163621886
+      },
+      {
+        "feature": "amount_change_after_failure",
+        "auc": 0.6831550802139037,
+        "strength": 0.1831550802139037
+      }
+    ],
+    "world_B_top_feature_auc": [
+      {
+        "feature": "g_merchant_payers",
+        "auc": 0.20260339506172842,
+        "strength": 0.2973966049382716
+      },
+      {
+        "feature": "merchant_age_min",
+        "auc": 0.2375987654320988,
+        "strength": 0.2624012345679012
+      },
+      {
+        "feature": "amount_min",
+        "auc": 0.726878086419753,
+        "strength": 0.22687808641975304
+      },
+      {
+        "feature": "amount_mean",
+        "auc": 0.7038333333333333,
+        "strength": 0.2038333333333333
+      },
+      {
+        "feature": "merchant_young_txn_share",
+        "auc": 0.2972407407407408,
+        "strength": 0.2027592592592592
+      },
+      {
+        "feature": "mean_time_between_transactions",
+        "auc": 0.30152932098765434,
+        "strength": 0.19847067901234566
+      },
+      {
+        "feature": "time_login_to_first_transaction",
+        "auc": 0.30317746913580246,
+        "strength": 0.19682253086419754
+      },
+      {
+        "feature": "min_time_between_transactions",
+        "auc": 0.32518364197530863,
+        "strength": 0.17481635802469137
+      }
+    ],
+    "legit_simulator_distinguishability_auc": 0.9973416055649558
+  }
+}

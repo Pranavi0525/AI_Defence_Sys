@@ -1,0 +1,52 @@
+{
+  "world_A": {
+    "no_graph": {
+      "f1": 0.9741520774757625,
+      "recall": 0.9741532976827094,
+      "fp": 9.666666666666666,
+      "fn": 9.666666666666666,
+      "per_family_recall": {
+        "ACCOUNT_TAKEOVER": 0.9690721649484536,
+        "AUTHORIZED_PUSH_PAYMENT": 0.9871794871794872,
+        "MULE_NETWORK": 0.9614325068870523
+      }
+    },
+    "with_graph": {
+      "f1": 0.9781131117920401,
+      "recall": 0.9759358288770054,
+      "fp": 7.333333333333333,
+      "fn": 9.0,
+      "per_family_recall": {
+        "ACCOUNT_TAKEOVER": 0.9690721649484536,
+        "AUTHORIZED_PUSH_PAYMENT": 0.9871794871794872,
+        "MULE_NETWORK": 0.9669421487603306
+      }
+    }
+  },
+  "world_B": {
+    "no_graph": {
+      "f1": 0.8111795052608818,
+      "recall": 0.7537037037037037,
+      "fp": 37.666666666666664,
+      "fn": 88.66666666666667,
+      "per_family_recall": {
+        "SYNTHETIC_IDENTITY": 0.8555555555555555,
+        "FAKE_MERCHANT": 0.4962962962962963,
+        "DEEPFAKE_KYC": 0.862962962962963,
+        "AI_SCRIPTED_APP": 0.8000000000000002
+      }
+    },
+    "with_graph": {
+      "f1": 0.8409137314491894,
+      "recall": 0.7953703703703704,
+      "fp": 34.666666666666664,
+      "fn": 73.66666666666667,
+      "per_family_recall": {
+        "SYNTHETIC_IDENTITY": 0.8814814814814814,
+        "FAKE_MERCHANT": 0.5333333333333333,
+        "DEEPFAKE_KYC": 0.8925925925925927,
+        "AI_SCRIPTED_APP": 0.8740740740740741
+      }
+    }
+  }
+}

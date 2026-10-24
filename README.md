@@ -1,986 +1,195 @@
-# AI Defence System
+# AI Defence System (v2): a layered payment-fraud risk prototype, evaluated honestly on synthetic data
 
-## AI Risk Manager for Payment Fraud
+**What this is.** A prototype that scores a payment-session "trace" and returns ALLOW / REVIEW / BLOCK with an explanation.
+It combines a supervised model for known fraud patterns, two novelty detectors for unusual behaviour, history-only graph features
+(shared devices, payees, addresses, phones), and a cost-based decision policy. Every result in this repository is on **synthetic data**.
 
-An explainable, layered payment-risk system that combines behavioral rules, calibrated machine learning, graph signals, anomaly detection, risk fusion, and operational decision policy to evaluate synthetic payment-security event.
+**What this is not.** It does not detect real-world fraud, and it does not yet legitimately claim to detect GenAI-era fraud.
+The "GenAI-era" families are my own lightweight simulations of behaviour (for example KYC telemetry, not images or video). The honest claim is:
+*a layered fraud-risk prototype with unseen-fraud evaluation on synthetic data.*
 
----
+## Headline results (all synthetic; produced by the scripts listed under "Reproduce")
 
-## 1. What We Built
+| | v1 as I first reported it | v1 re-run, customer-grouped folds | v2 World A (v1 attacks) | v2 World B (harder, 4 new families) |
+|---|---|---|---|---|
+| F1 | 0.976 | 0.981 +/- 0.001 | 0.975 +/- 0.003 | 0.824 +/- 0.012 |
+| Recall | 0.968 | - | 0.973 [0.957, 0.987] | 0.780 [0.738, 0.824] |
+| Precision on the synthetic mix | 0.984 | - | 0.970 | 0.882 |
+| Precision at an assumed 0.6% fraud rate | not reported | not reported | 0.401 [0.273, 0.577] | 0.103 [0.077, 0.141] |
 
-Payment fraud detection is not only a classification problem.
+How to read it: the first column is the number I originally put in the v1 README (the Stage 1 + 2 cascade on all 1,556 traces). The second column is a different,
+simpler model (single-stage XGBoost, all 28 features) re-run with customer-grouped folds, so it is not an exact like-for-like. On the SAME attacks (World A) the score
+barely moves: **fixing customer leakage and in-fold tuning did not change the picture**. The big drop appears only in World B, where legitimate traffic includes hard
+cases and some attackers adapt. That drop is the finding: it shows how much of a high score came from an easy simulator.
+At a realistic fraud rate, most flags in the hard world are false alarms (precision about 0.10).
 
-A production-oriented risk system needs to answer several questions:
+## Real vs offline vs served (read this before trusting any claim)
 
-- Is this behavior suspicious?
-- How confident are we?
-- Should the transaction be allowed, reviewed, or blocked?
-- Can we explain why?
-- Which operational party should act?
-- What happens when a fraud case is missed?
-- Can the system be evaluated without leaking hidden attack information into the model?
+| Component | Status |
+|---|---|
+| Red Team simulator (v1 attacks) and v2 generators | Offline, synthetic. The v2 generators are my assumptions and were not validated by the Red Team validators |
+| v1 pipeline (Stage 1 rules + calibrated XGBoost) | Served at `POST /api/score` (unchanged from the hackathon) |
+| v1 GCN graph stage | Offline only; it was evaluated on rings I injected by hand |
+| v2 XGBoost + Isolation Forest + autoencoder + history-only graph features + stacked policy | Served at `POST /api/v2/score` (numpy-only novelty models; no scikit-learn at serving time) |
+| v2 case dossiers | Served at `POST /api/v2/dossier` (read-only) |
+| v2 analyst feedback loop | Offline experiment; result is negative / inconclusive (see below) |
+| Stage 1 rules inside v2 | Not part of v2 serving; in-fold they added nothing in World B |
+| Authentication, rate limiting, shared state | Not built. One worker; the entity store and drift buffer live in memory |
 
-AI Defence System addresses these questions through a layered risk-management architecture.
+## Architecture
 
-The project combines:
-
-1. **Behavioral rule filtering**
-2. **Calibrated XGBoost fraud scoring**
-3. **Graph-based relationship analysis**
-4. **Autoencoder-based novelty detection**
-5. **Risk fusion**
-6. **Cost-aware decision policy**
-7. **SHAP-based explainability**
-8. **Miss collection and hard-example analysis**
-9. **A production API and web dashboard**
-
-The system is evaluated using controlled synthetic payment-security scenarios representing:
-
-- `ACCOUNT_TAKEOVER` (ATO)
-- `AUTHORIZED_PUSH_PAYMENT` (APP)
-- `MULE_NETWORK`
-
-The data is synthetic and does not interact with real payment systems, accounts, or payment networks.
-
----
-
-# 2. Product View
-
-At a high level:
-
-```text
-                 Synthetic Payment Telemetry
-                           │
-                           ▼
-                 Observable Trace Boundary
-                           │
-                           ▼
-                     Feature Engineering
-                           │
-              ┌────────────┼────────────┐
-              │            │            │
-              ▼            ▼            ▼
-           Rules       XGBoost       Graph
-              │            │          Detector
-              │            │            │
-              │            └─────┬──────┘
-              │                  │
-              │            Autoencoder
-              │                  │
-              └────────────┬─────┘
-                           ▼
-                       Risk Fusion
-                           │
-                           ▼
-                     Decision Policy
-                           │
-                 ┌─────────┼─────────┐
-                 ▼         ▼         ▼
-               ALLOW     REVIEW     BLOCK
-                           │
-                           ▼
-                       Explanation
-                           │
-                           ▼
-                       Miss Collection
-                           │
-                           ▼
-                     Hard Examples /
-                      Re-evaluation
+```mermaid
+flowchart LR
+    T[Payment session trace] --> F[One shared feature extractor<br/>training and serving use the same code]
+    S[(History-only entity store<br/>devices, payees, addresses, phones)] --> F
+    F --> X[XGBoost<br/>known patterns]
+    F --> I[Isolation Forest<br/>unusual vs normal]
+    F --> A[Autoencoder<br/>unusual vs normal]
+    X --> M[Stacked logistic regression]
+    I --> M
+    A --> M
+    M --> P[Cost-based policy<br/>thresholds learned on inner out-of-fold scores]
+    P --> D{ALLOW / REVIEW / BLOCK}
+    D -->|REVIEW or BLOCK| C[Case dossier<br/>drivers, evidence, graph, acting party]
 ```
 
-The architecture deliberately separates:
+Why one feature extractor and history-only graph features: the first version of my graph features looked at future traces, which made World A
+look better. Replaying traces in time order (training) and reading the live store (serving) removed that leakage, and a test checks that serving
+reproduces the training features exactly.
 
-- **observable behavioral evidence**
-- **hidden ground truth used for evaluation**
-- **model inference**
-- **operational decisioning**
+## What I found wrong in my own v1 (and what it was worth)
 
-This separation is a central design requirement of the project.
+| Finding | Effect, measured |
+|---|---|
+| Folds shared customers (about 88% of test rows had a customer in training) | Not the cause of the high scores: F1 0.980 (v1 folds) vs 0.981 (grouped) |
+| Calibration (sigmoid / isotonic) | Made probabilities worse: Brier World A: raw 0.012, sigmoid 0.014, isotonic 0.014; World B: raw 0.069, sigmoid 0.086, isotonic 0.082 |
+| Graph features built from future traces | Looked like a gain in World A; with history-only features the gain is gone: 0.975 -> 0.975. World B keeps a small gain: 0.810 -> 0.824 |
+| The simulator made attacks easy | With no adaptive attackers F1 is 0.986; when all attackers adapt it is 0.774 |
+| Raw v1 fields that perfectly separate fraud from legit | Documented in `reports/v2/v2_report.md`; v1 features do not read them, so they did not inflate scores |
+| Mixing the two simulators | The model learns which simulator made a trace (legit-vs-legit AUC 0.997), so the two worlds are evaluated separately |
 
----
+## Hard world: how much do adaptive attackers cost?
 
-# 3. Core Design Principle: No Ground-Truth Leakage
+World B has 1260 traces (360 fraud). Default setting: 50% of attackers adapt to look legitimate, 20% of legitimate traffic is genuine onboarding,
+12% of legitimate accounts are young. These values are my assumptions, chosen after seeing which features gave families away.
 
-The Red Team produces two conceptually different pieces of information:
+| share of adaptive attackers | F1 | recall | FP | FN | recall FAKE_MERCHANT |
+|---|---|---|---|---|---|
+| 0% | 0.986 | 0.990 | 6.3 | 3.7 | 1.00 |
+| 25% | 0.898 | 0.856 | 17.7 | 52.0 | 0.71 |
+| 50% | 0.824 | 0.769 | 35.0 | 83.3 | 0.49 |
+| 75% | 0.772 | 0.738 | 62.3 | 94.3 | 0.37 |
+| 100% | 0.774 | 0.753 | 69.3 | 89.0 | 0.34 |
 
-```text
-AttackRecord
-├── observable_trace
-└── ground_truth
+Per-family recall at the default setting: SYNTHETIC_IDENTITY 0.86, FAKE_MERCHANT 0.49, DEEPFAKE_KYC 0.89, AI_SCRIPTED_APP 0.83.
+The biggest source of false alarms is genuine "new payee then pay" traffic (28% flagged) followed by person-to-person sprees (8%): the same behaviours that define scams.
+
+## Unseen fraud families (leave-one-family-out, fixed thresholds)
+
+World B:
+
+| held-out family | supervised XGBoost | Isolation Forest | autoencoder | novelty lane (XGB or IF) | lane false-alarm rate |
+|---|---|---|---|---|---|
+| SYNTHETIC_IDENTITY | 10% | 15% | 24% | 22% | 5% |
+| FAKE_MERCHANT | 0% | 0% | 1% | 0% | 5% |
+| DEEPFAKE_KYC | 17% | 41% | 23% | 42% | 6% |
+| AI_SCRIPTED_APP | 0% | 28% | 38% | 28% | 5% |
+
+World A:
+
+| held-out family | supervised XGBoost | Isolation Forest | autoencoder | novelty lane (XGB or IF) | lane false-alarm rate |
+|---|---|---|---|---|---|
+| ACCOUNT_TAKEOVER | 94% | 75% | 77% | 100% | 2% |
+| AUTHORIZED_PUSH_PAYMENT | 98% | 17% | 78% | 99% | 2% |
+| MULE_NETWORK | 59% | 2% | 14% | 59% | 2% |
+
+Reading: a supervised model is close to blind to a family it never saw (FAKE_MERCHANT: 0%; in World A the graph-dependent MULE_NETWORK reaches 59%).
+Novelty detectors catch some unusual behaviour (best on DEEPFAKE_KYC and AI_SCRIPTED_APP) but flag legitimate traffic too. None of this is a solved problem.
+
+## Decision policy and cost (World B, outer-test only)
+
+Assumptions (mine, not estimated from data): L = 500.0, q = 0.9, c_r = 12.0, c_fp = 25.0, prevalence = 0.006, review_cap = 0.05.
+
+| strategy | allow | review | block | fraud caught (review+block) | block precision | cost per 10k transactions |
+|---|---|---|---|---|---|---|
+| xgb_only | 97.8% | 1.8% | 0.4% | 69.2% | 73.5% | 12,186 |
+| stacked | 98.0% | 1.5% | 0.4% | 68.9% | 74.4% | 11,901 |
+| naive_max | 95.7% | 4.3% | 0.0% | 39.7% | 100.0% | 24,268 |
+| allow everything | 100% | 0% | 0% | 0% | - | 30,000 |
+
+Naive max-fusion is much worse than a learned stacker, but stacking barely beats XGBoost alone, and novelty-aware thresholds did not pay off:
+mean cost when the next fraud wave is an unseen family, World B: stacked with novelty-aware thresholds 27,955 vs standard stacked 21,731 vs XGBoost only 21,627.
+
+## Analyst feedback loop (Phase 7): a negative result
+
+Misses and false alarms from the round-0 model become fresh look-alike training cases; a same-size control arm separates "learning from mistakes" from "more data".
+
+| setting | cost change, targeted minus same-size control (per 10k) | sd over worlds | targeted better in |
+|---|---|---|---|
+| 2 fresh cases per mistake, all misses found | -232 | 1,135 | 7 of 10 worlds |
+| 2 fresh cases per mistake, half of the misses found | -1,128 | 1,319 | 8 of 10 worlds |
+| 4 fresh cases per mistake, all misses found | +292 | 1,284 | 3 of 10 worlds |
+
+The effects are small, inconsistent across settings and smaller than their spread, so I do not claim the loop helps. Most misses are stealth attackers
+(94% of misses; stealth fraud is missed 47% of the time versus 3% for plain fraud).
+
+
+## External method check on a public dataset (Phase 8)
+
+This checks the modelling METHOD only, on the public ULB credit-card fraud data (284,807 transactions, 492 frauds, about 48 hours, no customer ids, anonymised features).
+It is not the layered system: there are no sessions, devices, payees or graph here. Chronological split 60/20/20 (train / calibration / test).
+
+| model | split | average precision | recall at a 0.5% alert budget | precision at that budget |
+|---|---|---|---|---|
+| XGBoost | time | 0.778 | 0.813 | 0.214 |
+| XGBoost | random | 0.881 | 0.909 | 0.316 |
+| logistic regression | time | 0.684 | 0.827 | 0.218 |
+
+- Calibration (time split, XGBoost): calibration did not improve the Brier score by more than 5% over the raw scores; isotonic also lowered average precision (0.711 vs 0.778) (a plausible reason is that isotonic outputs step values that tie many scores, but I did not test that here) (0.00047 raw, 0.00047 sigmoid, 0.00050 isotonic); for logistic regression isotonic calibration lowered Brier from 0.00067 to 0.00062.
+- Time vs random split (XGBoost): average precision 0.778 (75 frauds in the test block) vs 0.881 (99 frauds): a gap of +0.103. The 95% bootstrap intervals overlap ([0.674, 0.848] vs [0.821, 0.934]). Across 4 chronological test blocks average precision ranged 0.740 to 0.822 (spread 0.081), all below the random-split value. The test sets differ and fraud counts are small, so read this as suggestive of an ordering effect at most, not as established.
+- On this data XGBoost had the higher time-split average precision (0.778 vs 0.684), but the logistic regression value lies inside XGBoost's bootstrap interval, so this is not a clear win; recall at a 0.5% alert budget was 0.813 (XGBoost) vs 0.827 (logistic regression). Leakage control (labels shuffled in training): average precision 0.0018 against a test base rate of 0.0013; this only rules out gross label leakage.
+- Limits: about two days of data, tens of frauds in the test block, no way to group by customer. Full tables: `reports/public/phase8_report.md`.
+
+## Limitations (stated up front)
+
+- Everything is synthetic. Scores are not real-world fraud probabilities and say nothing about real payment networks.
+- World B's distributions, the stealth level, the onboarding share and every cost constant are my assumptions.
+- The A-to-B transfer test is confounded by simulator differences; do not read it as generalisation.
+- Some model behaviour is a simulator artifact (for example "no merchant purchase raises risk").
+- Liability mappings for the four new families are assumptions, not regulation.
+- The API has no authentication or rate limiting; state is in memory on one worker.
+- Environment used to generate the reports in this repository: python 3.12.3, sklearn 1.8.0, xgboost 3.4.1, pandas 3.0.2, numpy 2.4.4. Regenerate on your own machine before quoting numbers.
+
+## Reproduce (Windows cmd)
+
 ```
-
-The model receives only the observable trace.
-
-Ground truth is reserved for:
-
-- labels
-- stratification
-- evaluation
-- error analysis
-- attack-family comparison
-- difficulty-specific analysis
-
-It is not used as a predictive feature.
-
-For example, fields such as:
-
-```text
-attack_family
-attack_difficulty
-hidden_objective
-planner_metadata
-internal phase labels
-ground-truth attack objective
+python -m venv .venv-eval
+.venv-eval\Scripts\activate
+pip install -r requirements-eval.lock.txt
+pip install fastapi uvicorn httpx
+set PYTHONPATH=src
+pytest tests -q
+pytest web_prototype\api\tests -q
+python scripts\run_v2_all.py
+python scripts\v2_stealth_sweep.py
+python scripts\run_v2_feedback_loop.py --reps 10 --per-case 2 --found-share 1.0
+python scripts\run_v2_feedback_loop.py --report
+python scripts\v2_feedback_miss_audit.py
+python scripts\make_v2_dossiers.py
+python scripts\build_phase9_docs.py
+python web_prototype\run_api.py --host 127.0.0.1 --port 8000
 ```
+Run the two pytest commands separately (both test folders are named `tests`). Each long script runs in under a few minutes.
 
-must never become model features.
+## API
 
-This preserves the distinction between:
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/score` | v1: Stage 1 rules + XGBoost |
+| `POST /api/v2/score` | v2 cascade: stage scores, decision, top feature contributions |
+| `POST /api/v2/dossier` | Case dossier for REVIEW / BLOCK (read-only) |
+| `GET /api/v2/model-card`, `/api/v2/drift`, `/api/v2/status` | Model card with limitations, drift against training data, readiness |
 
-> **what the attacker actually did**
+`commit=true` on scoring is refused unless `V2_ALLOW_COMMIT=true`, so a public demo cannot poison the entity store.
 
-and
-
-> **what a payment-security system could observe.**
-
-The final Red Team verification reported:
-
-```text
-Observable events scanned:       1,783
-Observable leakage findings:          0
-Ground-truth/observable mismatches:   0
-```
-
----
-
-# 4. Attack Scenarios
-
-## ACCOUNT_TAKEOVER
-
-ATO represents unauthorized access to a customer's account.
-
-Observable behavioral signals can include:
-
-- new-device registration
-- login/session activity
-- device changes
-- transaction frequency
-- transaction fragmentation
-- failed transaction attempts
-- timing patterns
-- transaction progression
-
----
-
-## AUTHORIZED_PUSH_PAYMENT
-
-APP represents a legitimate customer being socially engineered into authorizing a payment.
-
-Observable signals can include:
-
-- trusted-device usage
-- session continuity
-- beneficiary activity
-- hesitation gaps
-- failed/retried payments
-- amount reduction after failures
-- transaction timing
-- session-to-payment relationships
-
----
-
-## MULE_NETWORK
-
-MULE_NETWORK models coordinated movement of funds through related entities.
-
-The graph layer can use observable relationships such as:
-
-```text
-Customer
-   │
-   ├── Device
-   ├── Session
-   ├── Beneficiary
-   └── Transaction
-```
-
-Graph connectivity is only used where an observable relationship exists.
-
-The system does not fabricate relationships for traces where the corpus does not expose a connecting field.
-
----
-
-# 5. Risk Pipeline
-
-## Stage 1 — Behavioral Rule Filter
-
-Fast deterministic checks identify suspicious behavioral patterns.
-
-The purpose is not to replace machine learning.
-
-It acts as an initial routing layer:
-
-```text
-Low-risk behavior
-      │
-      └──► May be auto-cleared
-
-Suspicious / uncertain behavior
-      │
-      └──► Escalated to ML scoring
-```
-
-This provides a measurable trade-off between fraud recall and the amount of legitimate traffic requiring further processing.
-
----
-
-## Stage 2 — Calibrated XGBoost
-
-The primary tabular ML detector uses engineered behavioral and event-sequence features.
-
-Representative features include:
-
-- transaction counts
-- session/login counts
-- device registrations
-- beneficiary additions
-- total events
-- transactions per hour
-- transactions per session
-- authentication failures
-- failed transactions
-- amount statistics
-- amount trends
-- channel diversity
-- event timing
-
-The deployed API currently uses the validated Stage 1+2 model artifact.
-
-Model provenance is tracked through the project's model registry.
-
----
-
-## Stage 3 — Graph Escalation
-
-The graph detector models relationships among:
-
-```text
-Customer
-Device
-Session
-Beneficiary
-Transaction
-```
-
-It is particularly useful when suspicious activity is connected through observable cross-customer relationships.
-
-In the evaluated corpus:
-
-- graph escalation rescued additional fraud cases
-- graph processing is structurally a no-op for traces with no observable connecting relationship
-
-This is an intentional limitation rather than an attempt to infer unavailable information.
-
----
-
-## Stage 4 — Autoencoder Novelty Detection
-
-The autoencoder provides an independent anomaly signal based on reconstruction error.
-
-It is designed to identify behavior that differs from the learned normal behavioral representation.
-
-Unlike the graph layer, the autoencoder can score every row.
-
-This creates an important operational trade-off:
-
-> unusual does not necessarily mean fraudulent.
-
-Therefore anomaly scores are not treated as fraud truth by themselves.
-
----
-
-## Stage 5 — Risk Fusion
-
-Multiple signals can be combined into a unified risk score:
-
-```text
-Stage 1 / Stage 2 score
-          +
-Graph signal
-          +
-Autoencoder signal
-          │
-          ▼
-       Risk Fusion
-          │
-          ▼
-      Unified risk
-```
-
-The project evaluates multiple fusion strategies rather than assuming that adding another detector automatically improves performance.
-
-For the real corpus, the reported comparison was:
-
-| Configuration | Precision | Recall | F1 |
-|---|---:|---:|---:|
-| Stage 1+2 | 0.989 | 0.963 | 0.976 |
-| Stage 1+2 + GCN | 0.989 | 0.968 | 0.978 |
-| Stage 1+2 + Autoencoder | 0.854 | 0.973 | 0.910 |
-| Naive max of all three | 0.855 | 0.979 | 0.913 |
-| Stacked logistic-regression fusion | 0.986 | 0.965 | 0.976 |
-
-These results illustrate an important engineering point:
-
-> More detectors do not automatically produce a better production decision system.
-
-Additional signals must be evaluated against both detection benefit and operational cost.
-
----
-
-# 6. Decision Policy
-
-The unified risk score is mapped to an operational action:
-
-```text
-                    Risk Score
-                        │
-          ┌─────────────┼─────────────┐
-          ▼             ▼             ▼
-        ALLOW         REVIEW         BLOCK
-```
-
-The decision policy is cost-aware rather than optimized solely for classification accuracy.
-
-The evaluation considers factors such as:
-
-- fraud prevalence
-- review operations cost
-- legitimate-user friction
-- liability exposure
-- fraud caught through review
-
-The nested/fold-honest threshold analysis reported:
-
-```text
-ALLOW   73.5%
-REVIEW   4.7%
-BLOCK   21.8%
-
-Fraud recall (BLOCK + REVIEW): 97.6%
-```
-
-These figures are evaluation results on the project's synthetic corpus and should not be interpreted as production fraud-rate estimates.
-
----
-
-## Decision-Policy Sensitivity
-
-The decision policy was tested under different assumptions about production fraud prevalence and review-operation cost.
-
-Across the tested ranges:
-
-- Production fraud rate: **0.2%–2.0%**
-- Review-operation cost: **$5–$50**
-
-the selected block threshold remained stable at:
-
-```text
-t_block = 0.9643
-```
-
-The block-threshold span across both sensitivity sweeps was:
-
-```text
-0.9643 - 0.9643
-span = 0.000
-```
-
-At the reference sensitivity setting of **0.6% production fraud rate** and **$12 review-operation cost**, the evaluated policy produced:
-
-| Decision | Share |
-|---|---:|
-| Allow | 72.9% |
-| Review | 5.0% |
-| Block | 22.1% |
-
-Fraud recall when combining Review + Block was **98.1%** under this sensitivity setting.
-
-The review threshold was more sensitive to the operating assumptions than the block threshold. This indicates that, within the tested range, the high-risk boundary was stable while the amount of traffic routed to manual review could change.
-
-These are sensitivity-analysis results on the project's synthetic evaluation population and are not claims about real-world fraud prevalence, operating cost, or production performance.
-
----
-
-# 7. Liability-Aware Decisions
-
-The system does not treat every fraud family as having identical operational responsibility.
-
-The evaluated policy records:
-
-```text
-ACCOUNT_TAKEOVER
-liable side:   SENDING
-acting side:   SENDING
-
-AUTHORIZED_PUSH_PAYMENT
-liable side:   SHARED_50_50
-acting side:   BOTH
-
-MULE_NETWORK
-liable side:   RECEIVING
-acting side:   RECEIVING
-```
-
-This allows the risk system to connect a detection decision to an operational action rather than stopping at:
-
-> "This transaction is fraudulent."
-
-The system can instead reason about:
-
-> "This is risky, and this is the side that should act."
-
----
-
-# 8. Explainability
-
-The system provides both global and case-level explanations.
-
-## Global explanations
-
-SHAP is used to understand the features driving the Stage 2 model.
-
-The strongest reported features included:
-
-```text
-min_time_between_transactions
-failed_transaction_count
-mean_time_between_transactions
-count_beneficiary_addition
-total_events
-count_device_registration
-window_seconds
-transactions_per_hour
-```
-
-## Case-level explanations
-
-Representative cases include:
-
-- correctly blocked ATO
-- correctly blocked APP
-- MULE_NETWORK case rescued by fusion
-- fraud routed to review
-- fraud that remained allowed
-- legitimate case routed to review
-- ordinary legitimate activity auto-cleared
-
-The project also generates investigator-oriented case dossiers for Review/Block cases.
-
----
-
-# 9. Evaluation
-
-The evaluation is designed around more than accuracy.
-
-Metrics include:
-
-- Precision
-- Recall
-- F1
-- ROC-AUC
-- PR-AUC
-- Confusion Matrix
-- False-positive rate
-- False-negative rate
-
-Performance is also examined by attack family.
-
-The primary Stage 1+2 evaluation on the validated evaluation population reported:
-
-```text
-Population:       1,556
-Fraud:              374
-Legitimate:       1,182
-
-Accuracy:        98.84%
-Precision:       98.37%
-Recall:          96.79%
-F1:              97.57%
-
-False-positive rate: 0.51%
-False-negative rate: 3.21%
-```
-
-The corresponding classification counts were:
-
-```text
-True Positive:   362
-True Negative:  1176
-False Positive:    6
-False Negative:   12
-```
-
-These numbers are evaluation results on synthetic data. They are not claims of real-world payment-fraud performance.
-
----
-
-# 10. Family-Level Evaluation
-
-The project evaluates the three attack families separately because aggregate performance can hide family-specific weaknesses.
-
-The full-cascade diagnostic reported:
-
-| Attack family | Precision | Recall | F1 |
-|---|---:|---:|---:|
-| ACCOUNT_TAKEOVER | 0.959 | 0.959 | 0.959 |
-| AUTHORIZED_PUSH_PAYMENT | 0.974 | 0.962 | 0.968 |
-| MULE_NETWORK | 0.967 | 0.967 | 0.967 |
-
-Family-level evaluation is especially important for MULE_NETWORK because graph reachability depends on whether the observable corpus actually exposes a shared relationship.
-
----
-
-# 11. Data Quality
-
-The persisted Red Team corpus contains:
-
-```text
-ATO:                 97 traces
-APP:                156 traces
-Total attacks:      253 traces
-Observable events: 1,783
-```
-
-Final corpus verification reported:
-
-```text
-Malformed records:              0
-Duplicate attack IDs:           0
-Cross-family ID overlap:        0
-GT/observable mismatches:       0
-Observable leakage findings:    0
-Chronology failures:            0
-Schema failures:                0
-```
-
-The project deliberately preserves the actual qualified corpus size rather than fabricating records to reach a requested target.
-
----
-
-# 12. Adaptive Feedback Loop
-
-Missed fraud cases are collected after the full cascade.
-
-The feedback workflow is:
-
-```text
-Full-cascade evaluation
-          │
-          ▼
-      Miss collection
-          │
-          ▼
-  Responsible-stage analysis
-          │
-          ▼
-  Hard-example generation
-          │
-          ▼
-  Controlled re-evaluation
-```
-
-The purpose is to identify where the cascade fails and whether targeted examples can improve the responsible stage.
-
-The feedback loop distinguishes:
-
-- Stage 1 misses
-- Stage 2 misses
-- graph-stage misses
-- decision-policy misses
-
-Importantly, the system does not simply lower thresholds to eliminate misses.
-
-The current adaptive evaluation found that some Stage 1 misses can be recovered through additional validated examples, while Stage 2 generalization remained partial for the original miss set.
-
-This is treated as an evaluation finding, not as evidence that every miss has been solved.
-
----
-
-# 13. Production Deployment
-
-The project includes a production API and web dashboard.
-
-### Frontend
-
-Vercel:
-
-**https://ai-defence-sys.vercel.app/**
-
-### Backend
-
-Render:
-
-**https://ai-defense-api.onrender.com/**
-
-The production backend exposes health/readiness endpoints and the scoring API.
-
-The readiness endpoint confirms that the required runtime artifact is available before the API accepts scoring traffic.
-
----
-
-# 14. Production Scoring Flow
-
-The live dashboard sends an `ObservableAttackTrace` to the API.
-
-Conceptually:
-
-```text
-Browser
-   │
-   │ POST /api/score
-   ▼
-Render API
-   │
-   ▼
-Observable trace validation
-   │
-   ▼
-Stage 1 + Stage 2 scoring
-   │
-   ▼
-Calibrated fraud probability
-   │
-   ▼
-Operational decision
-   │
-   ├── ALLOW
-   ├── REVIEW
-   └── BLOCK
-   │
-   ▼
-Explanation / evidence
-```
-
-The dashboard is designed to expose the real API response rather than fabricate evaluation statistics.
-
----
-
-# 15. Important Deployment Scope
-
-The production deployment should be interpreted precisely.
-
-The currently deployed online scoring path is the validated Stage 1+2 path.
-
-The Stage 3, Stage 4, and Stage 5 components have been implemented and evaluated offline, but their complete trained inference artifacts are not currently exposed through the production API as independent deployable stages.
-
-Therefore the dashboard explicitly distinguishes between:
-
-```text
-Online scoring:
-Stage 1 + Stage 2
-
-Offline evaluation:
-Stage 1 → Stage 2 → Stage 3 → Stage 4 → Stage 5
-```
-
-This distinction is intentional.
-
-The project does not claim that a component is production-served merely because it exists in the research/evaluation pipeline.
-
----
-
-# 16. Running Locally
-
-## Requirements
-
-Python 3.12 is the supported runtime used by the deployment configuration.
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Set the project source path.
-
-### Windows PowerShell
-
-```powershell
-$env:PYTHONPATH="src"
-```
-
-### Linux/macOS
-
-```bash
-export PYTHONPATH=src
-```
-
----
-
-## Run the API
-
-From the repository root:
-
-```bash
-python web_prototype/run_api.py --host 0.0.0.0 --port 8000
-```
-
-The API can then be accessed locally at:
-
-```text
-http://localhost:8000
-```
-
----
-
-## API Health
-
-Check:
-
-```text
-/healthz
-/readyz
-```
-
-`/healthz` indicates that the process is alive.
-
-`/readyz` verifies that the runtime model/artifact prerequisites are available.
-
----
-
-# 17. Running Tests
-
-The project's tests can be executed with:
-
-### Windows PowerShell
-
-```powershell
-$env:PYTHONPATH="src"
-pytest tests/ -v -W error::DeprecationWarning
-```
-
-The repository contains dedicated tests covering the Red Team generation, validation, model/evaluation behavior, integration, and robustness work.
-
----
-
-# 18. Repository Structure
-
-```text
-AI_Defence_Sys/
-│
-├── src/
-│   └── red_team/
-│       ├── attacks/
-│       ├── schemas/
-│       ├── validation/
-│       ├── world/
-│       └── ml/
-│
-├── reports/
-│   ├── ato_corpus_raw.json
-│   └── app_corpus_raw.json
-│
-├── blue_team_output_FROZEN/
-│   ├── xgb_model.joblib
-│   ├── gnn_results.json
-│   ├── stage4_autoencoder_results.json
-│   ├── risk_fusion_results.json
-│   └── explainability/
-│
-├── frozen_reports/
-│
-├── blue_team_output/
-│
-├── web_prototype/
-│   ├── dashboard/
-│   └── ...
-│
-├── streamlit_app/
-│
-├── tests/
-│
-├── RED_TEAM_HANDOFF.md
-├── BLUE_TEAM_INTEGRATION_SPEC.md
-├── requirements.txt
-├── render.yaml
-└── README.md
-```
-
----
-
-# 19. Security and Data Boundary
-
-This project is a controlled payment-security research simulation.
-
-It:
-
-- does not access real banking systems
-- does not interact with payment networks
-- does not submit real payment requests
-- does not target real customer accounts
-- does not contain real customer payment information
-- uses synthetic entities and simulated events
-
-The Red Team exists to provide controlled adversarial scenarios for defensive evaluation.
-
----
-
-# 20. Engineering Principles
-
-The project follows several principles throughout the pipeline.
-
-### 1. Observable data is the model boundary
-
-Hidden attack metadata is never treated as behavioral evidence.
-
-### 2. Accuracy is not enough
-
-Precision, recall, F1, PR-AUC, false positives, false negatives, operational cost, and family-specific performance are considered.
-
-### 3. More models are not automatically better
-
-Each additional signal must demonstrate useful incremental value.
-
-### 4. Detection and decisioning are separate concerns
-
-A probability estimate is not itself an operational action.
-
-### 5. Explainability is part of the system
-
-The system produces evidence intended to support investigation rather than only returning a number.
-
-### 6. Limitations are reported explicitly
-
-Unavailable telemetry, graph-unreachable cases, synthetic-data limitations, and incomplete production deployment are documented rather than hidden.
-
-### 7. Evaluation artifacts are treated as versioned evidence
-
-Baseline results should not be silently overwritten by later experimental runs.
-
----
-
-# 21. Demo
-
-The recommended demonstration flow is:
-
-### Step 1 — Open the dashboard
-
-Open:
-
-**https://ai-defence-sys.vercel.app/**
-
-### Step 2 — Confirm backend connectivity
-
-The dashboard should connect to:
-
-**https://ai-defense-api.onrender.com**
-
-### Step 3 — Load a real example trace
-
-Use the dashboard's real-example workflow rather than inventing a synthetic response in the UI.
-
-### Step 4 — Run scoring
-
-Submit the observable trace to the live API.
-
-### Step 5 — Show the decision
-
-Demonstrate:
-
-```text
-Fraud probability
-      ↓
-Risk decision
-      ↓
-ALLOW / REVIEW / BLOCK
-```
-
-### Step 6 — Show the explanation
-
-Highlight the behavioral evidence contributing to the decision.
-
-### Step 7 — Explain the offline pipeline
-
-Show how the same research system was evaluated across:
-
-```text
-Stage 1
-   ↓
-Stage 2
-   ↓
-Stage 3
-   ↓
-Stage 4
-   ↓
-Stage 5
-   ↓
-Decision Policy
-   ↓
-Explainability
-```
-
-Be explicit that the production API currently serves the Stage 1+2 online path while the complete cascade is evaluated offline.
-
----
-
-# 22. Project Status
-
-The project currently provides:
-
-- synthetic adversarial payment-security corpora
-- observable/ground-truth separation
-- behavioral feature engineering
-- calibrated Stage 1+2 ML scoring
-- graph-based evaluation
-- autoencoder novelty detection
-- risk-fusion evaluation
-- cost-aware decision policy
-- liability-aware operational routing
-- SHAP-based explainability
-- miss collection
-- hard-example analysis
-- evaluation and robustness infrastructure
-- production API deployment
-- production web dashboard
-
-The production deployment and research/evaluation pipeline are intentionally documented as separate scopes.
-
----
-
-# 23. Documentation
-
-Additional technical documentation is available in:
-
-```text
-RED_TEAM_HANDOFF.md
-BLUE_TEAM_INTEGRATION_SPEC.md
-```
-
-The integration specification contains the detailed Red Team → Blue Team data contract, observable-data rules, feature-engineering guidance, evaluation requirements, and corpus verification information.
-
----
-
-# 24. Final Note
-
-AI Defence System is designed as an end-to-end risk-management research prototype rather than a claim of production fraud-detection performance.
-
-The central engineering goal is to demonstrate a defensible path from:
-
-```text
-Observable behavior
-        ↓
-Detection
-        ↓
-Risk estimation
-        ↓
-Operational decision
-        ↓
-Explanation
-        ↓
-Evaluation
-        ↓
-Feedback
-```
-
-while maintaining a strict boundary between observable evidence and hidden ground truth.
+Further reading: `reports/v2/v2_report.md` (full generated report), `reports/v2/dossiers.md` (example cases), `DEFENCE_NOTES.md` (my own questions and answers), `INTERVIEW_KIT.md`.

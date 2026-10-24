@@ -1,0 +1,106 @@
+{
+  "lofo_world_B": {
+    "SYNTHETIC_IDENTITY": {
+      "xgb_rec": 0.13333333333333333,
+      "iforest_rec": 0.14666666666666667,
+      "ae_rec": 0.24666666666666665,
+      "lane_rec": 0.21333333333333332,
+      "xgb_fpr": 0.034444444444444444,
+      "iforest_fpr": 0.02222222222222222,
+      "ae_fpr": 0.024444444444444446,
+      "lane_fpr": 0.056666666666666664,
+      "n_held_out": 90
+    },
+    "FAKE_MERCHANT": {
+      "xgb_rec": 0.0,
+      "iforest_rec": 0.0,
+      "ae_rec": 0.006666666666666666,
+      "lane_rec": 0.0,
+      "xgb_fpr": 0.03333333333333334,
+      "iforest_fpr": 0.02222222222222222,
+      "ae_fpr": 0.03,
+      "lane_fpr": 0.05555555555555556,
+      "n_held_out": 90
+    },
+    "DEEPFAKE_KYC": {
+      "xgb_rec": 0.1911111111111111,
+      "iforest_rec": 0.38666666666666666,
+      "ae_rec": 0.21111111111111108,
+      "lane_rec": 0.4133333333333333,
+      "xgb_fpr": 0.03777777777777778,
+      "iforest_fpr": 0.02333333333333333,
+      "ae_fpr": 0.028888888888888888,
+      "lane_fpr": 0.0611111111111111,
+      "n_held_out": 90
+    },
+    "AI_SCRIPTED_APP": {
+      "xgb_rec": 0.01111111111111111,
+      "iforest_rec": 0.27555555555555555,
+      "ae_rec": 0.35333333333333333,
+      "lane_rec": 0.27999999999999997,
+      "xgb_fpr": 0.025555555555555554,
+      "iforest_fpr": 0.025555555555555554,
+      "ae_fpr": 0.026666666666666672,
+      "lane_fpr": 0.05,
+      "n_held_out": 90
+    }
+  },
+  "lofo_world_A": {
+    "ACCOUNT_TAKEOVER": {
+      "xgb_rec": 0.9402061855670103,
+      "iforest_rec": 0.7855670103092784,
+      "ae_rec": 0.775257731958763,
+      "lane_rec": 1.0,
+      "xgb_fpr": 0.004233712365014661,
+      "iforest_fpr": 0.02029607380390474,
+      "ae_fpr": 0.02027461918043338,
+      "lane_fpr": 0.0245297861689194,
+      "n_held_out": 97
+    },
+    "AUTHORIZED_PUSH_PAYMENT": {
+      "xgb_rec": 0.985897435897436,
+      "iforest_rec": 0.1897435897435897,
+      "ae_rec": 0.7897435897435898,
+      "lane_rec": 0.9871794871794872,
+      "xgb_fpr": 0.005074018450976185,
+      "iforest_fpr": 0.019452191947364656,
+      "ae_fpr": 0.024540513480655078,
+      "lane_fpr": 0.023682328541800756,
+      "n_held_out": 156
+    },
+    "MULE_NETWORK": {
+      "xgb_rec": 0.23140495867768598,
+      "iforest_rec": 0.047933884297520664,
+      "ae_rec": 0.228099173553719,
+      "lane_rec": 0.27603305785123966,
+      "xgb_fpr": 0.0016877637130801686,
+      "iforest_fpr": 0.02030680111564042,
+      "ae_fpr": 0.025380819566616607,
+      "lane_fpr": 0.021994564828720593,
+      "n_held_out": 121
+    }
+  },
+  "transfer_A_to_B": {
+    "xgb_trained_on_A": {
+      "fpr_on_B_legit": 0.3566666666666667,
+      "SYNTHETIC_IDENTITY": 0.8888888888888888,
+      "FAKE_MERCHANT": 0.6,
+      "DEEPFAKE_KYC": 0.4666666666666667,
+      "AI_SCRIPTED_APP": 0.8222222222222222
+    },
+    "iforest_trained_on_A_legit": {
+      "fpr_on_B_legit": 0.10111111111111111,
+      "SYNTHETIC_IDENTITY": 0.0,
+      "FAKE_MERCHANT": 0.0,
+      "DEEPFAKE_KYC": 0.7222222222222222,
+      "AI_SCRIPTED_APP": 0.36666666666666664
+    },
+    "xgb_or_iforest": {
+      "fpr_on_B_legit": 0.4022222222222222,
+      "SYNTHETIC_IDENTITY": 0.8888888888888888,
+      "FAKE_MERCHANT": 0.6,
+      "DEEPFAKE_KYC": 0.7666666666666667,
+      "AI_SCRIPTED_APP": 0.8444444444444444
+    }
+  }
+}
