@@ -1,0 +1,19 @@
+{
+  "status": "COMPLETED",
+  "selected_proxy_objective": "PAYMENT-INSTRUMENT BEHAVIOR",
+  "exact_source_fields": ["card1", "card2", "card3", "card4", "card5", "card6", "addr1", "P_emaildomain"],
+  "construction_rule": "String concatenation separated by underscores: card1_card2_card3_card4_card5_card6_addr1_P_emaildomain",
+  "normalization": "Cast to string, convert missing to 'nan'",
+  "missing_value_rules": "Missing values treated as distinct 'nan' categories",
+  "semantic_interpretation": "Represents an aggregate payment-instrument slice (card BIN/type + billing region + email provider), NOT an individual customer.",
+  "longitudinal_validity": "LIMITED. Valid for tracking aggregate instrument/regional traffic patterns over time, but invalid for modeling individual human state sequences due to massive device/user collisions.",
+  "collision_risks": "EXTREME. High-frequency categories (e.g., generic anonymous.com domains, massive issuer BINs, large zip codes) collapse hundreds of distinct devices and users into a single entity.",
+  "extreme_entity_policy": "Model extreme entities as a separate population or cap historical contribution.",
+  "threshold_cap": "P99 (approx 71 transactions)",
+  "affected_entities": 930,
+  "affected_rows": 169374,
+  "decision_rationale": "IEEE-CIS anonymization fields (Card BIN + Zip + Email Domain) do not contain a unique user identifier. Rare combinations mimic individuals, but common combinations collapse up to 600 distinct devices into a single proxy. This destroys the construct validity of an 'originating individual' sequence. Therefore, no defensible individual proxy can be found.",
+  "provenance": "src/red_team/ml/proxy_design.py",
+  "deferred_candidates": ["Candidate_A_CardOnly", "Candidate_B_CardAddr", "Candidate_C_CardEmail"],
+  "fallback_objective": "PAYMENT-INSTRUMENT BEHAVIOR"
+}

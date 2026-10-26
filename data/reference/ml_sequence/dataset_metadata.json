@@ -1,0 +1,32 @@
+{
+  "source_dataset": "IEEE-CIS Fraud Detection",
+  "proxy_definition": "card1-card6 + addr1 + P_emaildomain",
+  "legitimate_filter": "isFraud == 0",
+  "sequence_definition": "predict next transaction category given >=1 past transactions",
+  "target_definition": "next_transaction_category (ProductCD)",
+  "feature_list": [
+    "previous_amount",
+    "time_since_previous_transaction",
+    "amount_mean_so_far",
+    "amount_median_so_far",
+    "amount_std_so_far",
+    "amount_min_so_far",
+    "amount_max_so_far",
+    "transactions_seen_so_far",
+    "elapsed_time_since_first_observed",
+    "previous_ProductCD",
+    "previous_DeviceType",
+    "previous_DeviceInfo"
+  ],
+  "split_seed": 42,
+  "split_method": "proxy_entity grouped (70/15/15)",
+  "preprocessing_version": "1.0",
+  "row_counts": {
+    "train": 329348,
+    "validation": 72858,
+    "test": 74598
+  },
+  "entity_counts": {
+    "total_pre_sequence": 93073
+  }
+}

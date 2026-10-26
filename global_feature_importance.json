@@ -1,0 +1,235 @@
+{
+  "overall_top_features": [
+    {
+      "feature": "min_time_between_transactions",
+      "mean_abs_shap": 2.1457
+    },
+    {
+      "feature": "amount_min",
+      "mean_abs_shap": 0.6079
+    },
+    {
+      "feature": "mean_time_between_transactions",
+      "mean_abs_shap": 0.5628
+    },
+    {
+      "feature": "time_login_to_first_transaction",
+      "mean_abs_shap": 0.4271
+    },
+    {
+      "feature": "count_beneficiary_addition",
+      "mean_abs_shap": 0.4227
+    },
+    {
+      "feature": "amount_mean",
+      "mean_abs_shap": 0.3842
+    },
+    {
+      "feature": "failed_transaction_count",
+      "mean_abs_shap": 0.3348
+    },
+    {
+      "feature": "transactions_per_hour",
+      "mean_abs_shap": 0.2705
+    },
+    {
+      "feature": "window_seconds",
+      "mean_abs_shap": 0.2611
+    },
+    {
+      "feature": "amount_cv",
+      "mean_abs_shap": 0.2397
+    },
+    {
+      "feature": "amount_max",
+      "mean_abs_shap": 0.2169
+    },
+    {
+      "feature": "count_transaction",
+      "mean_abs_shap": 0.1124
+    }
+  ],
+  "top_features_by_attack_family": {
+    "ACCOUNT_TAKEOVER": [
+      {
+        "feature": "min_time_between_transactions",
+        "mean_abs_shap": 3.3504
+      },
+      {
+        "feature": "count_beneficiary_addition",
+        "mean_abs_shap": 1.6727
+      },
+      {
+        "feature": "amount_mean",
+        "mean_abs_shap": 0.7705
+      },
+      {
+        "feature": "mean_time_between_transactions",
+        "mean_abs_shap": 0.4785
+      },
+      {
+        "feature": "failed_transaction_count",
+        "mean_abs_shap": 0.4613
+      },
+      {
+        "feature": "amount_max",
+        "mean_abs_shap": 0.4224
+      },
+      {
+        "feature": "window_seconds",
+        "mean_abs_shap": 0.3675
+      },
+      {
+        "feature": "amount_min",
+        "mean_abs_shap": 0.3628
+      },
+      {
+        "feature": "transactions_per_hour",
+        "mean_abs_shap": 0.3448
+      },
+      {
+        "feature": "time_login_to_first_transaction",
+        "mean_abs_shap": 0.326
+      },
+      {
+        "feature": "amount_cv",
+        "mean_abs_shap": 0.3174
+      },
+      {
+        "feature": "count_device_registration",
+        "mean_abs_shap": 0.23
+      }
+    ],
+    "AUTHORIZED_PUSH_PAYMENT": [
+      {
+        "feature": "min_time_between_transactions",
+        "mean_abs_shap": 4.4479
+      },
+      {
+        "feature": "count_beneficiary_addition",
+        "mean_abs_shap": 0.7923
+      },
+      {
+        "feature": "amount_mean",
+        "mean_abs_shap": 0.6379
+      },
+      {
+        "feature": "mean_time_between_transactions",
+        "mean_abs_shap": 0.4613
+      },
+      {
+        "feature": "transactions_per_hour",
+        "mean_abs_shap": 0.4537
+      },
+      {
+        "feature": "amount_max",
+        "mean_abs_shap": 0.4276
+      },
+      {
+        "feature": "amount_min",
+        "mean_abs_shap": 0.3919
+      },
+      {
+        "feature": "time_login_to_first_transaction",
+        "mean_abs_shap": 0.3602
+      },
+      {
+        "feature": "failed_transaction_count",
+        "mean_abs_shap": 0.3377
+      },
+      {
+        "feature": "amount_cv",
+        "mean_abs_shap": 0.3257
+      },
+      {
+        "feature": "window_seconds",
+        "mean_abs_shap": 0.2442
+      },
+      {
+        "feature": "failed_then_completed",
+        "mean_abs_shap": 0.2119
+      }
+    ],
+    "ring_mule_synthetic": [
+      {
+        "feature": "min_time_between_transactions",
+        "mean_abs_shap": 1.0178
+      },
+      {
+        "feature": "amount_min",
+        "mean_abs_shap": 0.7217
+      },
+      {
+        "feature": "time_login_to_first_transaction",
+        "mean_abs_shap": 0.6457
+      },
+      {
+        "feature": "amount_cv",
+        "mean_abs_shap": 0.4815
+      },
+      {
+        "feature": "mean_time_between_transactions",
+        "mean_abs_shap": 0.4787
+      },
+      {
+        "feature": "amount_mean",
+        "mean_abs_shap": 0.4024
+      },
+      {
+        "feature": "window_seconds",
+        "mean_abs_shap": 0.3854
+      },
+      {
+        "feature": "transactions_per_hour",
+        "mean_abs_shap": 0.3042
+      },
+      {
+        "feature": "failed_transaction_count",
+        "mean_abs_shap": 0.2692
+      },
+      {
+        "feature": "count_beneficiary_addition",
+        "mean_abs_shap": 0.2555
+      },
+      {
+        "feature": "amount_max",
+        "mean_abs_shap": 0.1757
+      },
+      {
+        "feature": "count_transaction",
+        "mean_abs_shap": 0.136
+      }
+    ]
+  },
+  "stage1_rule_diagnostics": {
+    "beneficiary_added_before_transaction": {
+      "condition": "beneficiary_added_before_transaction == 1",
+      "fire_rate_on_fraud": 0.3213,
+      "fire_rate_on_legit": 0.0
+    },
+    "new_device_present": {
+      "condition": "new_device_present == 1",
+      "fire_rate_on_fraud": 0.278,
+      "fire_rate_on_legit": 0.0406
+    },
+    "min_time_between_transactions": {
+      "condition": "min_time_between_transactions < 3600",
+      "fire_rate_on_fraud": 0.8845,
+      "fire_rate_on_legit": 0.42
+    },
+    "transactions_per_hour": {
+      "condition": "transactions_per_hour > 2.5",
+      "fire_rate_on_fraud": 0.2599,
+      "fire_rate_on_legit": 0.0059
+    }
+  },
+  "stage3_graph_escalation": {
+    "n_graph_connected_nodes": 24,
+    "n_total_nodes": 1458,
+    "n_rescued_by_graph": 14
+  },
+  "stage4_thresholds_used": {
+    "t_review": 0.0657,
+    "t_block": 0.935
+  }
+}

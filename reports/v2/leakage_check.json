@@ -1,0 +1,254 @@
+{
+  "environment": {
+    "python": "3.12.3",
+    "sklearn": "1.8.0",
+    "xgboost": "3.4.1",
+    "pandas": "3.0.2",
+    "numpy": "2.4.4"
+  },
+  "seeds": [
+    11,
+    22,
+    33,
+    44,
+    55
+  ],
+  "structure": {
+    "n_rows": 1556,
+    "n_fraud": 374,
+    "rows_per_family": {
+      "legitimate": 1182,
+      "AUTHORIZED_PUSH_PAYMENT": 156,
+      "MULE_NETWORK": 121,
+      "ACCOUNT_TAKEOVER": 97
+    },
+    "n_unique_customers": 481,
+    "customers_in_both_fraud_and_legit": 0,
+    "v1_fold_overlap": [
+      {
+        "fold": 0,
+        "n_test": 312,
+        "share_test_rows_customer_in_train": 0.8461538461538461
+      },
+      {
+        "fold": 1,
+        "n_test": 312,
+        "share_test_rows_customer_in_train": 0.9102564102564102
+      },
+      {
+        "fold": 2,
+        "n_test": 311,
+        "share_test_rows_customer_in_train": 0.9067524115755627
+      },
+      {
+        "fold": 3,
+        "n_test": 311,
+        "share_test_rows_customer_in_train": 0.8617363344051447
+      },
+      {
+        "fold": 4,
+        "n_test": 310,
+        "share_test_rows_customer_in_train": 0.8806451612903226
+      }
+    ],
+    "grouped_fold_overlap": [
+      {
+        "fold": 0,
+        "n_test": 312,
+        "share_test_rows_customer_in_train": 0.0
+      },
+      {
+        "fold": 1,
+        "n_test": 311,
+        "share_test_rows_customer_in_train": 0.0
+      },
+      {
+        "fold": 2,
+        "n_test": 311,
+        "share_test_rows_customer_in_train": 0.0
+      },
+      {
+        "fold": 3,
+        "n_test": 311,
+        "share_test_rows_customer_in_train": 0.0
+      },
+      {
+        "fold": 4,
+        "n_test": 311,
+        "share_test_rows_customer_in_train": 0.0
+      }
+    ],
+    "grouped_fold_composition": {
+      "0": {
+        "legitimate": 237,
+        "AUTHORIZED_PUSH_PAYMENT": 32,
+        "MULE_NETWORK": 24,
+        "ACCOUNT_TAKEOVER": 19
+      },
+      "1": {
+        "legitimate": 236,
+        "AUTHORIZED_PUSH_PAYMENT": 31,
+        "MULE_NETWORK": 24,
+        "ACCOUNT_TAKEOVER": 20
+      },
+      "2": {
+        "legitimate": 237,
+        "AUTHORIZED_PUSH_PAYMENT": 31,
+        "MULE_NETWORK": 24,
+        "ACCOUNT_TAKEOVER": 19
+      },
+      "3": {
+        "legitimate": 236,
+        "AUTHORIZED_PUSH_PAYMENT": 31,
+        "MULE_NETWORK": 25,
+        "ACCOUNT_TAKEOVER": 19
+      },
+      "4": {
+        "legitimate": 236,
+        "AUTHORIZED_PUSH_PAYMENT": 31,
+        "MULE_NETWORK": 24,
+        "ACCOUNT_TAKEOVER": 20
+      }
+    }
+  },
+  "grid": [
+    {
+      "split": "v1_trace_hash",
+      "features": "all_28_features",
+      "n_seeds": 5,
+      "precision_mean": 0.9838574682499213,
+      "precision_std": 0.0032002762065309266,
+      "recall_mean": 0.9770053475935828,
+      "recall_std": 0.003048597393313215,
+      "f1_mean": 0.9804133648935393,
+      "f1_std": 0.0015275595460011889,
+      "pr_auc_mean": 0.9965386548047276,
+      "pr_auc_std": 0.0006115971308427996,
+      "false_positives_mean": 6.0,
+      "false_positives_std": 1.224744871391589,
+      "false_negatives_mean": 8.6,
+      "false_negatives_std": 1.1401754250991378,
+      "recall_ACCOUNT_TAKEOVER_mean": 0.9608247422680412,
+      "recall_ACCOUNT_TAKEOVER_std": 0.0046104494381438805,
+      "recall_AUTHORIZED_PUSH_PAYMENT_mean": 0.985897435897436,
+      "recall_AUTHORIZED_PUSH_PAYMENT_std": 0.0028667538173074623,
+      "recall_MULE_NETWORK_mean": 0.9785123966942149,
+      "recall_MULE_NETWORK_std": 0.004526632706654311
+    },
+    {
+      "split": "v1_trace_hash",
+      "features": "no_HESITATION_DELTA",
+      "n_seeds": 5,
+      "precision_mean": 0.9838516008349419,
+      "precision_std": 0.003711766939917687,
+      "recall_mean": 0.9764705882352942,
+      "recall_std": 0.0034862044947607885,
+      "f1_mean": 0.9801398423501133,
+      "f1_std": 0.001986658181186396,
+      "pr_auc_mean": 0.9963245420691645,
+      "pr_auc_std": 0.0007075454250215737,
+      "false_positives_mean": 6.0,
+      "false_positives_std": 1.4142135623730951,
+      "false_negatives_mean": 8.8,
+      "false_negatives_std": 1.3038404810405297,
+      "recall_ACCOUNT_TAKEOVER_mean": 0.9608247422680412,
+      "recall_ACCOUNT_TAKEOVER_std": 0.0046104494381438805,
+      "recall_AUTHORIZED_PUSH_PAYMENT_mean": 0.985897435897436,
+      "recall_AUTHORIZED_PUSH_PAYMENT_std": 0.0028667538173074623,
+      "recall_MULE_NETWORK_mean": 0.9768595041322314,
+      "recall_MULE_NETWORK_std": 0.006914545673835365
+    },
+    {
+      "split": "v1_trace_hash",
+      "features": "v1_ablation_no_shortcut_benef_device",
+      "n_seeds": 5,
+      "precision_mean": 0.9794371299290509,
+      "precision_std": 0.002993596556998376,
+      "recall_mean": 0.967379679144385,
+      "recall_std": 0.002237058894476147,
+      "f1_mean": 0.9733663603293599,
+      "f1_std": 0.0011025291344957447,
+      "pr_auc_mean": 0.9922273649904374,
+      "pr_auc_std": 0.00034501297072793896,
+      "false_positives_mean": 7.6,
+      "false_positives_std": 1.1401754250991378,
+      "false_negatives_mean": 12.2,
+      "false_negatives_std": 0.8366600265340756,
+      "recall_ACCOUNT_TAKEOVER_mean": 0.931958762886598,
+      "recall_ACCOUNT_TAKEOVER_std": 0.00564662430417695,
+      "recall_AUTHORIZED_PUSH_PAYMENT_mean": 0.9820512820512821,
+      "recall_AUTHORIZED_PUSH_PAYMENT_std": 0.0028667538173074623,
+      "recall_MULE_NETWORK_mean": 0.9768595041322314,
+      "recall_MULE_NETWORK_std": 0.0036959801280988633
+    },
+    {
+      "split": "v2_customer_grouped",
+      "features": "all_28_features",
+      "n_seeds": 5,
+      "precision_mean": 0.9859633037683302,
+      "precision_std": 0.001170221491644737,
+      "recall_mean": 0.9764705882352942,
+      "recall_std": 0.002928997633717478,
+      "f1_mean": 0.981191412900623,
+      "f1_std": 0.001369580083349217,
+      "pr_auc_mean": 0.9964285526336095,
+      "pr_auc_std": 0.0003046017465049567,
+      "false_positives_mean": 5.2,
+      "false_positives_std": 0.4472135954999579,
+      "false_negatives_mean": 8.8,
+      "false_negatives_std": 1.0954451150103321,
+      "recall_ACCOUNT_TAKEOVER_mean": 0.9546391752577319,
+      "recall_ACCOUNT_TAKEOVER_std": 0.00922089887628781,
+      "recall_AUTHORIZED_PUSH_PAYMENT_mean": 0.9871794871794872,
+      "recall_AUTHORIZED_PUSH_PAYMENT_std": 0.0,
+      "recall_MULE_NETWORK_mean": 0.9801652892561984,
+      "recall_MULE_NETWORK_std": 0.007391960256197677
+    },
+    {
+      "split": "v2_customer_grouped",
+      "features": "no_HESITATION_DELTA",
+      "n_seeds": 5,
+      "precision_mean": 0.985425550902398,
+      "precision_std": 0.0014196845452982734,
+      "recall_mean": 0.9759358288770054,
+      "recall_std": 0.003781319685489574,
+      "f1_mean": 0.9806530111770482,
+      "f1_std": 0.0015726902271112457,
+      "pr_auc_mean": 0.9962379633656198,
+      "pr_auc_std": 0.0003772656676828427,
+      "false_positives_mean": 5.4,
+      "false_positives_std": 0.5477225575051662,
+      "false_negatives_mean": 9.0,
+      "false_negatives_std": 1.4142135623730951,
+      "recall_ACCOUNT_TAKEOVER_mean": 0.9546391752577319,
+      "recall_ACCOUNT_TAKEOVER_std": 0.00922089887628781,
+      "recall_AUTHORIZED_PUSH_PAYMENT_mean": 0.985897435897436,
+      "recall_AUTHORIZED_PUSH_PAYMENT_std": 0.0028667538173074623,
+      "recall_MULE_NETWORK_mean": 0.9801652892561984,
+      "recall_MULE_NETWORK_std": 0.007391960256197677
+    },
+    {
+      "split": "v2_customer_grouped",
+      "features": "v1_ablation_no_shortcut_benef_device",
+      "n_seeds": 5,
+      "precision_mean": 0.9810436982243059,
+      "precision_std": 0.0052984332363276865,
+      "recall_mean": 0.9668449197860962,
+      "recall_std": 0.0030485973933132154,
+      "f1_mean": 0.9738791469717285,
+      "f1_std": 0.0014541516480155161,
+      "pr_auc_mean": 0.9913099083739088,
+      "pr_auc_std": 0.0012588684910961475,
+      "false_positives_mean": 7.0,
+      "false_positives_std": 2.0,
+      "false_negatives_mean": 12.4,
+      "false_negatives_std": 1.140175425099138,
+      "recall_ACCOUNT_TAKEOVER_mean": 0.931958762886598,
+      "recall_ACCOUNT_TAKEOVER_std": 0.00564662430417695,
+      "recall_AUTHORIZED_PUSH_PAYMENT_mean": 0.9820512820512821,
+      "recall_AUTHORIZED_PUSH_PAYMENT_std": 0.0028667538173074623,
+      "recall_MULE_NETWORK_mean": 0.975206611570248,
+      "recall_MULE_NETWORK_std": 0.00584385769575661
+    }
+  ]
+}

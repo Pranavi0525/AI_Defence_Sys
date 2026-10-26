@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+.venv/
+.venv_*/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Raw third-party datasets must NOT be committed
+data/raw/
+data/sparkov/*.csv
+data/public/*.csv
+*.parquet
+*.h5
+*.hdf5
+# Allow derived statistics (JSON)
+!data/reference/*.json
+
+# Environment
+.env
+.env.*
+!.env.example
+!web_prototype/api/.env.example
+
+# Pipeline job state (SQLite) -- runtime data, not source. See
+# web_prototype/api/job_store.py.
+web_prototype/api/pipeline_jobs.sqlite3
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# MyPy
+.mypy_cache/
+
+# Local scratch / investigation
+scratch/
+.venv_*/
+_investigation/
+
+# Frozen historical artifacts
+blue_team_output_FROZEN/
+
+# Backup files
+*.backup

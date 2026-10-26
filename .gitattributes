@@ -1,0 +1,15 @@
+# .gitattributes
+# ================
+# The repo has a mix of LF and CRLF line endings across files edited on
+# different OSes, which shows up as spurious "modified" diffs (no actual
+# content change, just line-ending churn) in `git status` / `git diff`.
+# This normalizes everything to LF on checkin, LF on checkout, for every
+# platform.
+
+* text=auto eol=lf
+
+# Keep binary model/report artifacts untouched -- git should never try to
+# normalize line endings inside these.
+*.joblib binary
+*.png binary
+*.pkl binary

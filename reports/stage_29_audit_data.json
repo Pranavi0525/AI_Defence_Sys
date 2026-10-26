@@ -1,0 +1,37 @@
+{
+  "ato": {
+    "family": "ACCOUNT_TAKEOVER",
+    "target": 400,
+    "accepted": 340,
+    "rejected": 2610,
+    "unique_fps": 334,
+    "difficulty_distribution": {
+      "easy": 40,
+      "medium": 100,
+      "hard": 100,
+      "advanced": 100
+    },
+    "isolation_clean": true,
+    "avg_events": 7.161764705882353,
+    "avg_txs": 4.802941176470588
+  },
+  "app": {
+    "family": "AUTHORIZED_PUSH_PAYMENT",
+    "target": 400,
+    "accepted": 299,
+    "rejected": 4316,
+    "unique_fps": 294,
+    "difficulty_distribution": {
+      "easy": 7,
+      "medium": 92,
+      "hard": 100,
+      "advanced": 100
+    },
+    "isolation_clean": true,
+    "avg_events": 8.438127090301004,
+    "avg_txs": 7.177257525083612
+  },
+  "novelty_isolation": {
+    "identical_behavior_cross_family_similarity": 0.0
+  }
+}

@@ -1,0 +1,101 @@
+[
+  {
+    "held_out_family": "ACCOUNT_TAKEOVER",
+    "policy": "xgb_only_std",
+    "recall_flag": 0.9524459296389121,
+    "recall_block": 0.8028497168848046,
+    "legit_flag": 0.005922165820642977,
+    "legit_block": 0.0008460236886632825,
+    "cost": 2798.8391424132806,
+    "world": "A",
+    "seed": 11
+  },
+  {
+    "held_out_family": "ACCOUNT_TAKEOVER",
+    "policy": "stacked_std",
+    "recall_flag": 0.9559547015687366,
+    "recall_block": 0.8116402116402117,
+    "legit_flag": 0.005076142131979696,
+    "legit_block": 0.0008460236886632825,
+    "cost": 2573.0142700236206,
+    "world": "A",
+    "seed": 11
+  },
+  {
+    "held_out_family": "ACCOUNT_TAKEOVER",
+    "policy": "stacked_lofo",
+    "recall_flag": 0.9806089297317367,
+    "recall_block": 0.9489278752436648,
+    "legit_flag": 0.02030456852791878,
+    "legit_block": 0.00338409475465313,
+    "cost": 3558.807288949955,
+    "world": "A",
+    "seed": 11
+  },
+  {
+    "held_out_family": "AUTHORIZED_PUSH_PAYMENT",
+    "policy": "xgb_only_std",
+    "recall_flag": 0.9722857869310958,
+    "recall_block": 0.9503559623696923,
+    "legit_flag": 0.005922165820642977,
+    "legit_block": 0.0025380710659898475,
+    "cost": 1947.3708216690477,
+    "world": "A",
+    "seed": 11
+  },
+  {
+    "held_out_family": "AUTHORIZED_PUSH_PAYMENT",
+    "policy": "stacked_std",
+    "recall_flag": 0.9795957284515637,
+    "recall_block": 0.9503559623696923,
+    "legit_flag": 0.010152284263959392,
+    "legit_block": 0.00338409475465313,
+    "cost": 2369.157267479004,
+    "world": "A",
+    "seed": 11
+  },
+  {
+    "held_out_family": "AUTHORIZED_PUSH_PAYMENT",
+    "policy": "stacked_lofo",
+    "recall_flag": 0.9854182557843885,
+    "recall_block": 0.9694126620900075,
+    "legit_flag": 0.01607445008460237,
+    "legit_block": 0.005922165820642978,
+    "cost": 3179.6158084462973,
+    "world": "A",
+    "seed": 11
+  },
+  {
+    "held_out_family": "MULE_NETWORK",
+    "policy": "xgb_only_std",
+    "recall_flag": 0.5373120121835142,
+    "recall_block": 0.5080588869852148,
+    "legit_flag": 0.002538071065989848,
+    "legit_block": 0.0,
+    "cost": 14292.202376983516,
+    "world": "A",
+    "seed": 11
+  },
+  {
+    "held_out_family": "MULE_NETWORK",
+    "policy": "stacked_std",
+    "recall_flag": 0.5389459991116188,
+    "recall_block": 0.4853893013516086,
+    "legit_flag": 0.002538071065989848,
+    "legit_block": 0.0,
+    "cost": 14333.592059069944,
+    "world": "A",
+    "seed": 11
+  },
+  {
+    "held_out_family": "MULE_NETWORK",
+    "policy": "stacked_lofo",
+    "recall_flag": 0.7115457833618885,
+    "recall_block": 0.5275715464179199,
+    "legit_flag": 0.004230118443316413,
+    "legit_block": 0.0,
+    "cost": 9842.57918849369,
+    "world": "A",
+    "seed": 11
+  }
+]

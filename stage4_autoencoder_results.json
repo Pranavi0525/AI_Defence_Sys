@@ -1,0 +1,80 @@
+{
+  "stage_1_2_overall": {
+    "n": 1458,
+    "precision": 0.9840637450199203,
+    "recall": 0.9762845849802372,
+    "f1": 0.9801587301587301,
+    "roc_auc": 0.9855460613714266,
+    "pr_auc": 0.9826829862925883,
+    "confusion_matrix": [
+      [
+        1201,
+        4
+      ],
+      [
+        6,
+        247
+      ]
+    ]
+  },
+  "stage_1_2_4_overall": {
+    "n": 1458,
+    "precision": 0.7931034482758621,
+    "recall": 1.0,
+    "f1": 0.8846153846153846,
+    "roc_auc": 0.9967297000311613,
+    "pr_auc": 0.9815604872103978,
+    "confusion_matrix": [
+      [
+        1139,
+        66
+      ],
+      [
+        0,
+        253
+      ]
+    ]
+  },
+  "stage_1_2_by_family": {
+    "ACCOUNT_TAKEOVER": {
+      "n": 1302,
+      "precision": 0.96,
+      "recall": 0.9896907216494846,
+      "f1": 0.9746192893401016,
+      "roc_auc": 0.999589339949523,
+      "pr_auc": 0.9956124416211843
+    },
+    "AUTHORIZED_PUSH_PAYMENT": {
+      "n": 1361,
+      "precision": 0.9741935483870968,
+      "recall": 0.967948717948718,
+      "f1": 0.9710610932475884,
+      "roc_auc": 0.9768140227683797,
+      "pr_auc": 0.9709303583584178
+    }
+  },
+  "stage_1_2_4_by_family": {
+    "ACCOUNT_TAKEOVER": {
+      "n": 1302,
+      "precision": 0.5950920245398773,
+      "recall": 1.0,
+      "f1": 0.7461538461538462,
+      "roc_auc": 0.996894383368268,
+      "pr_auc": 0.9625841814715683
+    },
+    "AUTHORIZED_PUSH_PAYMENT": {
+      "n": 1361,
+      "precision": 0.7027027027027027,
+      "recall": 1.0,
+      "f1": 0.8253968253968254,
+      "roc_auc": 0.9966273007766784,
+      "pr_auc": 0.9678296371267715
+    }
+  },
+  "fraud_cases_rescued_by_stage4": 6,
+  "legit_cases_newly_flagged_by_stage4": 62,
+  "fraud_cases_downgraded_by_stage4_should_be_zero": 0,
+  "ae_hidden_dim": 8,
+  "ae_score_calibration_percentile": 95.0,
+  "note": "downgraded is guaranteed 0 by construction (final score = max(stage_1_2, ae_score)) -- reported anyway as an explicit, checkable guardrail. legit_cases_newly_flagged is the real cost of this stage: unlike Stage 3 (which only touches graph-connected nodes), the autoencoder scores every row, so it can also escalate legitimate traces whose behavior is merely unusual, not fraudulent."
+}

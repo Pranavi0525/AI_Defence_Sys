@@ -1,0 +1,212 @@
+[
+  {
+    "stealth": 0.0,
+    "n": 1260,
+    "all_features": {
+      "f1": 0.9861636328573491,
+      "recall": 0.9898148148148148,
+      "precision": 0.9825401173969732,
+      "fp": 6.333333333333333,
+      "fn": 3.6666666666666665
+    },
+    "per_family_recall": {
+      "SYNTHETIC_IDENTITY": 1.0,
+      "FAKE_MERCHANT": 1.0,
+      "DEEPFAKE_KYC": 0.9740740740740742,
+      "AI_SCRIPTED_APP": 0.9851851851851853
+    },
+    "behaviour_only": {
+      "f1": 0.9240136553026551,
+      "recall": 0.9120370370370371,
+      "precision": 0.9363098629765297,
+      "fp": 22.333333333333332,
+      "fn": 31.666666666666668
+    },
+    "max_single_feature_auc": {
+      "SYNTHETIC_IDENTITY": {
+        "feature": "time_login_to_first_transaction",
+        "auc": 0.03146913580246912
+      },
+      "FAKE_MERCHANT": {
+        "feature": "merchant_young_txn_share",
+        "auc": 0.9905555555555555
+      },
+      "DEEPFAKE_KYC": {
+        "feature": "kyc_retries",
+        "auc": 0.9725493827160494
+      },
+      "AI_SCRIPTED_APP": {
+        "feature": "time_from_beneficiary_add_to_transaction",
+        "auc": 0.9662592592592593
+      }
+    }
+  },
+  {
+    "stealth": 0.25,
+    "n": 1260,
+    "all_features": {
+      "f1": 0.8984002521630418,
+      "recall": 0.8555555555555556,
+      "precision": 0.9457664863169452,
+      "fp": 17.666666666666668,
+      "fn": 52.0
+    },
+    "per_family_recall": {
+      "SYNTHETIC_IDENTITY": 0.9074074074074074,
+      "FAKE_MERCHANT": 0.7111111111111111,
+      "DEEPFAKE_KYC": 0.9185185185185185,
+      "AI_SCRIPTED_APP": 0.8851851851851852
+    },
+    "behaviour_only": {
+      "f1": 0.8206576825210549,
+      "recall": 0.7648148148148147,
+      "precision": 0.885359369782376,
+      "fp": 35.666666666666664,
+      "fn": 84.66666666666667
+    },
+    "max_single_feature_auc": {
+      "SYNTHETIC_IDENTITY": {
+        "feature": "time_login_to_first_transaction",
+        "auc": 0.0759753086419753
+      },
+      "FAKE_MERCHANT": {
+        "feature": "merchant_young_txn_share",
+        "auc": 0.8719876543209877
+      },
+      "DEEPFAKE_KYC": {
+        "feature": "kyc_retries",
+        "auc": 0.9504691358024692
+      },
+      "AI_SCRIPTED_APP": {
+        "feature": "time_from_beneficiary_add_to_transaction",
+        "auc": 0.9687469135802469
+      }
+    }
+  },
+  {
+    "stealth": 0.5,
+    "n": 1260,
+    "all_features": {
+      "f1": 0.8237781359492392,
+      "recall": 0.7685185185185185,
+      "precision": 0.887743561374393,
+      "fp": 35.0,
+      "fn": 83.33333333333333
+    },
+    "per_family_recall": {
+      "SYNTHETIC_IDENTITY": 0.862962962962963,
+      "FAKE_MERCHANT": 0.48888888888888893,
+      "DEEPFAKE_KYC": 0.8888888888888888,
+      "AI_SCRIPTED_APP": 0.8333333333333334
+    },
+    "behaviour_only": {
+      "f1": 0.7291285352115705,
+      "recall": 0.6592592592592593,
+      "precision": 0.8155878713892588,
+      "fp": 53.666666666666664,
+      "fn": 122.66666666666667
+    },
+    "max_single_feature_auc": {
+      "SYNTHETIC_IDENTITY": {
+        "feature": "time_login_to_first_transaction",
+        "auc": 0.12405555555555556
+      },
+      "FAKE_MERCHANT": {
+        "feature": "merchant_young_txn_share",
+        "auc": 0.7872962962962964
+      },
+      "DEEPFAKE_KYC": {
+        "feature": "kyc_retries",
+        "auc": 0.9352592592592592
+      },
+      "AI_SCRIPTED_APP": {
+        "feature": "time_from_beneficiary_add_to_transaction",
+        "auc": 0.9682962962962963
+      }
+    }
+  },
+  {
+    "stealth": 0.75,
+    "n": 1260,
+    "all_features": {
+      "f1": 0.7722764930606831,
+      "recall": 0.737962962962963,
+      "precision": 0.8099868702835601,
+      "fp": 62.333333333333336,
+      "fn": 94.33333333333333
+    },
+    "per_family_recall": {
+      "SYNTHETIC_IDENTITY": 0.8629629629629628,
+      "FAKE_MERCHANT": 0.3703703703703704,
+      "DEEPFAKE_KYC": 0.8962962962962963,
+      "AI_SCRIPTED_APP": 0.8222222222222221
+    },
+    "behaviour_only": {
+      "f1": 0.664953165850718,
+      "recall": 0.6046296296296297,
+      "precision": 0.738676568356496,
+      "fp": 77.0,
+      "fn": 142.33333333333334
+    },
+    "max_single_feature_auc": {
+      "SYNTHETIC_IDENTITY": {
+        "feature": "merchant_age_min",
+        "auc": 0.1338888888888889
+      },
+      "FAKE_MERCHANT": {
+        "feature": "merchant_young_txn_share",
+        "auc": 0.6899012345679012
+      },
+      "DEEPFAKE_KYC": {
+        "feature": "kyc_retries",
+        "auc": 0.9223086419753087
+      },
+      "AI_SCRIPTED_APP": {
+        "feature": "time_from_beneficiary_add_to_transaction",
+        "auc": 0.964679012345679
+      }
+    }
+  },
+  {
+    "stealth": 1.0,
+    "n": 1260,
+    "all_features": {
+      "f1": 0.7739169218425298,
+      "recall": 0.7527777777777778,
+      "precision": 0.7962831046614163,
+      "fp": 69.33333333333333,
+      "fn": 89.0
+    },
+    "per_family_recall": {
+      "SYNTHETIC_IDENTITY": 0.8740740740740741,
+      "FAKE_MERCHANT": 0.34074074074074073,
+      "DEEPFAKE_KYC": 0.8962962962962964,
+      "AI_SCRIPTED_APP": 0.8999999999999999
+    },
+    "behaviour_only": {
+      "f1": 0.633685884924512,
+      "recall": 0.5805555555555556,
+      "precision": 0.6976161780000526,
+      "fp": 90.66666666666667,
+      "fn": 151.0
+    },
+    "max_single_feature_auc": {
+      "SYNTHETIC_IDENTITY": {
+        "feature": "merchant_age_min",
+        "auc": 0.1338888888888889
+      },
+      "FAKE_MERCHANT": {
+        "feature": "merchant_age_min",
+        "auc": 0.7901728395061729
+      },
+      "DEEPFAKE_KYC": {
+        "feature": "kyc_face",
+        "auc": 0.9245679012345679
+      },
+      "AI_SCRIPTED_APP": {
+        "feature": "time_from_beneficiary_add_to_transaction",
+        "auc": 0.967
+      }
+    }
+  }
+]

@@ -1,0 +1,101 @@
+{
+  "observable_trace": {
+    "trace_id": "atk-505228ff",
+    "customer_id": "4270fd83-9924-4d2d-92e4-32943b262774",
+    "events": [
+      {
+        "event_type": "SESSION_LOGIN",
+        "event_id": "0742fecb-325e-f062-d7f3-c37f6f0ad978",
+        "timestamp": "2025-01-02T09:28:04",
+        "customer_id": "4270fd83-9924-4d2d-92e4-32943b262774",
+        "account_id": "cfb4a91e-e9d5-4214-9ffe-02280742505d",
+        "session_id": "75c73d1e-44c6-8e0a-ed72-f02bc70e5c42",
+        "device_id": "dev_4270f",
+        "geo_country": null,
+        "geo_city": null,
+        "auth_method": "password",
+        "auth_success": true,
+        "login_attempt_count": 1
+      },
+      {
+        "event_type": "TRANSACTION",
+        "event_id": "d3bc1db4-0347-967c-ecfb-194dadd46ed2",
+        "timestamp": "2025-01-02T09:33:04",
+        "customer_id": "4270fd83-9924-4d2d-92e4-32943b262774",
+        "account_id": "cfb4a91e-e9d5-4214-9ffe-02280742505d",
+        "amount": "23047.12",
+        "currency": "USD",
+        "transaction_type": "purchase",
+        "merchant_category": null,
+        "merchant_country": null,
+        "channel": "online",
+        "transaction_status": "completed"
+      }
+    ],
+    "observation_window": [
+      "2025-01-02T09:28:04",
+      "2025-01-02T09:33:04"
+    ]
+  },
+  "ground_truth": {
+    "attack_id": "atk-505228ff",
+    "attack_family": "AUTHORIZED_PUSH_PAYMENT",
+    "attack_difficulty": "easy",
+    "hidden_objective": "extract_funds",
+    "phases_executed": [
+      {
+        "phase": "SOCIAL_ENGINEERING",
+        "entered_at": "2025-01-02T09:16:04",
+        "exited_at": "2025-01-02T09:26:04",
+        "transition_to": "SESSION_ACTIVE",
+        "was_optional": false
+      },
+      {
+        "phase": "SESSION_ACTIVE",
+        "entered_at": "2025-01-02T09:26:04",
+        "exited_at": "2025-01-02T09:28:04",
+        "transition_to": "PAYMENT_EXECUTION",
+        "was_optional": false
+      },
+      {
+        "phase": "PAYMENT_EXECUTION",
+        "entered_at": "2025-01-02T09:28:04",
+        "exited_at": "2025-01-02T09:33:04",
+        "transition_to": "END",
+        "was_optional": false
+      }
+    ],
+    "linked_event_ids": [
+      "0742fecb-325e-f062-d7f3-c37f6f0ad978",
+      "d3bc1db4-0347-967c-ecfb-194dadd46ed2"
+    ],
+    "generation_metadata": {
+      "random_seed": 2746317213,
+      "generator_version": "1.0",
+      "signature_version": "1.0",
+      "provenance_registry_version": "1.0",
+      "configuration_hash": "b3148e18",
+      "generated_at": "2026-08-29T19:07:37.411898Z"
+    },
+    "planner_metadata": {
+      "planner_type": "mock",
+      "plan_json": {
+        "attack_family": "AUTHORIZED_PUSH_PAYMENT",
+        "entry_state": "SOCIAL_ENGINEERING",
+        "difficulty": "easy",
+        "variation_settings": {},
+        "target_signal_intensity": "MEDIUM",
+        "affected_entity_preferences": [],
+        "max_phases": 8,
+        "max_events": 100,
+        "max_simulation_duration_minutes": 1440
+      },
+      "model_version": null,
+      "prompt_hash": null
+    },
+    "evaluation_metadata": {
+      "structural_valid": true,
+      "rejection_reason": null
+    }
+  }
+}

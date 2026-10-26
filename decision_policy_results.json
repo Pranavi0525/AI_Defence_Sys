@@ -1,0 +1,254 @@
+{
+  "naive": {
+    "t_review": 0.0593,
+    "t_block": 0.0933,
+    "allow_rate": 0.6947,
+    "review_rate": 0.0341,
+    "block_rate": 0.2712,
+    "legit_blocked": 55,
+    "legit_blocked_rate": 0.0465,
+    "legit_reviewed_rate": 0.0423,
+    "fraud_blocked": 367,
+    "fraud_reviewed": 3,
+    "fraud_allowed": 4,
+    "fraud_recall_blocked_only": 0.9813,
+    "fraud_recall_blocked_plus_review": 0.9893,
+    "dollars_fraud_allowed_through": 1748.23,
+    "dollars_fraud_total": 7304745.04,
+    "expected_cost_at_assumed_prevalence": 11386.59,
+    "liability_breakdown": {
+      "ACCOUNT_TAKEOVER": {
+        "liable_side": "SENDING",
+        "acting_side": "SENDING",
+        "sending_liability_share": 1.0,
+        "receiving_liability_share": 0.0,
+        "n_fraud_traces": 97,
+        "n_blocked": 95,
+        "n_reviewed": 1,
+        "n_allowed_through": 1,
+        "dollars_allowed_through_total": 0.0,
+        "dollars_allowed_through_this_institution_liable_for": 0.0
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "liable_side": "SHARED_50_50",
+        "acting_side": "BOTH",
+        "sending_liability_share": 0.5,
+        "receiving_liability_share": 0.5,
+        "n_fraud_traces": 156,
+        "n_blocked": 152,
+        "n_reviewed": 2,
+        "n_allowed_through": 2,
+        "dollars_allowed_through_total": 0.0,
+        "dollars_allowed_through_this_institution_liable_for": 0.0
+      },
+      "MULE_NETWORK": {
+        "liable_side": "RECEIVING",
+        "acting_side": "RECEIVING",
+        "sending_liability_share": 1.0,
+        "receiving_liability_share": 1.0,
+        "n_fraud_traces": 121,
+        "n_blocked": 120,
+        "n_reviewed": 0,
+        "n_allowed_through": 1,
+        "dollars_allowed_through_total": 1748.23,
+        "dollars_allowed_through_this_institution_liable_for": 1748.23
+      }
+    },
+    "cost_model": {
+      "review_ops_cost": 12.0,
+      "review_catch_rate": 0.85,
+      "legit_block_friction_cost": 150.0,
+      "assumed_production_fraud_rate": null,
+      "app_sending_liability_share": 0.5
+    }
+  },
+  "corrected": {
+    "t_review": 0.0933,
+    "t_block": 0.9643,
+    "allow_rate": 0.7288,
+    "review_rate": 0.0501,
+    "block_rate": 0.2211,
+    "legit_blocked": 1,
+    "legit_blocked_rate": 0.0008,
+    "legit_reviewed_rate": 0.0457,
+    "fraud_blocked": 343,
+    "fraud_reviewed": 24,
+    "fraud_allowed": 7,
+    "fraud_recall_blocked_only": 0.9171,
+    "fraud_recall_blocked_plus_review": 0.9813,
+    "dollars_fraud_allowed_through": 11779.67,
+    "dollars_fraud_total": 7304745.04,
+    "expected_cost_at_assumed_prevalence": 1177.72,
+    "liability_breakdown": {
+      "ACCOUNT_TAKEOVER": {
+        "liable_side": "SENDING",
+        "acting_side": "SENDING",
+        "sending_liability_share": 1.0,
+        "receiving_liability_share": 0.0,
+        "n_fraud_traces": 97,
+        "n_blocked": 90,
+        "n_reviewed": 5,
+        "n_allowed_through": 2,
+        "dollars_allowed_through_total": 0.0,
+        "dollars_allowed_through_this_institution_liable_for": 0.0
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "liable_side": "SHARED_50_50",
+        "acting_side": "BOTH",
+        "sending_liability_share": 0.5,
+        "receiving_liability_share": 0.5,
+        "n_fraud_traces": 156,
+        "n_blocked": 149,
+        "n_reviewed": 3,
+        "n_allowed_through": 4,
+        "dollars_allowed_through_total": 10031.44,
+        "dollars_allowed_through_this_institution_liable_for": 5015.72
+      },
+      "MULE_NETWORK": {
+        "liable_side": "RECEIVING",
+        "acting_side": "RECEIVING",
+        "sending_liability_share": 1.0,
+        "receiving_liability_share": 1.0,
+        "n_fraud_traces": 121,
+        "n_blocked": 104,
+        "n_reviewed": 16,
+        "n_allowed_through": 1,
+        "dollars_allowed_through_total": 1748.23,
+        "dollars_allowed_through_this_institution_liable_for": 1748.23
+      }
+    },
+    "cost_model": {
+      "review_ops_cost": 12.0,
+      "review_catch_rate": 0.85,
+      "legit_block_friction_cost": 150.0,
+      "assumed_production_fraud_rate": 0.006,
+      "app_sending_liability_share": 0.5
+    }
+  },
+  "score_source": {
+    "score": "risk_fusion_stacked_lr",
+    "validation_population": "ring_overlay_corpus (cwg.load_all_records, same rows Stage 3/Stage 4 were validated on)",
+    "fusion_avg_coefficients": {
+      "stage_1_2_score": 6.886057041599038,
+      "gcn_score": 2.440168114826725,
+      "ae_score": 2.514358617327715,
+      "intercept": -3.855113815235474
+    },
+    "n_graph_connected_nodes": 229,
+    "note": "These coefficients come from THIS run (ring-overlay corpus), not from risk_fusion_results.json's real_corpus_risk_fusion block, which is a separate no-overlay run with a structurally different (near-zero) gcn_score weight. Consumers needing to explain why the fused score moved (e.g. explainability.py) should read fusion_avg_coefficients from here, not from risk_fusion_results.json's real-corpus block."
+  },
+  "nested_fold_honest_estimate": {
+    "method": "nested_kfold_threshold_selection",
+    "n_splits": 5,
+    "note": "Each row's ALLOW/REVIEW/BLOCK decision here was made using thresholds selected on the OTHER folds only -- this row's own fold never contributed to picking the pair applied to it. Different outer folds may select different (t_review, t_block) pairs (see fold_thresholds), so these aggregated numbers estimate the out-of-sample performance of the THRESHOLD-SELECTION PROCEDURE itself, not the future performance of one single fixed pair. Compare against 'corrected' above: that block reports the single, full-population-selected policy that would actually be deployed (and is therefore the more optimistic estimate of its own future performance).",
+    "fold_thresholds": [
+      {
+        "fold": 1,
+        "t_review": 0.1213,
+        "t_block": 0.9643,
+        "n_selection_rows": 1244,
+        "n_holdout_rows": 312
+      },
+      {
+        "fold": 2,
+        "t_review": 0.1037,
+        "t_block": 0.9639,
+        "n_selection_rows": 1244,
+        "n_holdout_rows": 312
+      },
+      {
+        "fold": 3,
+        "t_review": 0.8666,
+        "t_block": 0.9661,
+        "n_selection_rows": 1245,
+        "n_holdout_rows": 311
+      },
+      {
+        "fold": 4,
+        "t_review": 0.0918,
+        "t_block": 0.9639,
+        "n_selection_rows": 1245,
+        "n_holdout_rows": 311
+      },
+      {
+        "fold": 5,
+        "t_review": 0.1103,
+        "t_block": 0.9641,
+        "n_selection_rows": 1246,
+        "n_holdout_rows": 310
+      }
+    ],
+    "allow_rate": 0.7352,
+    "review_rate": 0.0469,
+    "block_rate": 0.2179,
+    "legit_blocked": 1,
+    "legit_blocked_rate": 0.0008,
+    "legit_reviewed_rate": 0.0389,
+    "fraud_blocked": 338,
+    "fraud_reviewed": 27,
+    "fraud_allowed": 9,
+    "fraud_recall_blocked_only": 0.9037,
+    "fraud_recall_blocked_plus_review": 0.9759,
+    "dollars_fraud_allowed_through": 62944.43,
+    "dollars_fraud_total": 7304745.04,
+    "expected_cost_at_assumed_prevalence": 1534.16,
+    "liability_breakdown": {
+      "ACCOUNT_TAKEOVER": {
+        "liable_side": "SENDING",
+        "acting_side": "SENDING",
+        "sending_liability_share": 1.0,
+        "receiving_liability_share": 0.0,
+        "n_fraud_traces": 97,
+        "n_blocked": 90,
+        "n_reviewed": 5,
+        "n_allowed_through": 2,
+        "dollars_allowed_through_total": 0.0,
+        "dollars_allowed_through_this_institution_liable_for": 0.0
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "liable_side": "SHARED_50_50",
+        "acting_side": "BOTH",
+        "sending_liability_share": 0.5,
+        "receiving_liability_share": 0.5,
+        "n_fraud_traces": 156,
+        "n_blocked": 147,
+        "n_reviewed": 3,
+        "n_allowed_through": 6,
+        "dollars_allowed_through_total": 61196.2,
+        "dollars_allowed_through_this_institution_liable_for": 30598.1
+      },
+      "MULE_NETWORK": {
+        "liable_side": "RECEIVING",
+        "acting_side": "RECEIVING",
+        "sending_liability_share": 1.0,
+        "receiving_liability_share": 1.0,
+        "n_fraud_traces": 121,
+        "n_blocked": 101,
+        "n_reviewed": 19,
+        "n_allowed_through": 1,
+        "dollars_allowed_through_total": 1748.23,
+        "dollars_allowed_through_this_institution_liable_for": 1748.23
+      }
+    }
+  },
+  "methodology_note": {
+    "threshold_selection_optimism": "The 'corrected' block above selects (t_review, t_block) by grid search over expected cost computed on the FULL validation population, then reports allow/review/block rates, recall, cost, and liability_breakdown on that SAME population. proba is legitimately out-of-fold w.r.t. the base/fusion models, but the threshold pair itself is a free parameter fit to this exact sample and judged on it -- a separate, additional source of optimism (moderate severity; does not affect the API, which uses a fixed DECISION_THRESHOLD=0.5 on Stage 1+2 only and does not consume these thresholds -- see web_prototype/api/inference.py). 'nested_fold_honest_estimate' below is a fold-honest estimate of the OUT-OF-SAMPLE PERFORMANCE OF THE THRESHOLD-SELECTION PROCEDURE itself, not literally the future performance of the single full-population-selected 'corrected' pair above: thresholds are re-selected on 4 folds and applied only to the held-out 5th, rotated across all 5, and different outer folds may pick different pairs (see its 'fold_thresholds' list). See reports/stage_leakage_audit_risk_fusion_decision_policy.md, Finding 2, for the full writeup."
+  },
+  "_artifact_metadata": {
+    "generated_at_utc": "2026-09-08T14:12:23.234249+00:00",
+    "git_commit": "122bdc444b4985a3ac2f54a422f6f18d101795e7",
+    "git_dirty": true,
+    "python_version": "3.14.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "package_versions": {
+      "numpy": "2.4.5",
+      "pandas": "2.3.3",
+      "sklearn": "1.7.2",
+      "xgboost": "3.4.1",
+      "pydantic": "2.13.4"
+    },
+    "seeds": {
+      "RANDOM_STATE": 42
+    }
+  }
+}

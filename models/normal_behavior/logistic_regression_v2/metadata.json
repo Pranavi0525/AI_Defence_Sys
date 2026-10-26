@@ -1,0 +1,35 @@
+{
+  "dataset_identifier": "ml_sequence_v2",
+  "target": "target_ProductCD",
+  "feature_list": [
+    "previous_amount",
+    "time_since_previous_transaction",
+    "amount_mean_so_far",
+    "amount_median_so_far",
+    "amount_std_so_far",
+    "amount_min_so_far",
+    "amount_max_so_far",
+    "transactions_seen_so_far",
+    "elapsed_time_since_first_observed",
+    "previous_ProductCD",
+    "previous_DeviceType",
+    "previous_DeviceInfo"
+  ],
+  "class_list": [
+    "C",
+    "H",
+    "R",
+    "S",
+    "W"
+  ],
+  "C": 0.1,
+  "class_weight": null,
+  "solver": "lbfgs",
+  "max_iter": 1000,
+  "random_state": 42,
+  "training_row_count": 310453,
+  "validation_row_count": 66217,
+  "test_row_count": 70211,
+  "model_creation_timestamp": 1787828872.448882,
+  "model_size_bytes": 83914
+}

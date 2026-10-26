@@ -1,0 +1,21 @@
+{
+  "ato": {
+    "accepted": 20,
+    "rejections": 7,
+    "events": {
+      "DEVICE_REGISTRATION": 18,
+      "SESSION_LOGIN": 20,
+      "BENEFICIARY_ADDITION": 8,
+      "TRANSACTION": 44
+    }
+  },
+  "app": {
+    "accepted": 20,
+    "rejections": 83,
+    "events": {
+      "SESSION_LOGIN": 20,
+      "TRANSACTION": 56,
+      "BENEFICIARY_ADDITION": 10
+    }
+  }
+}

@@ -1,0 +1,146 @@
+[
+  {
+    "feature_name": "previous_amount",
+    "source_fields": [
+      "TransactionAmt"
+    ],
+    "raw_or_derived": "derived",
+    "entity_scope": "card_addr_email",
+    "available_before_target": true,
+    "missing_value_strategy": "impute_mean_128.4317671733243",
+    "leakage_risk": "low",
+    "provenance": "previous transaction amount"
+  },
+  {
+    "feature_name": "time_since_previous_transaction",
+    "source_fields": [
+      "TransactionDT"
+    ],
+    "raw_or_derived": "derived",
+    "entity_scope": "card_addr_email",
+    "available_before_target": true,
+    "missing_value_strategy": "impute_mean_700934.076845768",
+    "leakage_risk": "low",
+    "provenance": "delta from previous TransactionDT"
+  },
+  {
+    "feature_name": "amount_mean_so_far",
+    "source_fields": [
+      "TransactionAmt"
+    ],
+    "raw_or_derived": "derived",
+    "entity_scope": "card_addr_email",
+    "available_before_target": true,
+    "missing_value_strategy": "impute_mean",
+    "leakage_risk": "low",
+    "provenance": "expanding mean of past transactions"
+  },
+  {
+    "feature_name": "amount_median_so_far",
+    "source_fields": [
+      "TransactionAmt"
+    ],
+    "raw_or_derived": "derived",
+    "entity_scope": "card_addr_email",
+    "available_before_target": true,
+    "missing_value_strategy": "impute_mean",
+    "leakage_risk": "low",
+    "provenance": "expanding median of past transactions"
+  },
+  {
+    "feature_name": "amount_std_so_far",
+    "source_fields": [
+      "TransactionAmt"
+    ],
+    "raw_or_derived": "derived",
+    "entity_scope": "card_addr_email",
+    "available_before_target": true,
+    "missing_value_strategy": "fill_0_then_mean",
+    "leakage_risk": "low",
+    "provenance": "expanding std of past transactions"
+  },
+  {
+    "feature_name": "amount_min_so_far",
+    "source_fields": [
+      "TransactionAmt"
+    ],
+    "raw_or_derived": "derived",
+    "entity_scope": "card_addr_email",
+    "available_before_target": true,
+    "missing_value_strategy": "impute_mean",
+    "leakage_risk": "low",
+    "provenance": "expanding min of past transactions"
+  },
+  {
+    "feature_name": "amount_max_so_far",
+    "source_fields": [
+      "TransactionAmt"
+    ],
+    "raw_or_derived": "derived",
+    "entity_scope": "card_addr_email",
+    "available_before_target": true,
+    "missing_value_strategy": "impute_mean",
+    "leakage_risk": "low",
+    "provenance": "expanding max of past transactions"
+  },
+  {
+    "feature_name": "transactions_seen_so_far",
+    "source_fields": [
+      "TransactionID"
+    ],
+    "raw_or_derived": "derived",
+    "entity_scope": "card_addr_email",
+    "available_before_target": true,
+    "missing_value_strategy": "impute_mean",
+    "leakage_risk": "low",
+    "provenance": "expanding count of past transactions"
+  },
+  {
+    "feature_name": "elapsed_time_since_first_observed",
+    "source_fields": [
+      "TransactionDT"
+    ],
+    "raw_or_derived": "derived",
+    "entity_scope": "card_addr_email",
+    "available_before_target": true,
+    "missing_value_strategy": "impute_mean",
+    "leakage_risk": "low",
+    "provenance": "current TransactionDT minus first TransactionDT (strictly causal since dt is monotonic)"
+  },
+  {
+    "feature_name": "previous_ProductCD",
+    "source_fields": [
+      "ProductCD"
+    ],
+    "raw_or_derived": "derived",
+    "entity_scope": "card_addr_email",
+    "available_before_target": true,
+    "missing_value_strategy": "UNKNOWN",
+    "leakage_risk": "low",
+    "provenance": "ProductCD of the immediate previous transaction"
+  },
+  {
+    "feature_name": "previous_DeviceType",
+    "source_fields": [
+      "DeviceType"
+    ],
+    "raw_or_derived": "derived",
+    "entity_scope": "card_addr_email",
+    "available_before_target": true,
+    "missing_value_strategy": "UNKNOWN",
+    "leakage_risk": "low",
+    "provenance": "DeviceType of the immediate previous transaction"
+  },
+  {
+    "feature_name": "previous_DeviceInfo",
+    "source_fields": [
+      "DeviceInfo"
+    ],
+    "raw_or_derived": "derived",
+    "entity_scope": "card_addr_email",
+    "available_before_target": true,
+    "missing_value_strategy": "UNKNOWN",
+    "leakage_risk": "low",
+    "provenance": "DeviceInfo of the immediate previous transaction"
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "ato": {
+    "family": "ACCOUNT_TAKEOVER",
+    "accepted": 97,
+    "rejected": 530,
+    "unique_fps": 91,
+    "difficulty_distribution": {
+      "easy": 22,
+      "medium": 25,
+      "hard": 25,
+      "advanced": 25
+    },
+    "invariant_and_leakage_clean": true,
+    "failed_reason": null
+  },
+  "app": {
+    "family": "AUTHORIZED_PUSH_PAYMENT",
+    "accepted": 156,
+    "rejected": 1440,
+    "unique_fps": 153,
+    "difficulty_distribution": {
+      "easy": 6,
+      "medium": 50,
+      "hard": 50,
+      "advanced": 50
+    },
+    "invariant_and_leakage_clean": true,
+    "failed_reason": null
+  }
+}

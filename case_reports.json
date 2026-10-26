@@ -1,0 +1,705 @@
+{
+  "easy_ato_correctly_blocked": {
+    "trace_id": "atk-73100246",
+    "customer_id": "ace3b175-db94-4ca5-9d87-34d64fd6b993",
+    "true_label": "fraud",
+    "attack_family": "ACCOUNT_TAKEOVER",
+    "attack_difficulty": "easy",
+    "dollars_in_trace": 33647.49,
+    "stage1": {
+      "escalated": true,
+      "rules_checked": [
+        {
+          "rule": "a payee was added and then paid within the same session",
+          "feature": "beneficiary_added_before_transaction",
+          "value": 1.0,
+          "threshold": 1,
+          "fired": true
+        },
+        {
+          "rule": "a new device was registered on this trace",
+          "feature": "new_device_present",
+          "value": 1.0,
+          "threshold": 1,
+          "fired": true
+        },
+        {
+          "rule": "two transactions happened under an hour apart",
+          "feature": "min_time_between_transactions",
+          "value": 960.0,
+          "threshold": 3600,
+          "fired": true
+        },
+        {
+          "rule": "transaction velocity exceeded 2.5/hour",
+          "feature": "transactions_per_hour",
+          "value": 3.75,
+          "threshold": 2.5,
+          "fired": true
+        }
+      ]
+    },
+    "stage2": {
+      "ran": true,
+      "score": 0.9823,
+      "score_if_it_had_run_anyway": 0.9934,
+      "top_features": [
+        {
+          "feature": "count_beneficiary_addition",
+          "label": "number of new payees added",
+          "value": 1.0,
+          "shap_value": 3.4696,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "amount_mean",
+          "label": "average transaction amount",
+          "value": 33647.49,
+          "shap_value": 2.2165,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "min_time_between_transactions",
+          "label": "shortest gap between two transactions",
+          "value": 960.0,
+          "shap_value": -1.24,
+          "pushed_score": "down"
+        },
+        {
+          "feature": "amount_max",
+          "label": "largest transaction amount",
+          "value": 33647.49,
+          "shap_value": 1.1727,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "transactions_per_hour",
+          "label": "transaction velocity (txns/hour)",
+          "value": 3.75,
+          "shap_value": 0.5531,
+          "pushed_score": "up"
+        }
+      ]
+    },
+    "stage3": {
+      "graph_connected": false,
+      "neighbors": [],
+      "graph_score": null,
+      "escalated_by_graph": false
+    },
+    "stage4": {
+      "final_score": 0.9829,
+      "t_review": 0.0657,
+      "t_block": 0.935,
+      "decision": "BLOCK"
+    },
+    "narrative": "Trace atk-73100246 (customer ace3b175-db94-4ca5-9d87-34d64fd6b993), true label: FRAUD [ACCOUNT_TAKEOVER, easy], $33,647.49 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: a payee was added and then paid within the same session; a new device was registered on this trace; two transactions happened under an hour apart; transaction velocity exceeded 2.5/hour. Stage 2 (XGBoost) scored it 0.982. Top contributing signals: number of new payees added (1.0) pushed the score up; average transaction amount (33647.49) pushed the score up; shortest gap between two transactions (960.0) pushed the score down. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 4 (decision policy): final score 0.983 vs. thresholds REVIEW>=0.066 / BLOCK>=0.935 -> decision: BLOCK."
+  },
+  "hard_app_correctly_blocked": {
+    "trace_id": "atk-57b9b051",
+    "customer_id": "4a3172b4-c168-4e46-a2a2-f7a6442e491b",
+    "true_label": "fraud",
+    "attack_family": "AUTHORIZED_PUSH_PAYMENT",
+    "attack_difficulty": "hard",
+    "dollars_in_trace": 12359.16,
+    "stage1": {
+      "escalated": true,
+      "rules_checked": [
+        {
+          "rule": "a payee was added and then paid within the same session",
+          "feature": "beneficiary_added_before_transaction",
+          "value": 0.0,
+          "threshold": 1,
+          "fired": false
+        },
+        {
+          "rule": "a new device was registered on this trace",
+          "feature": "new_device_present",
+          "value": 0.0,
+          "threshold": 1,
+          "fired": false
+        },
+        {
+          "rule": "two transactions happened under an hour apart",
+          "feature": "min_time_between_transactions",
+          "value": 39.0,
+          "threshold": 3600,
+          "fired": true
+        },
+        {
+          "rule": "transaction velocity exceeded 2.5/hour",
+          "feature": "transactions_per_hour",
+          "value": 0.15,
+          "threshold": 2.5,
+          "fired": false
+        }
+      ]
+    },
+    "stage2": {
+      "ran": true,
+      "score": 0.991,
+      "score_if_it_had_run_anyway": 0.9933,
+      "top_features": [
+        {
+          "feature": "min_time_between_transactions",
+          "label": "shortest gap between two transactions",
+          "value": 39.0,
+          "shap_value": 6.3226,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "mean_time_between_transactions",
+          "label": "average gap between transactions",
+          "value": 141.0,
+          "shap_value": 0.8048,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "amount_min",
+          "label": "smallest transaction amount",
+          "value": 1927.66,
+          "shap_value": -0.6718,
+          "pushed_score": "down"
+        },
+        {
+          "feature": "failed_then_completed",
+          "label": "a failed transaction was immediately retried and succeeded",
+          "value": 1.0,
+          "shap_value": 0.2913,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "amount_cv",
+          "label": "relative spread in transaction amounts",
+          "value": 0.181,
+          "shap_value": 0.2152,
+          "pushed_score": "up"
+        }
+      ]
+    },
+    "stage3": {
+      "graph_connected": false,
+      "neighbors": [],
+      "graph_score": null,
+      "escalated_by_graph": false
+    },
+    "stage4": {
+      "final_score": 0.9912,
+      "t_review": 0.0657,
+      "t_block": 0.935,
+      "decision": "BLOCK"
+    },
+    "narrative": "Trace atk-57b9b051 (customer 4a3172b4-c168-4e46-a2a2-f7a6442e491b), true label: FRAUD [AUTHORIZED_PUSH_PAYMENT, hard], $12,359.16 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: two transactions happened under an hour apart. Stage 2 (XGBoost) scored it 0.991. Top contributing signals: shortest gap between two transactions (39.0) pushed the score up; average gap between transactions (141.0) pushed the score up; smallest transaction amount (1927.66) pushed the score down. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 4 (decision policy): final score 0.991 vs. thresholds REVIEW>=0.066 / BLOCK>=0.935 -> decision: BLOCK."
+  },
+  "mule_ring_member_rescued_by_graph": {
+    "trace_id": "legit_sess_d6a380f4-b081-4172-ae0a-3b5c8a02327d",
+    "customer_id": "f99d139c-081c-4ba0-b4eb-b89cf23105c7",
+    "true_label": "fraud",
+    "attack_family": "ring_mule_synthetic",
+    "attack_difficulty": "n/a",
+    "dollars_in_trace": 3466.92,
+    "stage1": {
+      "escalated": true,
+      "rules_checked": [
+        {
+          "rule": "a payee was added and then paid within the same session",
+          "feature": "beneficiary_added_before_transaction",
+          "value": 0.0,
+          "threshold": 1,
+          "fired": false
+        },
+        {
+          "rule": "a new device was registered on this trace",
+          "feature": "new_device_present",
+          "value": 0.0,
+          "threshold": 1,
+          "fired": false
+        },
+        {
+          "rule": "two transactions happened under an hour apart",
+          "feature": "min_time_between_transactions",
+          "value": 1422.0,
+          "threshold": 3600,
+          "fired": true
+        },
+        {
+          "rule": "transaction velocity exceeded 2.5/hour",
+          "feature": "transactions_per_hour",
+          "value": 0.05,
+          "threshold": 2.5,
+          "fired": false
+        }
+      ]
+    },
+    "stage2": {
+      "ran": true,
+      "score": 0.001,
+      "score_if_it_had_run_anyway": 0.7635,
+      "top_features": [
+        {
+          "feature": "amount_cv",
+          "label": "relative spread in transaction amounts",
+          "value": 0.143,
+          "shap_value": 0.904,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "window_seconds",
+          "label": "length of the observation window",
+          "value": 445221.0,
+          "shap_value": 0.8023,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "mean_time_between_transactions",
+          "label": "average gap between transactions",
+          "value": 85795.8,
+          "shap_value": 0.7884,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "time_login_to_first_transaction",
+          "label": "time from login to first transaction",
+          "value": 16242.0,
+          "shap_value": 0.6119,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "min_time_between_transactions",
+          "label": "shortest gap between two transactions",
+          "value": 1422.0,
+          "shap_value": -0.5718,
+          "pushed_score": "down"
+        }
+      ]
+    },
+    "stage3": {
+      "graph_connected": true,
+      "neighbors": [
+        {
+          "trace_id": "legit_sess_6f4ccc04-7ba6-47ff-b4a4-e8b97c095589",
+          "customer_id": "33182a77-ff07-470f-b54f-a670aadc2c9d",
+          "fraud_label": 1,
+          "is_ring": true
+        },
+        {
+          "trace_id": "legit_sess_f9a12027-925f-4bcd-a14f-09d5e9a24185",
+          "customer_id": "ad6c5f34-f79c-4058-b81f-cab9889434d4",
+          "fraud_label": 1,
+          "is_ring": true
+        },
+        {
+          "trace_id": "legit_sess_cf8dd8ad-01ab-4115-a02a-82e947e7779f",
+          "customer_id": "d4d65e70-18a7-48c4-acb8-fa37faec9db2",
+          "fraud_label": 1,
+          "is_ring": true
+        },
+        {
+          "trace_id": "legit_sess_43f2ea99-abba-4bf2-bad4-f1dd8dea4dba",
+          "customer_id": "3a44c298-cbc7-41c2-9d69-a91236991ee8",
+          "fraud_label": 1,
+          "is_ring": true
+        },
+        {
+          "trace_id": "legit_sess_d0140309-16af-4657-a734-a318e993e1ca",
+          "customer_id": "8c68427d-08d9-4885-8273-afcb5bbd7cbb",
+          "fraud_label": 1,
+          "is_ring": true
+        }
+      ],
+      "graph_score": 0.8413,
+      "escalated_by_graph": true
+    },
+    "stage4": {
+      "final_score": 0.9361,
+      "t_review": 0.0657,
+      "t_block": 0.935,
+      "decision": "BLOCK"
+    },
+    "narrative": "Trace legit_sess_d6a380f4-b081-4172-ae0a-3b5c8a02327d (customer f99d139c-081c-4ba0-b4eb-b89cf23105c7), true label: FRAUD [ring_mule_synthetic, n/a], $3,466.92 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: two transactions happened under an hour apart. Stage 2 (XGBoost) scored it 0.001. Top contributing signals: relative spread in transaction amounts (0.143) pushed the score up; length of the observation window (445221.0) pushed the score up; average gap between transactions (85795.8) pushed the score up. Stage 3 (graph): this trace shares an entity (device or payee) with 5 other customer(s)' traces, 5 of which are part of a flagged mule ring. Illustrative graph-propagated score: 0.841 (out-of-fold decision score with graph escalation applied: 0.936). Graph escalation RAISED the final score above Stage 1+2 alone. Stage 4 (decision policy): final score 0.936 vs. thresholds REVIEW>=0.066 / BLOCK>=0.935 -> decision: BLOCK."
+  },
+  "fraud_case_routed_to_review": {
+    "trace_id": "atk-308113e9",
+    "customer_id": "b56b42e3-4b67-4eee-a294-17aa8de74cbb",
+    "true_label": "fraud",
+    "attack_family": "ACCOUNT_TAKEOVER",
+    "attack_difficulty": "easy",
+    "dollars_in_trace": 0,
+    "stage1": {
+      "escalated": true,
+      "rules_checked": [
+        {
+          "rule": "a payee was added and then paid within the same session",
+          "feature": "beneficiary_added_before_transaction",
+          "value": 0.0,
+          "threshold": 1,
+          "fired": false
+        },
+        {
+          "rule": "a new device was registered on this trace",
+          "feature": "new_device_present",
+          "value": 1.0,
+          "threshold": 1,
+          "fired": true
+        },
+        {
+          "rule": "two transactions happened under an hour apart",
+          "feature": "min_time_between_transactions",
+          "value": 1440.0,
+          "threshold": 3600,
+          "fired": true
+        },
+        {
+          "rule": "transaction velocity exceeded 2.5/hour",
+          "feature": "transactions_per_hour",
+          "value": 0.0,
+          "threshold": 2.5,
+          "fired": false
+        }
+      ]
+    },
+    "stage2": {
+      "ran": true,
+      "score": 0.9344,
+      "score_if_it_had_run_anyway": 0.9637,
+      "top_features": [
+        {
+          "feature": "count_beneficiary_addition",
+          "label": "number of new payees added",
+          "value": 1.0,
+          "shap_value": 4.9021,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "min_time_between_transactions",
+          "label": "shortest gap between two transactions",
+          "value": 1440.0,
+          "shap_value": -1.1878,
+          "pushed_score": "down"
+        },
+        {
+          "feature": "window_seconds",
+          "label": "length of the observation window",
+          "value": 1440.0,
+          "shap_value": 0.5131,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "count_device_registration",
+          "label": "number of new-device registrations",
+          "value": 1.0,
+          "shap_value": 0.4796,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "amount_min",
+          "label": "smallest transaction amount",
+          "value": 0.0,
+          "shap_value": 0.4713,
+          "pushed_score": "up"
+        }
+      ]
+    },
+    "stage3": {
+      "graph_connected": false,
+      "neighbors": [],
+      "graph_score": null,
+      "escalated_by_graph": false
+    },
+    "stage4": {
+      "final_score": 0.9324,
+      "t_review": 0.0657,
+      "t_block": 0.935,
+      "decision": "REVIEW"
+    },
+    "narrative": "Trace atk-308113e9 (customer b56b42e3-4b67-4eee-a294-17aa8de74cbb), true label: FRAUD [ACCOUNT_TAKEOVER, easy], $0.00 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: a new device was registered on this trace; two transactions happened under an hour apart. Stage 2 (XGBoost) scored it 0.934. Top contributing signals: number of new payees added (1.0) pushed the score up; shortest gap between two transactions (1440.0) pushed the score down; length of the observation window (1440.0) pushed the score up. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 4 (decision policy): final score 0.932 vs. thresholds REVIEW>=0.066 / BLOCK>=0.935 -> decision: REVIEW."
+  },
+  "fraud_case_that_slipped_through_as_allow": {
+    "trace_id": "atk-693a3017",
+    "customer_id": "e9669dd5-9e35-4c39-901d-6ffb9e8ca7dd",
+    "true_label": "fraud",
+    "attack_family": "ACCOUNT_TAKEOVER",
+    "attack_difficulty": "advanced",
+    "dollars_in_trace": 0,
+    "stage1": {
+      "escalated": true,
+      "rules_checked": [
+        {
+          "rule": "a payee was added and then paid within the same session",
+          "feature": "beneficiary_added_before_transaction",
+          "value": 0.0,
+          "threshold": 1,
+          "fired": false
+        },
+        {
+          "rule": "a new device was registered on this trace",
+          "feature": "new_device_present",
+          "value": 1.0,
+          "threshold": 1,
+          "fired": true
+        },
+        {
+          "rule": "two transactions happened under an hour apart",
+          "feature": "min_time_between_transactions",
+          "value": 420.0,
+          "threshold": 3600,
+          "fired": true
+        },
+        {
+          "rule": "transaction velocity exceeded 2.5/hour",
+          "feature": "transactions_per_hour",
+          "value": 0.0,
+          "threshold": 2.5,
+          "fired": false
+        }
+      ]
+    },
+    "stage2": {
+      "ran": true,
+      "score": 0.0833,
+      "score_if_it_had_run_anyway": 0.7313,
+      "top_features": [
+        {
+          "feature": "window_seconds",
+          "label": "length of the observation window",
+          "value": 420.0,
+          "shap_value": 0.8343,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "min_time_between_transactions",
+          "label": "shortest gap between two transactions",
+          "value": 420.0,
+          "shap_value": 0.603,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "failed_transaction_count",
+          "label": "number of failed transaction attempts",
+          "value": 0.0,
+          "shap_value": 0.6026,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "count_device_registration",
+          "label": "number of new-device registrations",
+          "value": 1.0,
+          "shap_value": 0.4796,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "mean_time_between_transactions",
+          "label": "average gap between transactions",
+          "value": 420.0,
+          "shap_value": 0.4559,
+          "pushed_score": "up"
+        }
+      ]
+    },
+    "stage3": {
+      "graph_connected": false,
+      "neighbors": [],
+      "graph_score": null,
+      "escalated_by_graph": false
+    },
+    "stage4": {
+      "final_score": 0.0565,
+      "t_review": 0.0657,
+      "t_block": 0.935,
+      "decision": "ALLOW"
+    },
+    "narrative": "Trace atk-693a3017 (customer e9669dd5-9e35-4c39-901d-6ffb9e8ca7dd), true label: FRAUD [ACCOUNT_TAKEOVER, advanced], $0.00 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: a new device was registered on this trace; two transactions happened under an hour apart. Stage 2 (XGBoost) scored it 0.083. Top contributing signals: length of the observation window (420.0) pushed the score up; shortest gap between two transactions (420.0) pushed the score up; number of failed transaction attempts (0.0) pushed the score up. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 4 (decision policy): final score 0.057 vs. thresholds REVIEW>=0.066 / BLOCK>=0.935 -> decision: ALLOW."
+  },
+  "legitimate_case_routed_to_review": {
+    "trace_id": "legit_sess_e4033923-6a25-4179-b764-988809100fb7",
+    "customer_id": "bdbdb271-084a-4526-b317-d1fdb192051d",
+    "true_label": "legitimate",
+    "attack_family": "legitimate",
+    "attack_difficulty": "n/a",
+    "dollars_in_trace": 0,
+    "stage1": {
+      "escalated": true,
+      "rules_checked": [
+        {
+          "rule": "a payee was added and then paid within the same session",
+          "feature": "beneficiary_added_before_transaction",
+          "value": 0.0,
+          "threshold": 1,
+          "fired": false
+        },
+        {
+          "rule": "a new device was registered on this trace",
+          "feature": "new_device_present",
+          "value": 1.0,
+          "threshold": 1,
+          "fired": true
+        },
+        {
+          "rule": "two transactions happened under an hour apart",
+          "feature": "min_time_between_transactions",
+          "value": 97359.0,
+          "threshold": 3600,
+          "fired": false
+        },
+        {
+          "rule": "transaction velocity exceeded 2.5/hour",
+          "feature": "transactions_per_hour",
+          "value": 0.0,
+          "threshold": 2.5,
+          "fired": false
+        }
+      ]
+    },
+    "stage2": {
+      "ran": true,
+      "score": 0.1132,
+      "score_if_it_had_run_anyway": 0.0447,
+      "top_features": [
+        {
+          "feature": "min_time_between_transactions",
+          "label": "shortest gap between two transactions",
+          "value": 97359.0,
+          "shap_value": -1.5895,
+          "pushed_score": "down"
+        },
+        {
+          "feature": "count_device_registration",
+          "label": "number of new-device registrations",
+          "value": 1.0,
+          "shap_value": 0.5359,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "window_seconds",
+          "label": "length of the observation window",
+          "value": 97359.0,
+          "shap_value": -0.4129,
+          "pushed_score": "down"
+        },
+        {
+          "feature": "failed_transaction_count",
+          "label": "number of failed transaction attempts",
+          "value": 0.0,
+          "shap_value": 0.3509,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "amount_mean",
+          "label": "average transaction amount",
+          "value": 0.0,
+          "shap_value": -0.3269,
+          "pushed_score": "down"
+        }
+      ]
+    },
+    "stage3": {
+      "graph_connected": false,
+      "neighbors": [],
+      "graph_score": null,
+      "escalated_by_graph": false
+    },
+    "stage4": {
+      "final_score": 0.1066,
+      "t_review": 0.0657,
+      "t_block": 0.935,
+      "decision": "REVIEW"
+    },
+    "narrative": "Trace legit_sess_e4033923-6a25-4179-b764-988809100fb7 (customer bdbdb271-084a-4526-b317-d1fdb192051d), true label: legitimate, $0.00 moved in this trace. Stage 1 (rules) escalated this trace to the ML model because: a new device was registered on this trace. Stage 2 (XGBoost) scored it 0.113. Top contributing signals: shortest gap between two transactions (97359.0) pushed the score down; number of new-device registrations (1.0) pushed the score up; length of the observation window (97359.0) pushed the score down. Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 4 (decision policy): final score 0.107 vs. thresholds REVIEW>=0.066 / BLOCK>=0.935 -> decision: REVIEW."
+  },
+  "ordinary_legitimate_autocleared_by_stage1": {
+    "trace_id": "legit_sess_d0521084-07b0-4313-bc1e-449db3356b7e",
+    "customer_id": "e9c8c0c0-89cb-438d-b942-a85203b94ba5",
+    "true_label": "legitimate",
+    "attack_family": "legitimate",
+    "attack_difficulty": "n/a",
+    "dollars_in_trace": 2978.7,
+    "stage1": {
+      "escalated": false,
+      "rules_checked": [
+        {
+          "rule": "a payee was added and then paid within the same session",
+          "feature": "beneficiary_added_before_transaction",
+          "value": 0.0,
+          "threshold": 1,
+          "fired": false
+        },
+        {
+          "rule": "a new device was registered on this trace",
+          "feature": "new_device_present",
+          "value": 0.0,
+          "threshold": 1,
+          "fired": false
+        },
+        {
+          "rule": "two transactions happened under an hour apart",
+          "feature": "min_time_between_transactions",
+          "value": 76268.0,
+          "threshold": 3600,
+          "fired": false
+        },
+        {
+          "rule": "transaction velocity exceeded 2.5/hour",
+          "feature": "transactions_per_hour",
+          "value": 0.06,
+          "threshold": 2.5,
+          "fired": false
+        }
+      ]
+    },
+    "stage2": {
+      "ran": false,
+      "score": 0.0,
+      "score_if_it_had_run_anyway": 0.0283,
+      "top_features": [
+        {
+          "feature": "min_time_between_transactions",
+          "label": "shortest gap between two transactions",
+          "value": 76268.0,
+          "shap_value": -1.3708,
+          "pushed_score": "down"
+        },
+        {
+          "feature": "window_seconds",
+          "label": "length of the observation window",
+          "value": 186811.0,
+          "shap_value": 0.788,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "amount_cv",
+          "label": "relative spread in transaction amounts",
+          "value": 0.142,
+          "shap_value": 0.6982,
+          "pushed_score": "up"
+        },
+        {
+          "feature": "amount_mean",
+          "label": "average transaction amount",
+          "value": 992.9,
+          "shap_value": -0.5636,
+          "pushed_score": "down"
+        },
+        {
+          "feature": "amount_max",
+          "label": "largest transaction amount",
+          "value": 1154.14,
+          "shap_value": -0.4032,
+          "pushed_score": "down"
+        }
+      ]
+    },
+    "stage3": {
+      "graph_connected": false,
+      "neighbors": [],
+      "graph_score": null,
+      "escalated_by_graph": false
+    },
+    "stage4": {
+      "final_score": 0.0,
+      "t_review": 0.0657,
+      "t_block": 0.935,
+      "decision": "ALLOW"
+    },
+    "narrative": "Trace legit_sess_d0521084-07b0-4313-bc1e-449db3356b7e (customer e9c8c0c0-89cb-438d-b942-a85203b94ba5), true label: legitimate, $2,978.70 moved in this trace. Stage 1 (rules) did NOT escalate this trace -- none of the four trigger conditions fired, so it was auto-cleared without the ML model ever running. (For reference only, the model's score had it been escalated would have been 0.028.) Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 4 (decision policy): final score 0.000 vs. thresholds REVIEW>=0.066 / BLOCK>=0.935 -> decision: ALLOW."
+  }
+}

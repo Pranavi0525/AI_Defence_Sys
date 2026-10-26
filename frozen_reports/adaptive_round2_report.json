@@ -1,0 +1,216 @@
+{
+  "engine": "real_xgboost",
+  "legit_data_source": "feature_table.csv (stable persisted legitimate traces; prevents NormalWorld UUID4 trace-id drift across rounds)",
+  "miss_source_used": "C:\\Users\\New\\Downloads\\AI_Defence_Sys-master (1)\\AI_Defence_Sys-master\\misses.jsonl",
+  "miss_source_wiring_gap_note": "Legacy C:\\Users\\New\\Downloads\\AI_Defence_Sys-master (1)\\AI_Defence_Sys-master\\blue_team_output\\misses.jsonl contains 2 rows and is not used. The adaptive loop and hard-example generator both consume the repo-root misses.jsonl (5 rows), the full-cascade miss handoff written by miss_collector.py against the Stage 5 fused score.",
+  "misses_found": [
+    {
+      "trace_id": "atk-693a3017",
+      "attack_family": "ACCOUNT_TAKEOVER",
+      "attack_difficulty": "advanced",
+      "responsible_stage": "stage2_miss",
+      "why_missed": "Stage 1 escalated this trace to Stage 2 (XGBoost), and it has no cross-customer graph connections for Stage 3 to escalate via, but Stage 2's score (0.128) still fell under the REVIEW threshold (0.148)."
+    },
+    {
+      "trace_id": "atk-1179705d",
+      "attack_family": "ACCOUNT_TAKEOVER",
+      "attack_difficulty": "advanced",
+      "responsible_stage": "stage2_miss",
+      "why_missed": "Stage 1 escalated this trace to Stage 2 (XGBoost), and it has no cross-customer graph connections for Stage 3 to escalate via, but Stage 2's score (0.114) still fell under the REVIEW threshold (0.148)."
+    },
+    {
+      "trace_id": "atk-7cad7aab",
+      "attack_family": "AUTHORIZED_PUSH_PAYMENT",
+      "attack_difficulty": "medium",
+      "responsible_stage": "stage1_miss",
+      "why_missed": "Stage 1 (rule filter) never escalated this trace to the ML model -- none of the four trigger rules fired, so the cascade score stayed at 0.0 and the trace defaulted to ALLOW without ever being scored."
+    },
+    {
+      "trace_id": "atk-a127c99a",
+      "attack_family": "AUTHORIZED_PUSH_PAYMENT",
+      "attack_difficulty": "hard",
+      "responsible_stage": "stage1_miss",
+      "why_missed": "Stage 1 (rule filter) never escalated this trace to the ML model -- none of the four trigger rules fired, so the cascade score stayed at 0.0 and the trace defaulted to ALLOW without ever being scored."
+    },
+    {
+      "trace_id": "atk-ee11d67a",
+      "attack_family": "AUTHORIZED_PUSH_PAYMENT",
+      "attack_difficulty": "medium",
+      "responsible_stage": "stage1_miss",
+      "why_missed": "Stage 1 (rule filter) never escalated this trace to the ML model -- none of the four trigger rules fired, so the cascade score stayed at 0.0 and the trace defaulted to ALLOW without ever being scored."
+    }
+  ],
+  "component_adapted": {
+    "stage1_miss": "stage1_escalation.py -- additive rule addendum (stage1_rule_filter_v2)",
+    "stage2_miss": "Stage-2 XGBoost retrained with 2 validated ATO hard examples in the training pool only",
+    "stage3_graph_miss": "none of the 7 real misses fall in this category -- no change made",
+    "decision_policy_miss": "none of the 7 real misses fall in this category -- no change made"
+  },
+  "hard_examples_generated_total": 42,
+  "hard_examples_used_for_stage2_retrain": 5,
+  "hard_examples_used_as_stage1_evidence_only": 37,
+  "stage1_direct_check": {
+    "n_stage1_misses_checked": 3,
+    "n_newly_escalated_by_v2": 3,
+    "per_trace": [
+      {
+        "trace_id": "atk-7cad7aab",
+        "attack_family": "AUTHORIZED_PUSH_PAYMENT",
+        "v1_escalated": false,
+        "v2_escalated": true,
+        "high_value_signal_fired": true,
+        "beneficiary_no_txn_signal_fired": false
+      },
+      {
+        "trace_id": "atk-a127c99a",
+        "attack_family": "AUTHORIZED_PUSH_PAYMENT",
+        "v1_escalated": false,
+        "v2_escalated": true,
+        "high_value_signal_fired": false,
+        "beneficiary_no_txn_signal_fired": true
+      },
+      {
+        "trace_id": "atk-ee11d67a",
+        "attack_family": "AUTHORIZED_PUSH_PAYMENT",
+        "v1_escalated": false,
+        "v2_escalated": true,
+        "high_value_signal_fired": false,
+        "beneficiary_no_txn_signal_fired": true
+      }
+    ],
+    "measured_cost_on_real_legit_population": {
+      "n_legit_traces": 1205,
+      "v1_legit_escalation_rate": 0.44149377593360994,
+      "v2_legit_escalation_rate": 0.44149377593360994,
+      "additional_legit_traces_escalated_by_v2": 0,
+      "additional_legit_escalation_rate": 0.0,
+      "high_value_signal_alone_escalates_n_legit": 0,
+      "beneficiary_no_txn_signal_alone_escalates_n_legit": 0,
+      "legit_amount_max_p99": 6321.759200000002,
+      "legit_amount_max_p999": 6972.272520000007,
+      "legit_amount_max_max": 7294.71,
+      "high_value_threshold_used": 8000.0
+    }
+  },
+  "stage2_retrain_check": {
+    "held_out_trace_ids": [
+      "atk-693a3017",
+      "atk-1179705d"
+    ],
+    "note": "Both trained models NEVER see these two trace_ids -- explicitly excluded from the training pool regardless of the random 80/20 split, so this is a genuine out-of-sample check, not scoring a model on rows it already saw.",
+    "n_hard_ato_examples_added": 5,
+    "proba_without_hard_examples": {
+      "atk-693a3017": 0.1021,
+      "atk-1179705d": 0.0024
+    },
+    "proba_with_hard_examples": {
+      "atk-693a3017": 0.9188,
+      "atk-1179705d": 0.8229
+    },
+    "decision_threshold": 0.5,
+    "now_crosses_threshold": {
+      "atk-693a3017": true,
+      "atk-1179705d": true
+    }
+  },
+  "eval_split_coverage_caveat": {
+    "n_known_misses_in_holdout": 0,
+    "n_known_misses_in_training_pool": 5,
+    "caveat": "If most/all known misses land in the training pool for this draw, the untouched-eval aggregate metrics below are a valid REGRESSION CHECK (did anything else break?) but NOT by themselves evidence the known misses got fixed -- see the direct held-out checks (stage1_direct_check, stage2_retrain_check) for that instead."
+  },
+  "round1_holdout_metrics": {
+    "n": 291,
+    "precision": 0.9803921568627451,
+    "recall": 1.0,
+    "f1": 0.9900990099009901,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "confusion_matrix": [
+      [
+        240,
+        1
+      ],
+      [
+        0,
+        50
+      ]
+    ],
+    "by_family": {
+      "ACCOUNT_TAKEOVER": {
+        "n": 260,
+        "precision": 0.95,
+        "recall": 1.0,
+        "f1": 0.9743589743589743,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "n": 272,
+        "precision": 0.96875,
+        "recall": 1.0,
+        "f1": 0.9841269841269841,
+        "roc_auc": 1.0,
+        "pr_auc": 0.9999999999999998
+      }
+    },
+    "stage1_recall_ceiling_on_holdout_fraud": 1.0,
+    "stage1_legit_escalation_rate_on_holdout": 0.4066390041493776
+  },
+  "round2_holdout_metrics": {
+    "n": 291,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "confusion_matrix": [
+      [
+        241,
+        0
+      ],
+      [
+        0,
+        50
+      ]
+    ],
+    "by_family": {
+      "ACCOUNT_TAKEOVER": {
+        "n": 260,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 0.9999999999999998
+      },
+      "AUTHORIZED_PUSH_PAYMENT": {
+        "n": 272,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0
+      }
+    },
+    "stage1_recall_ceiling_on_holdout_fraud": 1.0,
+    "stage1_legit_escalation_rate_on_holdout": 0.4066390041493776
+  },
+  "metric_deltas_round2_minus_round1": {
+    "precision": 0.0196,
+    "recall": 0.0,
+    "f1": 0.0099,
+    "roc_auc": 0.0,
+    "pr_auc": 0.0
+  },
+  "remaining_known_misses": {
+    "stage1": 0,
+    "stage2": [],
+    "stage3_graph": [],
+    "decision_policy": []
+  },
+  "verdict": {
+    "stage1_recall_ceiling": "RAISED -- 3 of 3 real stage1_miss cases now escalate to Stage 2 under the additive v2 rules, with 0 additional legitimate traces escalated in the calibration population.",
+    "stage2_generalization": "FIXED in the isolated stage-aware check -- 2 of 2 original Stage-2 misses cross the decision threshold after adding validated ATO hard examples; 0 remain below threshold.",
+    "untouched_eval_aggregate": "VALID regression comparison on the same persisted original-corpus holdout containing both classes. Known misses and generated hard examples are excluded from this aggregate holdout; stage-aware direct checks provide the evidence for fixing the known misses.",
+    "no_thresholds_lowered_no_rules_weakened": true
+  }
+}
