@@ -1,0 +1,78 @@
+/* web_prototype/dashboard/card.css -- styles for the Credit Card Fraud Detection module and the module switch.
+   Loaded by index.html. Reuses the dashboard's CSS variables/classes; every new class is prefixed `cc-` (or is the module switch),
+   so nothing here restyles the Digital Payment module. */
+
+/* ---------- module switch (top-level) ---------- */
+.module-switch{ max-width:1180px; margin:0 auto; padding:0 24px 12px; display:flex; gap:8px; flex-wrap:wrap; }
+.module-switch button{
+  font-family:var(--sans); font-size:13.5px; font-weight:600; cursor:pointer;
+  background:transparent; color:var(--text-dim); border:1px solid var(--line); border-radius:8px; padding:8px 16px;
+  transition:border-color .15s ease, color .15s ease, background .15s ease;
+}
+.module-switch button:hover{ color:var(--text); border-color:var(--signal-dim); }
+.module-switch button[aria-selected="true"]{ color:#06121c; background:var(--signal); border-color:var(--signal); }
+.module-switch button:focus-visible{ outline:2px solid var(--signal); outline-offset:2px; }
+
+/* payment-only header controls / nav are hidden while the card module is showing */
+body[data-module="card"] #runBtn,
+body[data-module="card"] #refreshBtn,
+body[data-module="card"] nav.top-nav{ display:none; }
+#cardModule[hidden], #paymentModule[hidden]{ display:none; }
+
+/* ---------- card module ---------- */
+.cc-hero{ padding:40px 0 8px; }
+.cc-hero h1{ font-size:28px; font-weight:600; letter-spacing:-0.02em; margin:0 0 8px; }
+.cc-hero p{ color:var(--text-dim); max-width:680px; margin:0 0 16px; font-size:14.5px; }
+.cc-status{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-family:var(--mono); font-size:12.5px; color:var(--text-dim); margin-bottom:18px; }
+.cc-status .dot{ flex:none; }
+.cc-section{ margin-top:10px; }
+.cc-panel{ background:var(--bg-panel); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:16px; }
+.cc-panel h3{ margin:0 0 4px; font-size:14.5px; font-weight:600; }
+.cc-panel .cc-sub{ font-size:12.5px; color:var(--text-dim); margin:0 0 14px; }
+.cc-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+.cc-chip{ font-size:12px; font-family:var(--sans); background:transparent; color:var(--text-dim); border:1px dashed var(--line); border-radius:16px; padding:5px 12px; cursor:pointer; }
+.cc-chip:hover{ color:var(--text); border-color:var(--signal-dim); }
+.cc-field-wide{ grid-column:1 / -1; }
+.cc-area{
+  width:100%; min-height:130px; resize:vertical; background:#080c11; color:var(--text); border:1px solid var(--line); border-radius:8px;
+  padding:10px 12px; font-family:var(--mono); font-size:12px; line-height:1.5;
+}
+.cc-area:focus{ outline:none; border-color:var(--signal-dim); }
+.cc-field-select, .cc-file{
+  background:#080c11; color:var(--text); border:1px solid var(--line); border-radius:6px; padding:8px 10px; font-family:var(--mono); font-size:13px;
+}
+
+.cc-verdict{ display:flex; gap:20px; align-items:center; flex-wrap:wrap; border-radius:10px; padding:16px 20px; border:1px solid var(--line); background:var(--bg-panel-raised); }
+.cc-verdict .cc-label{ font-family:var(--mono); font-weight:700; font-size:22px; letter-spacing:.02em; }
+.cc-verdict.fraud{ border-color:var(--block); background:rgba(232,84,61,0.08); }
+.cc-verdict.fraud .cc-label{ color:var(--block); }
+.cc-verdict.legit{ border-color:var(--allow); background:rgba(62,207,142,0.07); }
+.cc-verdict.legit .cc-label{ color:var(--allow); }
+.cc-verdict .cc-why{ font-size:13px; color:var(--text-dim); max-width:560px; }
+.cc-kv{ display:grid; grid-template-columns:repeat(auto-fit, minmax(170px,1fr)); gap:12px; margin-top:14px; }
+.cc-kv .k{ font-size:12px; color:var(--text-dim); }
+.cc-kv .v{ font-family:var(--mono); font-size:18px; font-weight:600; }
+.cc-note{ font-size:12px; color:var(--text-dim); margin-top:10px; }
+.cc-warn-list{ margin:8px 0 0; padding-left:18px; font-size:12.5px; color:#f4d79a; }
+
+.cc-table-wrap{ overflow-x:auto; border:1px solid var(--line); border-radius:8px; }
+.cc-table-wrap table.data td, .cc-table-wrap table.data th{ white-space:nowrap; }
+.cc-tag{ font-family:var(--mono); font-size:11.5px; border:1px solid var(--line); border-radius:4px; padding:2px 7px; }
+.cc-tag.fraud{ color:var(--block); border-color:var(--block); }
+.cc-tag.legit{ color:var(--allow); border-color:var(--allow); }
+tr.cc-fraud-row td{ background:rgba(232,84,61,0.06); }
+
+.cc-matrix{ display:grid; grid-template-columns:auto 1fr 1fr; gap:6px; max-width:420px; font-family:var(--mono); font-size:13px; }
+.cc-matrix div{ padding:8px 10px; border:1px solid var(--line); border-radius:6px; background:var(--bg-panel-raised); text-align:center; }
+.cc-matrix .h{ background:transparent; border-color:transparent; color:var(--text-dim); font-size:11.5px; }
+.cc-matrix .bad{ border-color:var(--block); }
+.cc-matrix .good{ border-color:var(--allow); }
+.cc-limits{ margin:8px 0 0; padding-left:18px; font-size:13px; color:var(--text-dim); }
+.cc-limits li{ margin-bottom:6px; }
+.cc-spinner{ display:inline-block; width:12px; height:12px; border:2px solid var(--line); border-top-color:var(--signal); border-radius:50%; animation:cc-spin .8s linear infinite; vertical-align:-2px; margin-right:6px; }
+@keyframes cc-spin{ to{ transform:rotate(360deg); } }
+
+@media (max-width:640px){
+  .module-switch{ padding:0 16px 10px; }
+  .cc-verdict{ flex-direction:column; align-items:flex-start; }
+}

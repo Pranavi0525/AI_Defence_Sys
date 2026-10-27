@@ -349,6 +349,7 @@
     .shell{ padding:0 16px 60px; }
   }
 </style>
+<link rel="stylesheet" href="card.css">
 </head>
 <body>
 
@@ -363,6 +364,11 @@
     <button class="run-btn ghost" id="refreshBtn">Refresh</button>
     <button class="run-btn" id="runBtn">Run pipeline</button>
   </div>
+  <!-- Top-level module switch: two independent products. Logic + card UI live in card.js / card.css. -->
+  <div class="module-switch" role="tablist" aria-label="Fraud detection module">
+    <button id="modTabPayment" role="tab" aria-selected="true" type="button">Digital Payment Fraud Detection</button>
+    <button id="modTabCard" role="tab" aria-selected="false" type="button">Credit Card Fraud Detection</button>
+  </div>
   <nav class="top-nav" aria-label="Sections">
     <a href="#scoring">Transaction Scoring</a>
     <a href="#architecture">Pipeline Evaluation</a>
@@ -372,7 +378,7 @@
   </nav>
 </header>
 
-<div class="shell">
+<div class="shell" id="paymentModule">
 
   <div class="hero">
     <h1>AI Risk Manager — investigate and decide on transaction risk.</h1>
@@ -591,6 +597,9 @@
   </footer>
 
 </div>
+
+<!-- Credit Card Fraud Detection module: rendered by card.js (separate model, API routes and UI from the payment module above) -->
+<div class="shell" id="cardModule" hidden></div>
 
 <script src="config.js"></script>
 <script>
@@ -1478,5 +1487,6 @@ renderStageList(null);
 checkHealth().then(loadDashboard);
 refreshStageCatalogAndRender();
 </script>
+<script src="card.js"></script>
 </body>
 </html>

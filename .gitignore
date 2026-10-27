@@ -28,6 +28,8 @@ env/
 htmlcov/
 .tox/
 
+# Data — raw third-party datasets must NOT be committed
+data/raw/
 # Raw third-party datasets must NOT be committed
 data/raw/
 data/sparkov/*.csv
@@ -35,6 +37,13 @@ data/public/*.csv
 *.parquet
 *.h5
 *.hdf5
+
+# Allow derived statistics
+!data/reference/*.json
+*.parquet
+*.h5
+*.hdf5
+
 # Allow derived statistics (JSON)
 !data/reference/*.json
 

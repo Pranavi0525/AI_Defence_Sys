@@ -605,17 +605,17 @@
     "diagnostic_purpose": "This run uses the deliberately-injected quiet ring overlay (NOT real Red Team output -- see quiet_ring_overlay.py) purely to verify the fusion meta-model can recover a graph signal when one exists. The genuine MULE_NETWORK corpus remains untouched."
   },
   "_artifact_metadata": {
-    "generated_at_utc": "2026-09-08T14:12:10.176637+00:00",
-    "git_commit": "122bdc444b4985a3ac2f54a422f6f18d101795e7",
+    "generated_at_utc": "2026-10-26T12:44:13.780364+00:00",
+    "git_commit": "902597e7273021f99370067ebd54ae7adcaf080c",
     "git_dirty": true,
-    "python_version": "3.14.3",
+    "python_version": "3.14.4",
     "platform": "Windows-11-10.0.26200-SP0",
     "package_versions": {
-      "numpy": "2.4.5",
-      "pandas": "2.3.3",
-      "sklearn": "1.7.2",
+      "numpy": "2.5.4",
+      "pandas": "3.1.0",
+      "sklearn": "1.9.1",
       "xgboost": "3.4.1",
-      "pydantic": "2.13.4"
+      "pydantic": "2.14.1"
     },
     "seeds": {
       "RANDOM_STATE": 42

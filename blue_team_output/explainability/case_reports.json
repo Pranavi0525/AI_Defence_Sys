@@ -741,17 +741,17 @@
     "narrative": "Trace legit_sess_edd9f6a1-5a23-4f2c-8f28-370b2cd0aeb2 (customer 8600d020-b359-4eeb-b271-d359089a02d6), true label: legitimate, $0.00 moved in this trace. Stage 1 (rules) did NOT escalate this trace -- none of the four trigger conditions fired, so it was auto-cleared without the ML model ever running. (For reference only, the model's score had it been escalated would have been 0.000.) Stage 3 (graph): this trace has no cross-customer graph connections -- a no-op. Stage 5 (Risk Fusion): decision-grade out-of-fold fused score (GCN + autoencoder + logistic reweighting) is 0.035, vs. 0.000 from Stage 1+2 alone. This is a lift over Stage 1+2 alone, but the illustrative graph score doesn't explain it, so the more likely driver is the autoencoder and/or the fusion model's reweighting, not the graph specifically. Stage 6 (decision policy): final score 0.035 vs. thresholds REVIEW>=0.093 / BLOCK>=0.964 -> decision: ALLOW."
   },
   "_artifact_metadata": {
-    "generated_at_utc": "2026-09-08T14:12:37.039737+00:00",
-    "git_commit": "122bdc444b4985a3ac2f54a422f6f18d101795e7",
+    "generated_at_utc": "2026-10-26T12:45:05.719888+00:00",
+    "git_commit": "902597e7273021f99370067ebd54ae7adcaf080c",
     "git_dirty": true,
-    "python_version": "3.14.3",
+    "python_version": "3.14.4",
     "platform": "Windows-11-10.0.26200-SP0",
     "package_versions": {
-      "numpy": "2.4.5",
-      "pandas": "2.3.3",
-      "sklearn": "1.7.2",
+      "numpy": "2.5.4",
+      "pandas": "3.1.0",
+      "sklearn": "1.9.1",
       "xgboost": "3.4.1",
-      "pydantic": "2.13.4"
+      "pydantic": "2.14.1"
     }
   }
 }

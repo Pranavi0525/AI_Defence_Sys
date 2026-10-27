@@ -22,7 +22,10 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     pos = 0
     for _, g in df.groupby("card", sort=False):
         n = len(g)
-        ts = g["ts"].to_numpy(); amt = g["amount"].to_numpy(); la = g["lat"].to_numpy(); lo = g["lon"].to_numpy()
+        ts = g["ts"].to_numpy(dtype=np.float64)
+        amt = g["amount"].to_numpy(dtype=np.float64)
+        la = g["lat"].to_numpy(dtype=np.float64)
+        lo = g["lon"].to_numpy(dtype=np.float64)
         ch = g["channel"].to_numpy(); mcc = g["mcc"].to_numpy(); mer = g["merchant"].to_numpy(); dec = g["declined"].to_numpy()
         dcum = np.concatenate([[0], np.cumsum(dec)])               # exclusive prefix sums
         acum = np.concatenate([[0], np.cumsum(amt)])

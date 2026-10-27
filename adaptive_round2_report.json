@@ -1,8 +1,8 @@
 {
   "engine": "real_xgboost",
   "legit_data_source": "feature_table.csv (stable persisted legitimate traces; prevents NormalWorld UUID4 trace-id drift across rounds)",
-  "miss_source_used": "C:\\Users\\New\\Downloads\\AI_Defence_Sys-integration\\misses.jsonl",
-  "miss_source_wiring_gap_note": "Legacy C:\\Users\\New\\Downloads\\AI_Defence_Sys-integration\\blue_team_output\\misses.jsonl contains 8 rows and is not used. The adaptive loop and hard-example generator both consume the repo-root misses.jsonl (7 rows), the full-cascade miss handoff written by miss_collector.py against the Stage 5 fused score.",
+  "miss_source_used": "C:\\Users\\New\\Downloads\\AI_Defence_System_Phase10_Step5_Merged\\AI_Defence_System_Phase10_Merged\\misses.jsonl",
+  "miss_source_wiring_gap_note": "Legacy C:\\Users\\New\\Downloads\\AI_Defence_System_Phase10_Step5_Merged\\AI_Defence_System_Phase10_Merged\\blue_team_output\\misses.jsonl contains 8 rows and is not used. The adaptive loop and hard-example generator both consume the repo-root misses.jsonl (7 rows), the full-cascade miss handoff written by miss_collector.py against the Stage 5 fused score.",
   "misses_found": [
     {
       "trace_id": "atk-1179705d",
@@ -109,7 +109,7 @@
       "high_value_signal_alone_escalates_n_legit": 0,
       "beneficiary_no_txn_signal_alone_escalates_n_legit": 24,
       "legit_amount_max_p99": 5884.729100000002,
-      "legit_amount_max_p999": 6506.108190000004,
+      "legit_amount_max_p999": 6506.108189999999,
       "legit_amount_max_max": 6561.45,
       "high_value_threshold_used": 8000.0
     }

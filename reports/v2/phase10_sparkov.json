@@ -69,7 +69,7 @@
   "test_rows": 555719,
   "test_fraud": 2145,
   "prevalence": 0.0038598644278853163,
-  "seconds": 136
+  "seconds": 287
  },
  "_xgb_top_features": {
   "amount": 0.26499998569488525,

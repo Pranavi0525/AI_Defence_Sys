@@ -69,6 +69,14 @@ from logging_config import configure_logging  # noqa: E402
 from schemas import ObservableAttackTrace, ScoreResponse  # noqa: E402
 from settings import ConfigError, load_settings  # noqa: E402
 
+# Credit-card module: a completely separate model/router (see card_routes.py). Imported defensively so that NOTHING in the card
+# module -- not even an import-time error -- can stop the digital-payment API from starting.
+try:
+    import card_routes  # noqa: E402
+except Exception:  # pragma: no cover - exercised by tests/test_card_isolation via a monkeypatched import
+    card_routes = None
+    logging.getLogger("ai_defense.api").exception("card_routes_import_failed")
+
 try:
     settings = load_settings()
 except ConfigError as exc:
@@ -90,6 +98,11 @@ async def lifespan(app: FastAPI):
     # instead of a raw traceback.
     model_registry.load()
     v2_routes.registry.load()          # full v2 cascade (independent of the v1 model; a failure here never blocks v1)
+    if card_routes is not None:
+        try:
+            card_routes.registry.load()    # credit-card model (independent of every payment model; a failure here blocks nothing else)
+        except Exception:
+            logger.exception("card_registry_load_failed")
     yield
 
 
@@ -101,6 +114,8 @@ app = FastAPI(
 )
 
 app.include_router(v2_routes.router)
+if card_routes is not None:
+    app.include_router(card_routes.router)
 
 app.add_middleware(
     CORSMiddleware,
