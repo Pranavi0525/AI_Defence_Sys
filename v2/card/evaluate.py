@@ -53,7 +53,16 @@ def run_cases(f, seed, fpr=0.01, holdout=None):
     tr, va, te = split(f)
     if holdout:
         tr = tr[tr.pattern != holdout]
-        te = pd.concat([te[te.is_fraud == 0], f[f.pattern == holdout]])
+
+        heldout_fraud = f[
+            (f.pattern == holdout) &
+            (f.ts >= T_VAL)
+        ]
+
+        te = pd.concat([
+            te[te.is_fraud == 0],
+            heldout_fraud
+        ]).sort_values(["card", "ts"]).reset_index(drop=True)
     fns = fit_models(tr, seed)
     vleg = va[va.is_fraud == 0]
     res, flags = {}, {}

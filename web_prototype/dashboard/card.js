@@ -42,7 +42,7 @@
     if (e.status === 404) return 'This backend does not have the credit-card API (/api/card). Update or redeploy the backend.';
     if (e.status === 422 && b.error === 'invalid_card_input') {
       var items = (b.detail || []).map(function (d) {
-        var where = d.row == null ? 'Input' : 'Data row ' + (d.row + 1);
+        var where = d.source === 'transaction' ? 'Transaction' : d.row == null ? 'Input' : (d.source === 'history' ? 'History row ' : 'Data row ') + (d.row + 1);
         return '<li>' + where + (d.field ? ' · <b>' + esc(d.field) + '</b>' : '') + ': ' + esc(d.problem) + '</li>';
       }).join('');
       var more = b.total_problems > (b.detail || []).length ? '<li>… and ' + (b.total_problems - b.detail.length) + ' more</li>' : '';
@@ -93,6 +93,50 @@
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' })); a.download = name;
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+
+  // ---------------------------------------------------------------- reliability helpers
+  // Reliability values are shown exactly as the API returns them. A missing / non-boolean flag is "Not available" -- it is never
+  // read as true or false, and nothing here is derived from the model score.
+  var NA = 'Not available';
+  var REL_COLS = ['score_reliable', 'outside_training_range', 'features_outside_training_range', 'warnings'];
+  function triState(v) { return v === true ? true : v === false ? false : null; }
+  function listOrNull(v) {            // array / single string -> array of strings; anything else (missing) -> null
+    if (v == null) return null;
+    if (Array.isArray(v)) return v.filter(function (x) { return x != null && String(x).trim() !== ''; }).map(String);
+    if (typeof v === 'string') return v.trim() === '' ? [] : [v];
+    return null;
+  }
+  function reliability(r) {
+    r = r || {};
+    var sr = triState(r.score_reliable), out = triState(r.outside_training_range);
+    return { sr: sr, out: out, features: listOrNull(r.features_outside_training_range), warnings: listOrNull(r.warnings),
+             caution: sr === false || out === true, incomplete: sr === null || out === null };
+  }
+  function relBadge(sr) { return sr === true ? '<span class="cc-rel ok">Reliable</span>' : sr === false ? '<span class="cc-rel caution">Use with caution</span>' : '<span class="cc-rel na">' + NA + '</span>'; }
+  function outBadge(o) { return o === true ? '<span class="cc-rel caution">Yes</span>' : o === false ? '<span class="cc-rel ok">No</span>' : '<span class="cc-rel na">' + NA + '</span>'; }
+  function featuresText(list) { return list == null ? NA : list.length ? list.join(', ') : 'None'; }
+
+  // CSV cells for the reliability columns: arrays flattened to one readable line, newlines removed, spreadsheet-formula prefixes defused.
+  function oneLine(x) { return String(x).replace(/\s*[\r\n]+\s*/g, ' ').trim(); }
+  function csvSafe(x) { return /^[=+\-@\t]/.test(x) ? "'" + x : x; }
+  function csvBool(v) { v = triState(v); return v === null ? NA : String(v); }
+  function csvList(v, sep) { var l = listOrNull(v); return l === null ? NA : l.map(oneLine).map(csvSafe).join(sep); }
+
+  var REL_CSS = '' +
+    '.cc-rel{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;line-height:1.5;border:1px solid var(--line);white-space:nowrap}' +
+    '.cc-rel.ok{color:var(--allow);border-color:var(--allow);background:rgba(62,207,142,.08)}' +
+    '.cc-rel.caution{color:#f4d79a;border-color:var(--review);background:rgba(232,178,61,.1)}' +
+    '.cc-rel.na{color:var(--text-dim);border-style:dashed}' +
+    '.cc-caution{margin:14px 0 0}' +
+    '.cc-rel-block{margin-top:16px}' +
+    '.cc-rel-block h4{margin:0 0 8px;font-size:13px;font-weight:600;color:var(--text)}' +
+    '.cc-v-text{font-size:13px;word-break:break-word}' +
+    '.cc-rel-sub{font-size:11px;color:var(--text-dim);margin-top:2px}' +
+    '.cc-cell-wrap{min-width:160px;max-width:320px;white-space:normal;word-break:break-word}';
+  function ensureStyles() {
+    if (document.getElementById('ccReliabilityStyles')) return;
+    var st = document.createElement('style'); st.id = 'ccReliabilityStyles'; st.textContent = REL_CSS; document.head.appendChild(st);
   }
 
   // ---------------------------------------------------------------- example INPUTS (hand-written; results come from the model)
@@ -228,13 +272,27 @@
     var why = fraud
       ? 'model score ' + sci(r.model_score) + ' is at or above the threshold ' + sci(r.threshold) + '; it ranks above ' + pct(r.legit_percentile, 2) + ' of legitimate validation transactions.'
       : 'model score ' + sci(r.model_score) + ' is below the threshold ' + sci(r.threshold) + '; it ranks above ' + pct(r.legit_percentile, 2) + ' of legitimate validation transactions.';
-    var warns = (r.warnings || []).length ? '<ul class="cc-warn-list">' + r.warnings.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>' : '';
-    $('#ccSingleOut').innerHTML = '<div class="cc-panel"><div class="cc-verdict ' + (fraud ? 'fraud' : 'legit') + '"><div class="cc-label">' + esc(r.classification) + '</div><div class="cc-why">' + esc(why) + '</div></div>' +
+    var v = reliability(r), caution = '', incomplete = '', warns;
+    if (v.caution) {
+      caution = '<div class="banner-msg warn cc-caution" role="alert"><span>⚠</span><div><b>Use this score with caution.</b> The model has limited training support for the relevant feature values of this transaction' +
+        (v.features && v.features.length ? ' (' + esc(v.features.join(', ')) + ')' : '') + ', so the score is less dependable. ' +
+        'This does <b>not</b> mean the transaction is legitimate, and it does <b>not</b> mean it is fraudulent — treat the result as inconclusive and review the transaction by other means.</div></div>';
+    } else if (v.incomplete) {
+      incomplete = '<div class="cc-note">The backend did not return all reliability fields for this result; it has not been assumed to be reliable or unreliable.</div>';
+    }
+    warns = v.warnings == null ? '<div class="cc-v-text">' + NA + '</div>' : v.warnings.length ? '<ul class="cc-warn-list">' + v.warnings.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>' : '<div class="cc-v-text">None</div>';
+    $('#ccSingleOut').innerHTML = '<div class="cc-panel"><div class="cc-verdict ' + (fraud ? 'fraud' : 'legit') + '"><div class="cc-label">' + esc(r.classification) + '</div><div class="cc-why">' + esc(why) + '</div></div>' + caution +
       '<div class="cc-kv"><div><div class="k">Model score</div><div class="v">' + esc(sci(r.model_score)) + '</div></div>' +
       '<div><div class="k">Percentile vs legitimate (validation)</div><div class="v">' + esc(pct(r.legit_percentile, 2)) + '</div></div>' +
       '<div><div class="k">Threshold</div><div class="v">' + esc(sci(r.threshold)) + '</div></div>' +
       '<div><div class="k">Prior transactions used</div><div class="v">' + esc(r.prior_transactions_on_card) + '</div></div>' +
-      '<div><div class="k">Latency</div><div class="v">' + esc(fx(r.inference_latency_ms, 1)) + ' ms</div></div></div>' + warns +
+      (r.history_rows_supplied != null ? '<div><div class="k">History rows used / supplied</div><div class="v">' + esc(r.history_rows_used) + ' / ' + esc(r.history_rows_supplied) + '</div></div>' : '') +
+      '<div><div class="k">Latency</div><div class="v">' + esc(fx(r.inference_latency_ms, 1)) + ' ms</div></div></div>' +
+      '<div class="cc-rel-block"><h4>Model reliability</h4>' +
+      '<div class="cc-kv"><div><div class="k">Score reliability</div><div class="v">' + relBadge(v.sr) + '</div></div>' +
+      '<div><div class="k">Outside training range</div><div class="v">' + outBadge(v.out) + '</div></div>' +
+      '<div><div class="k">Features outside training range</div><div class="v cc-v-text">' + esc(featuresText(v.features)) + '</div></div></div>' +
+      incomplete + '<div class="cc-rel-block"><h4>Backend warnings</h4>' + warns + '</div></div>' +
       '<div class="cc-note">' + esc(r.disclaimer) + ' · ' + esc(r.model_version) + '</div>' +
       '<details class="tech-details" style="margin-top:12px"><summary>Raw API response</summary><pre>' + esc(JSON.stringify(r, null, 2)) + '</pre></details></div>';
   }
@@ -256,25 +314,46 @@
     var s = resp.summary, rows = resp.results.map(function (r, i) { return { r: r, x: inputs[i] || {} }; });
     if (onlyFlagged) rows = rows.filter(function (o) { return o.r.is_fraud; });
     var shown = showAll ? rows : rows.slice(0, SHOW_ROWS);
+    var tally = { out: 0, outNA: 0, unrel: 0, unrelNA: 0 }, total = resp.results.length;
+    resp.results.forEach(function (r) {   // counts of the API's own per-row values; missing fields are counted separately, never as true/false
+      var rv = reliability(r);
+      if (rv.out === null) tally.outNA++; else if (rv.out) tally.out++;
+      if (rv.sr === null) tally.unrelNA++; else if (!rv.sr) tally.unrel++;
+    });
+    var tile = function (label, n, na) {
+      return '<div><div class="k">' + label + '</div><div class="v">' + (total > 0 && na === total ? NA : esc(n)) + '</div>' +
+        (na > 0 && na < total ? '<div class="cc-rel-sub">' + esc(na) + ' row(s) not reported</div>' : '') + '</div>';
+    };
     var body = shown.map(function (o) {
+      var rv = reliability(o.r);
       return '<tr class="' + (o.r.is_fraud ? 'cc-fraud-row' : '') + '"><td class="mono">' + (o.r.index + 1) + '</td><td class="mono">' + esc(o.x.card) + '</td><td class="mono">' + esc(o.x.ts) + '</td><td class="mono">' + esc(o.x.amount) + '</td><td class="mono">' + esc(o.x.channel) + '</td><td class="mono">' + esc(o.x.merchant) + '</td>' +
-        '<td><span class="cc-tag ' + (o.r.is_fraud ? 'fraud' : 'legit') + '">' + esc(o.r.classification) + '</span></td><td class="mono">' + esc(sci(o.r.model_score)) + '</td><td class="mono">' + esc(pct(o.r.legit_percentile, 2)) + '</td><td class="mono">' + esc(o.r.prior_transactions_on_card) + '</td></tr>';
+        '<td><span class="cc-tag ' + (o.r.is_fraud ? 'fraud' : 'legit') + '">' + esc(o.r.classification) + '</span></td><td class="mono">' + esc(sci(o.r.model_score)) + '</td><td class="mono">' + esc(pct(o.r.legit_percentile, 2)) + '</td><td class="mono">' + esc(o.r.prior_transactions_on_card) + '</td>' +
+        '<td>' + relBadge(rv.sr) + '</td><td>' + outBadge(rv.out) + '</td>' +
+        '<td class="mono cc-cell-wrap">' + esc(featuresText(rv.features)) + '</td>' +
+        '<td class="cc-cell-wrap">' + (rv.warnings == null ? esc(NA) : rv.warnings.length ? rv.warnings.map(esc).join('<br>') : 'None') + '</td></tr>';
     }).join('');
     $('#ccBatchOut').innerHTML = '<div class="cc-panel"><h3>Batch summary</h3>' +
       '<div class="cc-kv"><div><div class="k">Transactions</div><div class="v">' + esc(s.transactions) + '</div></div><div><div class="k">Flagged FRAUD</div><div class="v">' + esc(s.flagged_fraud) + '</div></div>' +
-      '<div><div class="k">LEGITIMATE</div><div class="v">' + esc(s.legitimate) + '</div></div><div><div class="k">Flagged rate</div><div class="v">' + esc(pct(s.flagged_rate, 2)) + '</div></div>' +
+      '<div><div class="k">LEGITIMATE</div><div class="v">' + esc(s.legitimate) + '</div></div>' +
+      tile('Outside training range', tally.out, tally.outNA) + tile('Unreliable scores', tally.unrel, tally.unrelNA) +
+      '<div><div class="k">Flagged rate</div><div class="v">' + esc(pct(s.flagged_rate, 2)) + '</div></div>' +
       '<div><div class="k">Model score min / mean / max</div><div class="v" style="font-size:13px">' + esc(sci(s.model_score.min)) + ' / ' + esc(sci(s.model_score.mean)) + ' / ' + esc(sci(s.model_score.max)) + '</div></div>' +
       '<div><div class="k">Threshold</div><div class="v">' + esc(sci(resp.threshold)) + '</div></div></div>' +
       '<div class="cc-note">The flagged rate is the share of THIS file above the threshold; it is not a measured fraud rate or precision. ' + esc(resp.disclaimer) + '</div>' +
       '<div class="cc-row"><button type="button" class="run-btn" id="ccDownload">Download results (CSV)</button>' +
       '<label class="checkbox-row"><input type="checkbox" id="ccOnlyFlagged"' + (onlyFlagged ? ' checked' : '') + '> show flagged only</label></div></div>' +
       '<div class="cc-panel"><h3>Transaction-level results</h3><p class="cc-sub">' + esc(rows.length) + ' row(s)' + (!showAll && rows.length > SHOW_ROWS ? ' — showing the first ' + SHOW_ROWS : '') + '.</p>' +
-      '<div class="cc-table-wrap"><table class="data"><thead><tr><th>#</th><th>card</th><th>ts</th><th>amount</th><th>channel</th><th>merchant</th><th>classification</th><th>model score</th><th>percentile vs legit</th><th>prior txns</th></tr></thead><tbody>' + body + '</tbody></table></div>' +
+      '<div class="cc-table-wrap"><table class="data"><thead><tr><th>#</th><th>card</th><th>ts</th><th>amount</th><th>channel</th><th>merchant</th><th>classification</th><th>model score</th><th>percentile vs legit</th><th>prior txns</th><th>score reliability</th><th>outside training range</th><th>features outside range</th><th>warnings</th></tr></thead><tbody>' + body + '</tbody></table></div>' +
       (!showAll && rows.length > SHOW_ROWS ? '<div class="cc-row"><button type="button" class="cc-chip" id="ccShowAll">Show all ' + esc(rows.length) + ' rows</button></div>' : '') + '</div>';
     $('#ccDownload').onclick = function () {
       var extra = ['classification', 'is_fraud', 'model_score', 'legit_percentile', 'prior_transactions_on_card'];
-      var data = resp.results.map(function (r, i) { var o = Object.assign({}, inputs[i]); extra.forEach(function (k) { o[k] = r[k]; }); return o; });
-      download('card_fraud_predictions.csv', toCsv(COLS.concat(extra), data));
+      var data = resp.results.map(function (r, i) {
+        var o = Object.assign({}, inputs[i]); extra.forEach(function (k) { o[k] = r[k]; });
+        o.score_reliable = csvBool(r.score_reliable); o.outside_training_range = csvBool(r.outside_training_range);
+        o.features_outside_training_range = csvList(r.features_outside_training_range, '; '); o.warnings = csvList(r.warnings, ' | ');
+        return o;
+      });
+      download('card_fraud_predictions.csv', toCsv(COLS.concat(extra, REL_COLS), data));
     };
     $('#ccOnlyFlagged').onchange = function () { renderBatch(resp, inputs, showAll, this.checked); };
     var sa = $('#ccShowAll'); if (sa) sa.onclick = function () { renderBatch(resp, inputs, true, onlyFlagged); };
@@ -301,7 +380,7 @@
 
   var built = false;
   function build() {
-    if (built) return; built = true;
+    if (built) return; built = true; ensureStyles();
     $('#cardModule').innerHTML = HTML;
     $('#ccTabSingle').onclick = function () { selectTab('Single'); };
     $('#ccTabBatch').onclick = function () { selectTab('Batch'); };
@@ -343,5 +422,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 
   // exposed for tests only (pure helpers, no side effects)
-  window.__cardUi = { csvToObjects: csvToObjects, toCsv: toCsv, parseCsvRows: parseCsvRows, exBurst: exBurst, exLegit: exLegit, exBatch: exBatch };
+  window.__cardUi = { csvToObjects: csvToObjects, toCsv: toCsv, parseCsvRows: parseCsvRows, exBurst: exBurst, exLegit: exLegit, exBatch: exBatch, reliability: reliability, csvBool: csvBool, csvList: csvList };
 })();

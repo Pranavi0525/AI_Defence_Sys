@@ -141,7 +141,27 @@ class TestScoringMalformedRequests:
                 e["amount"] = "-5.00"
         r = app_client.post("/api/score", json=bad)
         assert r.status_code == 422
+    def test_non_finite_amount_returns_serializable_422(self, app_client, real_ato_trace):
+        import json
 
+        for token in ("NaN", "Infinity", "-Infinity"):
+            bad = copy.deepcopy(real_ato_trace)
+
+            for event in bad["events"]:
+                if event["event_type"] == "TRANSACTION":
+                    event["amount"] = float(token.replace("Infinity", "inf"))
+
+            body = json.dumps(bad)
+            r = app_client.post(
+                "/api/score",
+                content=body,
+                headers={"Content-Type": "application/json"},
+            )
+
+            assert r.status_code == 422, (token, r.text)
+            response = r.json()
+            assert response["error"] == "validation_error"
+            assert isinstance(response["detail"], list)
     def test_no_internal_details_leaked_in_error(self, app_client, real_ato_trace):
         bad = copy.deepcopy(real_ato_trace)
         del bad["trace_id"]

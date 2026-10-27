@@ -162,6 +162,23 @@ async def request_context_middleware(request: Request, call_next):
 # Structured error handling (requirement F) -- never leak tracebacks,
 # filesystem paths, or other internals to API clients.
 # ---------------------------------------------------------------------------
+def _json_safe_errors(errors):
+    """pydantic echoes the rejected value in `input`; NaN/Infinity there (JSON-illegal) turned a clean 422 into a 500.
+    Non-finite floats are reported as the strings "NaN" / "Infinity" / "-Infinity"; everything else is untouched."""
+    import math
+
+    def fix(v):
+        if isinstance(v, float) and not math.isfinite(v):
+            return "NaN" if v != v else ("Infinity" if v > 0 else "-Infinity")
+        if isinstance(v, dict):
+            return {k: fix(x) for k, x in v.items()}
+        if isinstance(v, (list, tuple)):
+            return [fix(x) for x in v]
+        return v
+
+    return [fix(e) for e in errors]
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     # Pydantic's default error detail is already client-safe (field paths +
@@ -177,7 +194,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             {
                 "error": "validation_error",
                 "request_id": getattr(request.state, "request_id", None),
-                "detail": exc.errors(),
+                "detail": _json_safe_errors(exc.errors()),
             }
         ),
     )

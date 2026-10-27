@@ -39,12 +39,12 @@ class CardTxn(BaseModel):
     """One card authorisation. Field meanings: see v2/card/serving.py."""
     model_config = ConfigDict(extra="forbid")
     card: int | str
-    ts: float = Field(..., ge=0, description="event time, seconds (hour-of-day features use ts mod 86400, UTC)")
-    amount: float = Field(..., gt=0)
+    ts: float = Field(..., ge=0, allow_inf_nan=False, description="event time, seconds (hour-of-day features use ts mod 86400, UTC)")
+    amount: float = Field(..., gt=0, allow_inf_nan=False, description="INR, > 0 and <= the configured business limit (CARD_MAX_TXN_AMOUNT); see /api/card/model-card")
     mcc: int | str
     channel: str = Field(..., description=f"one of {list(CHANNELS)}")
-    lat: float = Field(..., ge=-90, le=90)
-    lon: float = Field(..., ge=-180, le=180)
+    lat: float = Field(..., ge=-90, le=90, allow_inf_nan=False)
+    lon: float = Field(..., ge=-180, le=180, allow_inf_nan=False)
     merchant: str = Field(..., min_length=1)
     declined: int | None = Field(0, description="0/1; this card's authorisation outcome. Prior declines are features; the row's own is not.")
 
@@ -119,6 +119,9 @@ def _parse_csv(text: str) -> list[dict]:
     except Exception as exc:
         raise CardInputError([{"row": None, "field": None, "problem": f"CSV could not be parsed ({type(exc).__name__})"}]) from exc
     df.columns = [str(c).strip().lower() for c in df.columns]
+    dup_cols = sorted({c for c in df.columns if list(df.columns).count(c) > 1 or c.rsplit(".", 1)[0] in df.columns and c.rsplit(".", 1)[-1].isdigit() and c != c.rsplit(".", 1)[0]})
+    if dup_cols:
+        raise CardInputError([{"row": None, "field": c.rsplit(".", 1)[0], "problem": "column appears more than once in the CSV header"} for c in dup_cols])
     recs = []
     for r in df.to_dict("records"):
         out = {}
@@ -144,7 +147,17 @@ def card_status():
     body = {"ready": registry.ready, "synthetic_trained": True, "disclaimer": DISCLAIMER}
     if registry.ready:
         s = registry.scorer
-        body.update({"model_version": s.model_version, "threshold": s.threshold, "feature_count": len(s.features)})
+        from v2.card.limits import CURRENCY
+        body.update({
+            "model_version": s.model_version,
+            "threshold": s.threshold,
+            "feature_count": len(s.features),
+            "currency": CURRENCY,
+            "max_transaction_amount": s.amount_limit,
+            "configured_serving_input_limit": s.amount_limit,
+            "training_amount_support": s.amount_support,
+            "serving_limit_exceeds_training_support": s.serving_limit_exceeds_training_support,
+        })
     else:
         body["error"] = registry.load_error
     return body
@@ -164,6 +177,8 @@ def card_predict(req: CardPredictRequest, request: Request):
             latency = scorer._last_latency_ms
     except CardInputError as exc:
         return _invalid(exc)
+    except CardModelError as exc:
+        raise HTTPException(503, str(exc)) from exc
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
     logger.info("card_predict_computed", extra={"request_id": request_id, "classification": res["classification"],
                                                 "model_version": scorer.model_version})
@@ -182,6 +197,8 @@ def card_predict_batch(req: CardBatchRequest, request: Request):
             latency = scorer._last_latency_ms
     except CardInputError as exc:
         return _invalid(exc)
+    except CardModelError as exc:
+        raise HTTPException(503, str(exc)) from exc
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
     summary = CardScorer.summarize(results)
     logger.info("card_predict_batch_computed", extra={"request_id": request_id, "transactions": summary["transactions"],

@@ -92,3 +92,23 @@ leave-one-pattern-out scores may reflect signals shared across simulated pattern
   (it needs the CSVs, which are not in the repo, and uses extra fields the served schema does not have).
 - The card features need per-card history; the API is stateless, so the caller supplies it (no card-history store exists).
 - The dashboard's example transactions are hand-written inputs; their results come from the model.
+
+
+## Update: large-amount fix (branch `fix/card-fraud-large-amounts`)
+Root cause and measurements: `reports/card/large_amount_investigation.md`; before/after: `reports/card/bundle_comparison.json`;
+amount sweep: `reports/card/amount_sweep.md`. The tables above describe the ORIGINAL bundle; the served bundle is now trained on the
+extended simulator (`policy.json` has the current metrics, PR-AUC, per-pattern and per-slice results).
+
+**Amount boundaries and policies (INR).**
+1. *Synthetic simulator cap* (`DEFAULT_SIM_MAX_AMOUNT` = 1,000,000.0 INR): The ceiling used during synthetic data generation (`v2/card/sim.py`).
+2. *Actual training-data support* (`policy.amount_support.train_max_amount` = 465,290.34 INR): The maximum amount observed in training data. Tree models cannot extrapolate beyond learned splits; amounts above training support but within the serving limit are scored with out-of-training-range warnings and `score_reliable=False`.
+3. *Serving input-validation limit* (`DEFAULT_MAX_TXN_AMOUNT` = 1,000,000.0 INR, env `CARD_MAX_TXN_AMOUNT`): The system input-validation boundary for incoming transaction-scoring requests. Requests strictly exceeding it are rejected with HTTP 422 before reaching the model. The serving limit is separate from the simulator cap and is not lowered to training support (e.g. ₹4 lakh).
+4. *Issuer/business transaction policy*: Issuer-specific transaction rules (e.g., daily card caps, velocity limits). NOTE: Issuer-specific policy engines are NOT currently implemented in this module.
+
+**History cleaning.** For `/predict`, history rows of another card, later than the transaction, exact duplicates, or identical to the
+transaction are dropped; the response reports `history_rows_supplied/used` and `history_dropped`.
+```powershell
+python scripts/card_amount_sweep.py --old <dir with the old bundle>
+pytest tests/test_card_amounts.py        # run together with the other tests/ card files
+pytest web_prototype/api/tests/test_card_amount_api.py
+```
