@@ -2,15 +2,15 @@
 
 ## AI Risk Manager for Payment Fraud
 
-An explainable, layered payment-risk system that combines behavioral rules, calibrated machine learning, graph signals, anomaly detection, risk fusion, and operational decision policy to evaluate synthetic payment-security event.
+An explainable, layered payment-risk research and demonstration platform combining behavioral rules, machine learning, graph signals, anomaly detection, risk fusion, operational decision policy, and a separate credit-card fraud detection system.
 
 ---
 
-## 1. What We Built
+# 1. What We Built
 
 Payment fraud detection is not only a classification problem.
 
-A production-oriented risk system needs to answer several questions:
+A robust risk-management system needs to answer several questions:
 
 - Is this behavior suspicious?
 - How confident are we?
@@ -20,21 +20,98 @@ A production-oriented risk system needs to answer several questions:
 - What happens when a fraud case is missed?
 - Can the system be evaluated without leaking hidden attack information into the model?
 
-AI Defence System addresses these questions through a layered risk-management architecture.
+AI Defence System addresses these questions through two independent fraud-detection workflows:
 
-The project combines:
+1. **Digital Payment Fraud Detection** — a layered payment-security research pipeline involving attack simulation, behavioral detection, risk analysis, and decision support.
+2. **Credit Card Fraud Detection (Phase 10)** — an independent transaction-scoring system with its own simulator, feature engineering pipeline, XGBoost model, serving layer, API endpoints, and dashboard.
 
-1. **Behavioral rule filtering**
-2. **Calibrated XGBoost fraud scoring**
-3. **Graph-based relationship analysis**
-4. **Autoencoder-based novelty detection**
-5. **Risk fusion**
-6. **Cost-aware decision policy**
-7. **SHAP-based explainability**
-8. **Miss collection and hard-example analysis**
-9. **A production API and web dashboard**
+Both workflows are accessible through one web dashboard while maintaining separate models, scoring logic, and API routes.
 
-The system is evaluated using controlled synthetic payment-security scenarios representing:
+---
+
+# 2. Live Application
+
+| Component | URL |
+|---|---|
+| Web Dashboard | https://ai-defence-sys.vercel.app/ |
+| Backend API | https://ai-defense-api.onrender.com |
+| API Documentation | https://ai-defense-api.onrender.com/docs |
+| Health Check | https://ai-defense-api.onrender.com/healthz |
+| Readiness Check | https://ai-defense-api.onrender.com/readyz |
+| Credit Card Model Status | https://ai-defense-api.onrender.com/api/card/status |
+
+### Dashboard Modules
+
+The deployed dashboard provides two independent modules:
+
+- Digital Payment Fraud Detection
+- Credit Card Fraud Detection
+
+The frontend is hosted on Vercel, while the backend API and model-serving infrastructure run on Render.
+
+---
+
+# 3. Product Architecture
+
+The system separates the two fraud-detection workflows.
+
+```text
+                    AI DEFENCE SYSTEM
+                           |
+                           |
+                  Vercel Web Dashboard
+                           |
+             +-------------+-------------+
+             |                           |
+             ▼                           ▼
+    Digital Payment Fraud        Credit Card Fraud
+        Detection                    Detection
+             |                           |
+             ▼                           ▼
+       Payment API                  Card API
+             |                           |
+             ▼                           ▼
+     Payment Risk Pipeline          CardScorer
+             |                           |
+     +-------+--------+                  |
+     |       |        |                  ▼
+   Rules   XGBoost   Graph            XGBoost
+     |       |        |                  |
+     |   Autoencoder  |                  |
+     |       |        |                  |
+     +-------+--------+                  |
+             |                           |
+             ▼                           ▼
+        Risk Fusion                Card Model Bundle
+             |                           |
+             ▼                           ▼
+      Decision Policy             Transaction Score
+             |                           |
+             ▼                           ▼
+       ALLOW / REVIEW / BLOCK      FRAUD / LEGITIMATE
+```
+
+The credit-card module communicates exclusively with `/api/card/*` routes and does not reuse the digital-payment model.
+
+---
+
+# 4. Digital Payment Fraud Detection
+
+The digital-payment workstream focuses on a closed-loop payment-security research workflow.
+
+## Core Components
+
+1. Behavioral rule filtering
+2. Calibrated XGBoost fraud scoring
+3. Graph-based relationship analysis
+4. Autoencoder-based novelty detection
+5. Risk fusion
+6. Cost-aware decision policy
+7. SHAP-based explainability
+8. Miss collection and hard-example analysis
+9. API and dashboard integration
+
+The system evaluates controlled synthetic payment-security scenarios representing:
 
 - `ACCOUNT_TAKEOVER` (ATO)
 - `AUTHORIZED_PUSH_PAYMENT` (APP)
@@ -42,65 +119,7 @@ The system is evaluated using controlled synthetic payment-security scenarios re
 
 The data is synthetic and does not interact with real payment systems, accounts, or payment networks.
 
----
-
-# 2. Product View
-
-At a high level:
-
-```text
-                 Synthetic Payment Telemetry
-                           │
-                           ▼
-                 Observable Trace Boundary
-                           │
-                           ▼
-                     Feature Engineering
-                           │
-              ┌────────────┼────────────┐
-              │            │            │
-              ▼            ▼            ▼
-           Rules       XGBoost       Graph
-              │            │          Detector
-              │            │            │
-              │            └─────┬──────┘
-              │                  │
-              │            Autoencoder
-              │                  │
-              └────────────┬─────┘
-                           ▼
-                       Risk Fusion
-                           │
-                           ▼
-                     Decision Policy
-                           │
-                 ┌─────────┼─────────┐
-                 ▼         ▼         ▼
-               ALLOW     REVIEW     BLOCK
-                           │
-                           ▼
-                       Explanation
-                           │
-                           ▼
-                       Miss Collection
-                           │
-                           ▼
-                     Hard Examples /
-                      Re-evaluation
-```
-
-The architecture deliberately separates:
-
-- **observable behavioral evidence**
-- **hidden ground truth used for evaluation**
-- **model inference**
-- **operational decisioning**
-
-This separation is a central design requirement of the project.
-
----
-
-# 3. Core Design Principle: No Ground-Truth Leakage
+## 4.1 Core Design Principle: No Ground-Truth Leakage
 
 The Red Team produces two conceptually different pieces of information:
 
@@ -114,195 +133,132 @@ The model receives only the observable trace.
 
 Ground truth is reserved for:
 
-- labels
-- stratification
-- evaluation
-- error analysis
-- attack-family comparison
-- difficulty-specific analysis
+- Labels
+- Stratification
+- Evaluation
+- Error analysis
+- Attack-family comparison
+- Difficulty-specific analysis
 
 It is not used as a predictive feature.
 
-For example, fields such as:
-
-```text
-attack_family
-attack_difficulty
-hidden_objective
-planner_metadata
-internal phase labels
-ground-truth attack objective
-```
-
-must never become model features.
-
 This preserves the distinction between:
 
-> **what the attacker actually did**
+**What the attacker actually did**
 
 and
 
-> **what a payment-security system could observe.**
+**What a payment-security system could observe.**
 
-The final Red Team verification reported:
+## 4.2 Attack Scenarios
 
-```text
-Observable events scanned:       1,783
-Observable leakage findings:          0
-Ground-truth/observable mismatches:   0
-```
-
----
-
-# 4. Attack Scenarios
-
-## ACCOUNT_TAKEOVER
+### ACCOUNT_TAKEOVER
 
 ATO represents unauthorized access to a customer's account.
 
 Observable behavioral signals can include:
 
-- new-device registration
-- login/session activity
-- device changes
-- transaction frequency
-- transaction fragmentation
-- failed transaction attempts
-- timing patterns
-- transaction progression
+- New-device registration
+- Login and session activity
+- Device changes
+- Transaction frequency
+- Transaction fragmentation
+- Failed transaction attempts
+- Timing patterns
+- Transaction progression
 
----
-
-## AUTHORIZED_PUSH_PAYMENT
+### AUTHORIZED_PUSH_PAYMENT
 
 APP represents a legitimate customer being socially engineered into authorizing a payment.
 
 Observable signals can include:
 
-- trusted-device usage
-- session continuity
-- beneficiary activity
-- hesitation gaps
-- failed/retried payments
-- amount reduction after failures
-- transaction timing
-- session-to-payment relationships
+- Trusted-device usage
+- Session continuity
+- Beneficiary activity
+- Hesitation gaps
+- Failed and retried payments
+- Amount reduction after failures
+- Transaction timing
 
----
-
-## MULE_NETWORK
+### MULE_NETWORK
 
 MULE_NETWORK models coordinated movement of funds through related entities.
 
-The graph layer can use observable relationships such as:
+Graph relationships can include:
 
 ```text
 Customer
-   │
-   ├── Device
-   ├── Session
-   ├── Beneficiary
-   └── Transaction
+   |
+   +---- Device
+   |
+   +---- Session
+   |
+   +---- Beneficiary
+   |
+   +---- Transaction
 ```
 
-Graph connectivity is only used where an observable relationship exists.
+Graph connectivity is used only where an observable relationship exists.
 
-The system does not fabricate relationships for traces where the corpus does not expose a connecting field.
+## 4.3 Risk Pipeline
 
----
-
-# 5. Risk Pipeline
-
-## Stage 1 — Behavioral Rule Filter
+### Stage 1 — Behavioral Rule Filter
 
 Fast deterministic checks identify suspicious behavioral patterns.
 
-The purpose is not to replace machine learning.
-
-It acts as an initial routing layer:
-
 ```text
 Low-risk behavior
-      │
-      └──► May be auto-cleared
+      |
+      +----> May be auto-cleared
 
 Suspicious / uncertain behavior
-      │
-      └──► Escalated to ML scoring
+      |
+      +----> Escalated to ML scoring
 ```
 
-This provides a measurable trade-off between fraud recall and the amount of legitimate traffic requiring further processing.
-
----
-
-## Stage 2 — Calibrated XGBoost
+### Stage 2 — Calibrated XGBoost
 
 The primary tabular ML detector uses engineered behavioral and event-sequence features.
 
 Representative features include:
 
-- transaction counts
-- session/login counts
-- device registrations
-- beneficiary additions
-- total events
-- transactions per hour
-- transactions per session
-- authentication failures
-- failed transactions
-- amount statistics
-- amount trends
-- channel diversity
-- event timing
+- Transaction counts
+- Session and login counts
+- Device registrations
+- Beneficiary additions
+- Total events
+- Transactions per hour
+- Transactions per session
+- Authentication failures
+- Failed transactions
+- Amount statistics
+- Channel diversity
+- Event timing
 
-The deployed API currently uses the validated Stage 1+2 model artifact.
-
-Model provenance is tracked through the project's model registry.
-
----
-
-## Stage 3 — Graph Escalation
+### Stage 3 — Graph Escalation
 
 The graph detector models relationships among:
 
-```text
-Customer
-Device
-Session
-Beneficiary
-Transaction
-```
+- Customers
+- Devices
+- Sessions
+- Beneficiaries
+- Transactions
 
 It is particularly useful when suspicious activity is connected through observable cross-customer relationships.
 
-In the evaluated corpus:
-
-- graph escalation rescued additional fraud cases
-- graph processing is structurally a no-op for traces with no observable connecting relationship
-
-This is an intentional limitation rather than an attempt to infer unavailable information.
-
----
-
-## Stage 4 — Autoencoder Novelty Detection
+### Stage 4 — Autoencoder Novelty Detection
 
 The autoencoder provides an independent anomaly signal based on reconstruction error.
 
 It is designed to identify behavior that differs from the learned normal behavioral representation.
 
-Unlike the graph layer, the autoencoder can score every row.
+Unusual does not necessarily mean fraudulent, so anomaly scores are not treated as fraud truth by themselves.
 
-This creates an important operational trade-off:
+### Stage 5 — Risk Fusion
 
-> unusual does not necessarily mean fraudulent.
-
-Therefore anomaly scores are not treated as fraud truth by themselves.
-
----
-
-## Stage 5 — Risk Fusion
-
-Multiple signals can be combined into a unified risk score:
+Multiple signals can be combined into a unified risk score.
 
 ```text
 Stage 1 / Stage 2 score
@@ -310,113 +266,46 @@ Stage 1 / Stage 2 score
 Graph signal
           +
 Autoencoder signal
-          │
+          |
           ▼
        Risk Fusion
-          │
+          |
           ▼
-      Unified risk
+      Unified Risk
 ```
 
-The project evaluates multiple fusion strategies rather than assuming that adding another detector automatically improves performance.
-
-For the real corpus, the reported comparison was:
-
-| Configuration | Precision | Recall | F1 |
-|---|---:|---:|---:|
-| Stage 1+2 | 0.989 | 0.963 | 0.976 |
-| Stage 1+2 + GCN | 0.989 | 0.968 | 0.978 |
-| Stage 1+2 + Autoencoder | 0.854 | 0.973 | 0.910 |
-| Naive max of all three | 0.855 | 0.979 | 0.913 |
-| Stacked logistic-regression fusion | 0.986 | 0.965 | 0.976 |
-
-These results illustrate an important engineering point:
-
-> More detectors do not automatically produce a better production decision system.
-
-Additional signals must be evaluated against both detection benefit and operational cost.
+Additional signals must be evaluated against both their detection benefit and operational cost.
 
 ---
 
-# 6. Decision Policy
+# 5. Decision Policy
 
-The unified risk score is mapped to an operational action:
+The unified risk score is mapped to an operational action.
 
 ```text
                     Risk Score
-                        │
-          ┌─────────────┼─────────────┐
+                        |
+          +-------------+-------------+
+          |             |             |
           ▼             ▼             ▼
         ALLOW         REVIEW         BLOCK
 ```
 
 The decision policy is cost-aware rather than optimized solely for classification accuracy.
 
-The evaluation considers factors such as:
+The evaluation considers:
 
-- fraud prevalence
-- review operations cost
-- legitimate-user friction
-- liability exposure
-- fraud caught through review
+- Fraud prevalence
+- Review operations cost
+- Legitimate-user friction
+- Liability exposure
+- Fraud caught through review
 
-The nested/fold-honest threshold analysis reported:
+The project evaluates the decision policy under different assumptions rather than treating a model score as an automatic operational decision.
 
-```text
-ALLOW   73.5%
-REVIEW   4.7%
-BLOCK   21.8%
+## Liability-Aware Decisions
 
-Fraud recall (BLOCK + REVIEW): 97.6%
-```
-
-These figures are evaluation results on the project's synthetic corpus and should not be interpreted as production fraud-rate estimates.
-
----
-
-## Decision-Policy Sensitivity
-
-The decision policy was tested under different assumptions about production fraud prevalence and review-operation cost.
-
-Across the tested ranges:
-
-- Production fraud rate: **0.2%–2.0%**
-- Review-operation cost: **$5–$50**
-
-the selected block threshold remained stable at:
-
-```text
-t_block = 0.9643
-```
-
-The block-threshold span across both sensitivity sweeps was:
-
-```text
-0.9643 - 0.9643
-span = 0.000
-```
-
-At the reference sensitivity setting of **0.6% production fraud rate** and **$12 review-operation cost**, the evaluated policy produced:
-
-| Decision | Share |
-|---|---:|
-| Allow | 72.9% |
-| Review | 5.0% |
-| Block | 22.1% |
-
-Fraud recall when combining Review + Block was **98.1%** under this sensitivity setting.
-
-The review threshold was more sensitive to the operating assumptions than the block threshold. This indicates that, within the tested range, the high-risk boundary was stable while the amount of traffic routed to manual review could change.
-
-These are sensitivity-analysis results on the project's synthetic evaluation population and are not claims about real-world fraud prevalence, operating cost, or production performance.
-
----
-
-# 7. Liability-Aware Decisions
-
-The system does not treat every fraud family as having identical operational responsibility.
-
-The evaluated policy records:
+The system distinguishes operational responsibility across fraud families.
 
 ```text
 ACCOUNT_TAKEOVER
@@ -432,555 +321,250 @@ liable side:   RECEIVING
 acting side:   RECEIVING
 ```
 
-This allows the risk system to connect a detection decision to an operational action rather than stopping at:
-
-> "This transaction is fraudulent."
-
-The system can instead reason about:
-
-> "This is risky, and this is the side that should act."
+This connects detection to an operational response rather than stopping at a fraud classification.
 
 ---
 
-# 8. Explainability
+# 6. Explainability and Evaluation
 
-The system provides both global and case-level explanations.
+The system provides global and case-level explanations.
 
-## Global explanations
+## Global Explanations
 
-SHAP is used to understand the features driving the Stage 2 model.
+SHAP is used to understand features driving the Stage 2 model.
 
-The strongest reported features included:
+Representative features include:
 
-```text
-min_time_between_transactions
-failed_transaction_count
-mean_time_between_transactions
-count_beneficiary_addition
-total_events
-count_device_registration
-window_seconds
-transactions_per_hour
-```
+- `min_time_between_transactions`
+- `failed_transaction_count`
+- `mean_time_between_transactions`
+- `count_beneficiary_addition`
+- `total_events`
+- `count_device_registration`
+- `transactions_per_hour`
 
-## Case-level explanations
+## Evaluation Metrics
 
-Representative cases include:
-
-- correctly blocked ATO
-- correctly blocked APP
-- MULE_NETWORK case rescued by fusion
-- fraud routed to review
-- fraud that remained allowed
-- legitimate case routed to review
-- ordinary legitimate activity auto-cleared
-
-The project also generates investigator-oriented case dossiers for Review/Block cases.
-
----
-
-# 9. Evaluation
-
-The evaluation is designed around more than accuracy.
-
-Metrics include:
+The evaluation considers:
 
 - Precision
 - Recall
-- F1
+- F1-score
 - ROC-AUC
 - PR-AUC
-- Confusion Matrix
+- Confusion matrix
 - False-positive rate
 - False-negative rate
+- Family-level performance
 
-Performance is also examined by attack family.
+The project also examines:
 
-The primary Stage 1+2 evaluation on the validated evaluation population reported:
+- Stage-specific misses
+- Graph-stage recovery
+- Fusion performance
+- Decision-policy sensitivity
+- Hard-example generalization
+
+All synthetic evaluation metrics describe the evaluated synthetic population. They are not claims of real-world payment-fraud performance.
+
+---
+
+# 7. Credit Card Fraud Detection — Phase 10
+
+Phase 10 introduces an independent credit-card fraud detection system.
+
+Unlike the digital-payment workflow, this module is designed around individual card transactions and eligible transaction history.
+
+## 7.1 Features
+
+- Individual transaction scoring
+- CSV batch prediction
+- Transaction-history-based behavioral features
+- Velocity analysis
+- Merchant and transaction novelty analysis
+- XGBoost classification
+- Training-support and reliability checks
+- Model status and evaluation information
+- Separate dashboard interface
+
+## 7.2 Model Architecture
+
+The card module uses 27 engineered features and a separately trained XGBoost model.
 
 ```text
-Population:       1,556
-Fraud:              374
-Legitimate:       1,182
-
-Accuracy:        98.84%
-Precision:       98.37%
-Recall:          96.79%
-F1:              97.57%
-
-False-positive rate: 0.51%
-False-negative rate: 3.21%
+Card Transaction
+       |
+       ▼
+Input Validation
+       |
+       ▼
+History Filtering
+       |
+       ▼
+Feature Engineering
+       |
+       ▼
+27 Engineered Features
+       |
+       ▼
+XGBoost Model
+       |
+       ▼
+Threshold Comparison
+       |
+       ▼
+Prediction + Reliability Information
 ```
 
-The corresponding classification counts were:
+Model artifacts:
 
 ```text
-True Positive:   362
-True Negative:  1176
-False Positive:    6
-False Negative:   12
+models/card/
+├── policy.json
+└── xgb.json
 ```
 
-These numbers are evaluation results on synthetic data. They are not claims of real-world payment-fraud performance.
-
----
-
-# 10. Family-Level Evaluation
-
-The project evaluates the three attack families separately because aggregate performance can hide family-specific weaknesses.
-
-The full-cascade diagnostic reported:
-
-| Attack family | Precision | Recall | F1 |
-|---|---:|---:|---:|
-| ACCOUNT_TAKEOVER | 0.959 | 0.959 | 0.959 |
-| AUTHORIZED_PUSH_PAYMENT | 0.974 | 0.962 | 0.968 |
-| MULE_NETWORK | 0.967 | 0.967 | 0.967 |
-
-Family-level evaluation is especially important for MULE_NETWORK because graph reachability depends on whether the observable corpus actually exposes a shared relationship.
-
----
-
-# 11. Data Quality
-
-The persisted Red Team corpus contains:
+Deployed model version:
 
 ```text
-ATO:                 97 traces
-APP:                156 traces
-Total attacks:      253 traces
-Observable events: 1,783
+card-xgb-synthetic-seed0-c0a47d31
 ```
 
-Final corpus verification reported:
+The serving layer loads the model bundle and associated policy rather than hardcoding the model threshold in the frontend.
+
+## 7.3 Transaction History
+
+The system uses eligible earlier transactions belonging to the same card.
+
+It excludes:
+
+- Transactions belonging to another card
+- Future-dated transactions
+- Duplicate transactions
+- The transaction currently being scored
+
+History-dependent features may be unavailable when insufficient history is supplied.
+
+The API reports the number of supplied and used history rows, filtering information, and relevant warnings.
+
+## 7.4 Amount Boundaries
+
+The implementation distinguishes the following limits:
+
+| Boundary | Amount |
+|---|---:|
+| Synthetic simulator ceiling | ₹10,00,000 |
+| Observed training-data maximum | ₹4,65,290.34 |
+| Default serving input-validation limit | ₹10,00,000 |
+
+The serving limit is an input-validation boundary, not an issuer authorisation policy.
+
+Transactions above the observed training range may still be scored when within the configured serving limit. However, the API reports reliability warnings and out-of-range features.
+
+A transaction being below the serving limit does not guarantee that the model has sufficient learned resolution for that transaction amount.
+
+## 7.5 Single Transaction Prediction
+
+Endpoint:
 
 ```text
-Malformed records:              0
-Duplicate attack IDs:           0
-Cross-family ID overlap:        0
-GT/observable mismatches:       0
-Observable leakage findings:    0
-Chronology failures:            0
-Schema failures:                0
+POST /api/card/predict
 ```
 
-The project deliberately preserves the actual qualified corpus size rather than fabricating records to reach a requested target.
+Example request:
 
----
+```json
+{
+  "transaction": {
+    "card": "card_001",
+    "ts": 1793102400,
+    "amount": 1000,
+    "mcc": "5411",
+    "channel": "POS",
+    "lat": 13.0827,
+    "lon": 80.2707,
+    "merchant": "merchant_001",
+    "declined": 0
+  },
+  "history": []
+}
+```
 
-# 12. Adaptive Feedback Loop
+The response includes the prediction, ranking score, threshold, model version, history information, and reliability details.
 
-Missed fraud cases are collected after the full cascade.
+## 7.6 Batch CSV Prediction
 
-The feedback workflow is:
+Endpoint:
 
 ```text
-Full-cascade evaluation
-          │
-          ▼
-      Miss collection
-          │
-          ▼
-  Responsible-stage analysis
-          │
-          ▼
-  Hard-example generation
-          │
-          ▼
-  Controlled re-evaluation
+POST /api/card/predict-batch
 ```
 
-The purpose is to identify where the cascade fails and whether targeted examples can improve the responsible stage.
+The batch workflow supports CSV transaction uploads and returns predictions with relevant scoring and reliability information.
 
-The feedback loop distinguishes:
+The batch interface includes:
 
-- Stage 1 misses
-- Stage 2 misses
-- graph-stage misses
-- decision-policy misses
-
-Importantly, the system does not simply lower thresholds to eliminate misses.
-
-The current adaptive evaluation found that some Stage 1 misses can be recovered through additional validated examples, while Stage 2 generalization remained partial for the original miss set.
-
-This is treated as an evaluation finding, not as evidence that every miss has been solved.
+- CSV upload
+- Input validation
+- Transaction scoring
+- Fraud and legitimate classifications
+- Score and threshold information
+- Reliability warnings
+- Downloadable prediction results
 
 ---
 
-# 13. Production Deployment
+# 8. Model Limitations and Responsible Use
 
-The project includes a production API and web dashboard.
+The Phase 10 credit-card model is an engineering prototype.
 
-### Frontend
+- Trained and evaluated on synthetic simulator data only.
+- Fraud patterns and transaction distributions are simulator assumptions.
+- The model score is a ranking score, not a calibrated real-world fraud probability.
+- Synthetic evaluation metrics do not establish real-world fraud-detection performance.
+- Tree models cannot extrapolate beyond learned split boundaries.
+- Transactions outside observed training support may produce unreliable scores.
+- Out-of-training-range warnings must be considered when interpreting predictions.
 
-Vercel:
+**Do not use this prototype to approve, decline, block, or otherwise make real financial authorisation decisions.**
 
-**https://ai-defence-sys.vercel.app/**
-
-### Backend
-
-Render:
-
-**https://ai-defense-api.onrender.com/**
-
-The production backend exposes health/readiness endpoints and the scoring API.
-
-The readiness endpoint confirms that the required runtime artifact is available before the API accepts scoring traffic.
+Real-world deployment would require representative transaction data, temporal and out-of-distribution validation, calibration, operational threshold selection, monitoring, security review, and compliance approval.
 
 ---
 
-# 14. Production Scoring Flow
+# 9. Technology Stack
 
-The live dashboard sends an `ObservableAttackTrace` to the API.
-
-Conceptually:
-
-```text
-Browser
-   │
-   │ POST /api/score
-   ▼
-Render API
-   │
-   ▼
-Observable trace validation
-   │
-   ▼
-Stage 1 + Stage 2 scoring
-   │
-   ▼
-Calibrated fraud probability
-   │
-   ▼
-Operational decision
-   │
-   ├── ALLOW
-   ├── REVIEW
-   └── BLOCK
-   │
-   ▼
-Explanation / evidence
-```
-
-The dashboard is designed to expose the real API response rather than fabricate evaluation statistics.
+| Layer | Technologies |
+|---|---|
+| Backend | Python, FastAPI, Uvicorn, Pydantic |
+| Machine Learning | XGBoost, scikit-learn |
+| Data Processing | NumPy, pandas |
+| Payment Detection | Behavioral rules, graph signals, anomaly detection |
+| Credit Card Detection | Feature engineering, XGBoost |
+| Explainability | SHAP |
+| Frontend | HTML, CSS, JavaScript |
+| Testing | pytest |
+| Backend Hosting | Render |
+| Frontend Hosting | Vercel |
+| Version Control | Git, GitHub |
 
 ---
 
-# 15. Important Deployment Scope
+# 10. API Endpoints
 
-The production deployment should be interpreted precisely.
+## Digital Payment Fraud Detection
 
-The currently deployed online scoring path is the validated Stage 1+2 path.
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/healthz` | Backend health |
+| GET | `/readyz` | Backend readiness |
+| POST | `/api/score` | Payment trace scoring |
 
-The Stage 3, Stage 4, and Stage 5 components have been implemented and evaluated offline, but their complete trained inference artifacts are not currently exposed through the production API as independent deployable stages.
+Refer to the live API documentation for the complete payment-scoring route definitions and schemas.
 
-Therefore the dashboard explicitly distinguishes between:
+## Credit Card Fraud Detection
 
-```text
-Online scoring:
-Stage 1 + Stage 2
-
-Offline evaluation:
-Stage 1 → Stage 2 → Stage 3 → Stage 4 → Stage 5
-```
-
-This distinction is intentional.
-
-The project does not claim that a component is production-served merely because it exists in the research/evaluation pipeline.
-
----
-
-# 16. Running Locally
-
-## Requirements
-
-Python 3.12 is the supported runtime used by the deployment configuration.
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Set the project source path.
-
-### Windows PowerShell
-
-```powershell
-$env:PYTHONPATH="src"
-```
-
-### Linux/macOS
-
-```bash
-export PYTHONPATH=src
-```
-
----
-
-## Run the API
-
-From the repository root:
-
-```bash
-python web_prototype/run_api.py --host 0.0.0.0 --port 8000
-```
-
-The API can then be accessed locally at:
-
-```text
-http://localhost:8000
-```
-
----
-
-## API Health
-
-Check:
-
-```text
-/healthz
-/readyz
-```
-
-`/healthz` indicates that the process is alive.
-
-`/readyz` verifies that the runtime model/artifact prerequisites are available.
-
----
-
-# 17. Running Tests
-
-The project's tests can be executed with:
-
-### Windows PowerShell
-
-```powershell
-$env:PYTHONPATH="src"
-pytest tests/ -v -W error::DeprecationWarning
-```
-
-The repository contains dedicated tests covering the Red Team generation, validation, model/evaluation behavior, integration, and robustness work.
-
----
-
-# 18. Repository Structure
-
-```text
-AI_Defence_Sys/
-│
-├── src/
-│   └── red_team/
-│       ├── attacks/
-│       ├── schemas/
-│       ├── validation/
-│       ├── world/
-│       └── ml/
-│
-├── reports/
-│   ├── ato_corpus_raw.json
-│   └── app_corpus_raw.json
-│
-├── blue_team_output_FROZEN/
-│   ├── xgb_model.joblib
-│   ├── gnn_results.json
-│   ├── stage4_autoencoder_results.json
-│   ├── risk_fusion_results.json
-│   └── explainability/
-│
-├── frozen_reports/
-│
-├── blue_team_output/
-│
-├── web_prototype/
-│   ├── dashboard/
-│   └── ...
-│
-├── streamlit_app/
-│
-├── tests/
-│
-├── RED_TEAM_HANDOFF.md
-├── BLUE_TEAM_INTEGRATION_SPEC.md
-├── requirements.txt
-├── render.yaml
-└── README.md
-```
-
----
-
-# 19. Security and Data Boundary
-
-This project is a controlled payment-security research simulation.
-
-It:
-
-- does not access real banking systems
-- does not interact with payment networks
-- does not submit real payment requests
-- does not target real customer accounts
-- does not contain real customer payment information
-- uses synthetic entities and simulated events
-
-The Red Team exists to provide controlled adversarial scenarios for defensive evaluation.
-
----
-
-# 20. Engineering Principles
-
-The project follows several principles throughout the pipeline.
-
-### 1. Observable data is the model boundary
-
-Hidden attack metadata is never treated as behavioral evidence.
-
-### 2. Accuracy is not enough
-
-Precision, recall, F1, PR-AUC, false positives, false negatives, operational cost, and family-specific performance are considered.
-
-### 3. More models are not automatically better
-
-Each additional signal must demonstrate useful incremental value.
-
-### 4. Detection and decisioning are separate concerns
-
-A probability estimate is not itself an operational action.
-
-### 5. Explainability is part of the system
-
-The system produces evidence intended to support investigation rather than only returning a number.
-
-### 6. Limitations are reported explicitly
-
-Unavailable telemetry, graph-unreachable cases, synthetic-data limitations, and incomplete production deployment are documented rather than hidden.
-
-### 7. Evaluation artifacts are treated as versioned evidence
-
-Baseline results should not be silently overwritten by later experimental runs.
-
----
-
-# 21. Demo
-
-The recommended demonstration flow is:
-
-### Step 1 — Open the dashboard
-
-Open:
-
-**https://ai-defence-sys.vercel.app/**
-
-### Step 2 — Confirm backend connectivity
-
-The dashboard should connect to:
-
-**https://ai-defense-api.onrender.com**
-
-### Step 3 — Load a real example trace
-
-Use the dashboard's real-example workflow rather than inventing a synthetic response in the UI.
-
-### Step 4 — Run scoring
-
-Submit the observable trace to the live API.
-
-### Step 5 — Show the decision
-
-Demonstrate:
-
-```text
-Fraud probability
-      ↓
-Risk decision
-      ↓
-ALLOW / REVIEW / BLOCK
-```
-
-### Step 6 — Show the explanation
-
-Highlight the behavioral evidence contributing to the decision.
-
-### Step 7 — Explain the offline pipeline
-
-Show how the same research system was evaluated across:
-
-```text
-Stage 1
-   ↓
-Stage 2
-   ↓
-Stage 3
-   ↓
-Stage 4
-   ↓
-Stage 5
-   ↓
-Decision Policy
-   ↓
-Explainability
-```
-
-Be explicit that the production API currently serves the Stage 1+2 online path while the complete cascade is evaluated offline.
-
----
-
-# 22. Project Status
-
-The project currently provides:
-
-- synthetic adversarial payment-security corpora
-- observable/ground-truth separation
-- behavioral feature engineering
-- calibrated Stage 1+2 ML scoring
-- graph-based evaluation
-- autoencoder novelty detection
-- risk-fusion evaluation
-- cost-aware decision policy
-- liability-aware operational routing
-- SHAP-based explainability
-- miss collection
-- hard-example analysis
-- evaluation and robustness infrastructure
-- production API deployment
-- production web dashboard
-
-The production deployment and research/evaluation pipeline are intentionally documented as separate scopes.
-
----
-
-# 23. Documentation
-
-Additional technical documentation is available in:
-
-```text
-RED_TEAM_HANDOFF.md
-BLUE_TEAM_INTEGRATION_SPEC.md
-```
-
-The integration specification contains the detailed Red Team → Blue Team data contract, observable-data rules, feature-engineering guidance, evaluation requirements, and corpus verification information.
-
----
-
-# 24. Final Note
-
-AI Defence System is designed as an end-to-end risk-management research prototype rather than a claim of production fraud-detection performance.
-
-The central engineering goal is to demonstrate a defensible path from:
-
-```text
-Observable behavior
-        ↓
-Detection
-        ↓
-Risk estimation
-        ↓
-Operational decision
-        ↓
-Explanation
-        ↓
-Evaluation
-        ↓
-Feedback
-```
-
-while maintaining a strict boundary between observable evidence and hidden ground truth.
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/card/status` | Model readiness and configuration |
+| GET | `/api/card/model-card` | Model
