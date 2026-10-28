@@ -58,7 +58,6 @@ The system separates the two fraud-detection workflows.
 ```text
                     AI DEFENCE SYSTEM
                            |
-                           |
                   Vercel Web Dashboard
                            |
              +-------------+-------------+
@@ -512,9 +511,92 @@ The batch interface includes:
 - Reliability warnings
 - Downloadable prediction results
 
+## 7.7 Measured Phase 10 Results
+
+The following figures come from the **extended synthetic card-simulator evaluation**. They are not measurements from live bank or issuer transactions.
+
+### Held-out synthetic test results
+
+| Metric | Result |
+|---|---:|
+| Precision | **69.9%** |
+| Recall | **85.2%** |
+| F1-score | **0.768** |
+| False-positive rate | **0.652%** |
+| Fraud transactions detected | **53 / 61** |
+| High-ticket legitimate transactions incorrectly flagged | **25 / 215** |
+| Fraud-event recall | **92.0% across 150 simulated fraud events** |
+| Selected decision threshold | **0.044527** |
+
+The threshold was selected on validation legitimate transactions at a target false-positive rate of 1%. The 0.652% false-positive rate above is the measured result on the held-out synthetic test set.
+
+These results describe this simulator, data split, and model bundle only. They are not estimates of production performance.
+
+### Earlier bundle vs. extended-simulator bundle
+
+| Metric | Earlier bundle | Extended-simulator bundle |
+|---|---:|---:|
+| Precision | 54.0% | **69.9%** |
+| Recall | 80.9% | **85.2%** |
+| F1-score | 0.648 | **0.768** |
+| False-positive rate | 1.225% | **0.652%** |
+| High-ticket legitimate transactions flagged | 40 / 215 | **25 / 215** |
+| Fraud transactions detected | 44 / 61 | **53 / 61** |
+
+The extended simulator introduced:
+
+- Legitimate high-value purchases
+- Greater amount overlap between legitimate and fraudulent transactions
+- New-card behaviour
+- More organic fraud timing
+- Additional fraud scenarios
+
+The comparison shows improvement on this synthetic evaluation, while the remaining high-ticket false positives show that the issue is not fully solved.
+
+### Evaluation and test evidence
+
+- Temporal evaluation split: training before day 30, validation from day 30 to day 42, and test data from day 42 onward.
+- Model bundle: `card-xgb-synthetic-seed0-c0a47d31`.
+- Feature count: **27**.
+- Recorded full project test run: **681 passed**.
+- Recorded card/API-focused test run: **56 passed**.
+
+Test counts are software test results, not model-performance metrics.
+
+### Known score-resolution limitation
+
+Amount-range checks identify transactions outside observed training support, but do not guarantee useful score resolution throughout the supported range.
+
+The XGBoost score can become relatively flat above approximately ₹50,000 in some contexts because tree models do not smoothly extrapolate beyond learned split boundaries.
+
+This remains an open limitation. An in-range amount or a returned score is not proof of reliable ranking.
+
 ---
 
-# 8. Model Limitations and Responsible Use
+# 8. Engineering Challenges and How They Were Addressed
+
+The following table records concrete development issues and the engineering responses. Where a mitigation did not fully solve the issue, the remaining limitation is stated explicitly.
+
+| Challenge | What we changed | Remaining limitation |
+|---|---|---|
+| Card and digital-payment transactions have different schemas and scoring requirements | Kept Phase 10 separate, with its own 27-feature pipeline, model bundle, serving class, `/api/card/*` routes, and dashboard module | The two workflows are not interchangeable models |
+| The original synthetic card data underrepresented legitimate large purchases | Extended the simulator with legitimate high-ticket purchases and more overlap between legitimate and fraudulent amounts | 25 of 215 high-ticket legitimate transactions were still flagged in the reported held-out synthetic test |
+| Fraud timing was too concentrated and could become a shortcut feature | Used multi-seed timing diagnostics and retimed the extended simulator; the 10–30 minute concentration fell from roughly 97.6–98.5% to roughly 3–4% | This is a simulator diagnostic, not evidence about real-world fraud timing |
+| Model behaviour was unreliable beyond observed training support | Separated the ₹10,00,000 serving input cap from the ₹4,65,290.34 observed training maximum and added out-of-range reliability warnings | Score resolution can still flatten above approximately ₹50,000; warnings do not fix extrapolation |
+| Supplied history could contain other-card, future, duplicate, or current-transaction rows | Filtered history to unique, strictly earlier transactions for the same card and exposed supplied/used row counts and warnings | History-dependent features remain unavailable when valid history is insufficient |
+| New cards may have little or no history | Left unavailable history statistics missing and returned warnings rather than fabricating historical values | Sparse history means less behavioural context |
+| NaN and infinity could cause validation errors that were not JSON-serializable | Added recursive JSON-safe validation-error handling and a regression test for NaN, positive infinity, and negative infinity | Invalid values are still rejected; the change makes the error response serializable |
+| A dashboard test value did not match the amount actually sent to the API | Checked the form value, outgoing request, and API response, then corrected the test input | Manual tests should verify the actual request payload |
+| Payment pipeline signals have different strengths and operational costs | Kept rules, XGBoost, graph signals, and autoencoder novelty distinct for risk fusion | The payment cascade still has a Stage 1 recall ceiling; some fraud cases are never escalated |
+| Graph detection cannot infer links absent from the observed data | Restricted graph conclusions to observable relationships | In the evaluated synthetic payment scenarios, 21 of 42 mule rings had no observable links |
+| Anomaly detection can flag legitimate unusual behaviour | Treated autoencoder reconstruction error as an independent signal, not as fraud truth | In the evaluated synthetic payment scenarios, it recovered four frauds but newly flagged 55 legitimate cases |
+| Deployment could use the wrong branch or include unrelated generated outputs | Deployed the `phase10` branch and selectively staged intended project files | Generated reports and diagnostic artifacts left unstaged should be reviewed separately before future commits |
+
+The payment-pipeline counts above describe evaluated synthetic scenarios, not live payment-network measurements.
+
+---
+
+# 9. Model Limitations and Responsible Use
 
 The Phase 10 credit-card model is an engineering prototype.
 
@@ -532,7 +614,7 @@ Real-world deployment would require representative transaction data, temporal an
 
 ---
 
-# 9. Technology Stack
+# 10. Technology Stack
 
 | Layer | Technologies |
 |---|---|
@@ -550,7 +632,7 @@ Real-world deployment would require representative transaction data, temporal an
 
 ---
 
-# 10. API Endpoints
+# 11. API Endpoints
 
 ## Digital Payment Fraud Detection
 
@@ -567,4 +649,45 @@ Refer to the live API documentation for the complete payment-scoring route defin
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/api/card/status` | Model readiness and configuration |
-| GET | `/api/card/model-card` | Model
+| GET | `/api/card/model-card` | Model evaluation information |
+| POST | `/api/card/predict` | Score one card transaction |
+| POST | `/api/card/predict-batch` | Score a CSV batch of card transactions |
+
+---
+
+# 12. Deployment
+
+The application is deployed using separate frontend and backend services.
+
+### Frontend
+
+- Platform: Vercel
+- Dashboard: https://ai-defence-sys.vercel.app/
+
+### Backend
+
+- Platform: Render
+- API: https://ai-defense-api.onrender.com
+- Health endpoint: `/healthz`
+- Readiness endpoint: `/readyz`
+
+The backend serves both payment and card modules while keeping their API routes and model-serving logic separate.
+
+---
+
+# 13. Project Scope and Future Work
+
+The current implementation is a research and engineering prototype. The following are important next steps before any real-world financial deployment:
+
+1. Evaluate on representative, appropriately governed real transaction datasets.
+2. Validate across different time periods, transaction channels, merchants, and fraud patterns.
+3. Improve high-value legitimate transaction discrimination.
+4. Investigate the card model's score saturation at higher transaction amounts.
+5. Calibrate scores using representative validation data.
+6. Establish issuer-specific operating thresholds and review policies.
+7. Add production-grade monitoring for data drift, model drift, latency, and service health.
+8. Evaluate graph coverage and missing-relationship limitations.
+9. Improve the payment cascade's Stage 1 recall without creating unacceptable review volume.
+10. Conduct security, privacy, compliance, and operational reviews.
+
+The long-term objective is to build an explainable fraud-intelligence layer that combines deterministic controls with behavioural machine learning and contextual risk signals, while preserving human and issuer control over financial decisions.
